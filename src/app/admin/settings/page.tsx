@@ -12,9 +12,7 @@ import {
   Save,
   Upload
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
+import { Button, Input, Textarea } from '@/components/ui';
 import toast from 'react-hot-toast';
 
 const tabs = [

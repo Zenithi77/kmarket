@@ -12,7 +12,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addItem);
   const { toggleItem, isInWishlist } = useWishlistStore();
   const isWishlisted = isInWishlist(product.id);

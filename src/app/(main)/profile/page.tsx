@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Camera, Mail, Phone, MapPin, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button, Input } from '@/components/ui';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {

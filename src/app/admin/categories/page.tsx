@@ -10,9 +10,7 @@ import {
   FolderTree,
   GripVertical
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
+import { Button, Modal, Input } from '@/components/ui';
 
 // Mock categories data
 const mockCategories = [

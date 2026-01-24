@@ -14,8 +14,7 @@ import {
   Truck
 } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/constants';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
+import { Button, Modal } from '@/components/ui';
 
 // Mock orders data
 const mockOrders = [

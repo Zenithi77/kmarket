@@ -11,9 +11,7 @@ import {
   GripVertical,
   Image as ImageIcon
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
+import { Button, Input, Textarea } from '@/components/ui';
 
 const categories = [
   { id: '1', name: 'Гоо сайхан' },

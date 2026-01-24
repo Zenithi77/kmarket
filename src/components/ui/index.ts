@@ -1,6 +1,6 @@
-export { default as Button } from './Button';
-export { default as Input } from './Input';
-export { default as Textarea } from './Textarea';
-export { default as Select } from './Select';
-export { default as Modal } from './Modal';
-export { default as LoadingSpinner } from './LoadingSpinner';
+export { Button } from './Button';
+export { Input } from './Input';
+export { Textarea } from './Textarea';
+export { Select } from './Select';
+export { Modal } from './Modal';
+export { LoadingSpinner } from './LoadingSpinner';

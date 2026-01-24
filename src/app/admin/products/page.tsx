@@ -15,8 +15,7 @@ import {
   Package
 } from 'lucide-react';
 import { formatPrice } from '@/lib/constants';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
+import { Button, Modal } from '@/components/ui';
 
 // Mock products data
 const mockProducts = [

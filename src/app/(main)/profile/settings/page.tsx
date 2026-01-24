@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Shield, Bell, Eye, EyeOff, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button, Input } from '@/components/ui';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {

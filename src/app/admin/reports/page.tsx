@@ -14,7 +14,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { formatPrice } from '@/lib/constants';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui';
 
 // Mock data
 const summaryData = {

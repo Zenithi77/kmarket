@@ -12,9 +12,7 @@ import {
   Copy
 } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/constants';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { Input } from '@/components/ui/Input';
+import { Button, Modal, Input } from '@/components/ui';
 
 // Mock discounts data
 const mockDiscounts = [

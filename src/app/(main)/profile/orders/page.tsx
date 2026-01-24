@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Package, Eye, ChevronRight, Search, Filter } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/constants';
-import { Modal } from '@/components/ui/Modal';
+import { Modal } from '@/components/ui';
 
 // Mock orders data
 const mockOrders = [

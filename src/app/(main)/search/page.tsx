@@ -4,9 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { ProductCard } from '@/components/product/ProductCard';
-import { Button } from '@/components/ui/Button';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ProductCard } from '@/components/product';
+import { Button, LoadingSpinner } from '@/components/ui';
 
 // Mock products
 const mockProducts = [

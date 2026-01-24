@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight, Truck, Shield, RefreshCw, Headphones } from 'lucide-react';
-import ProductCard from '@/components/product/ProductCard';
+import { ProductCard } from '@/components/product';
 import { Product } from '@/types';
 
 // Hero Banner Slides

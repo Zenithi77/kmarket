@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronRight, SlidersHorizontal, Grid, List } from 'lucide-react';
-import { ProductCard } from '@/components/product/ProductCard';
-import { ProductGrid } from '@/components/product/ProductGrid';
-import { Button } from '@/components/ui/Button';
+import { ProductCard, ProductGrid } from '@/components/product';
+import { Button } from '@/components/ui';
 
 // Mock category data
 const mockCategories: Record<string, { name: string; description: string; subcategories: { name: string; slug: string }[] }> = {

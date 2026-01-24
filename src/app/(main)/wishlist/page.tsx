@@ -2,8 +2,8 @@
 
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
-import ProductCard from '@/components/product/ProductCard';
-import Button from '@/components/ui/Button';
+import { ProductCard } from '@/components/product';
+import { Button } from '@/components/ui';
 import { Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 

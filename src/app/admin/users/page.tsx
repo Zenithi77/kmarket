@@ -12,8 +12,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { formatDate } from '@/lib/constants';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
+import { Modal, Button } from '@/components/ui';
 
 // Mock users data
 const mockUsers = [
