@@ -63,19 +63,12 @@ export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlistStore();
   const { addItem } = useCartStore();
 
-  // Get wishlist products (in real app, fetch from API)
-  const wishlistProducts = mockProducts.filter(p => items.includes(p.id));
+  // Wishlist items are already Product objects
+  const wishlistProducts = items;
 
   const handleAddAllToCart = () => {
     wishlistProducts.forEach(product => {
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images[0],
-        quantity: 1,
-        size: product.sizes[0] || undefined
-      });
+      addItem(product, 1, product.sizes[0] || undefined);
     });
   };
 

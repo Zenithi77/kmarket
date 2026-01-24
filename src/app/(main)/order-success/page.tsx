@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Package, ArrowRight } from 'lucide-react';
@@ -8,7 +8,7 @@ import { formatPrice, formatDate } from '@/lib/constants';
 import { Order } from '@/types';
 import confetti from 'canvas-confetti';
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('id');
   const [order, setOrder] = useState<Order | null>(null);
@@ -90,5 +90,17 @@ export default function OrderSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import { ProductGrid } from '@/components/product';
@@ -183,7 +183,7 @@ const sortOptions = [
   { value: 'rating', label: 'Үнэлгээ' },
 ];
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [loading, setLoading] = useState(false);
@@ -459,5 +459,17 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }
