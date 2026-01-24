@@ -1,11 +1,5 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error('MONGODB_URI орчны хувьсагч тодорхойлогдоогүй байна');
-}
-
 interface Cached {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -22,6 +16,12 @@ if (!global.mongoose) {
 }
 
 async function connectDB(): Promise<typeof mongoose> {
+  const MONGODB_URI = process.env.MONGODB_URI;
+  
+  if (!MONGODB_URI) {
+    throw new Error('MONGODB_URI орчны хувьсагч тодорхойлогдоогүй байна. Vercel Settings -> Environment Variables дээр нэмнэ үү.');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
