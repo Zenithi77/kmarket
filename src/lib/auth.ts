@@ -62,15 +62,18 @@ export const authOptions: NextAuthOptions = {
         const existingUser = await User.findOne({ email: user.email ?? undefined });
 
         if (!existingUser) {
-          // Create new user for OAuth
-          await User.create({
+          // Create new user for OAuth - mark as needing profile completion
+          const newUser = await User.create({
             email: user.email ?? '',
             full_name: user.name ?? '',
             avatar: user.image ?? undefined,
             provider: account.provider,
             providerId: account.providerAccountId,
             role: 'user',
+            profileCompleted: false,
           });
+          // Add flag to redirect to complete-profile
+          (user as any).isNewUser = true;
         } else if (!existingUser.provider) {
           // Update existing user with OAuth info
           existingUser.provider = account.provider as 'google';
@@ -79,11 +82,14 @@ export const authOptions: NextAuthOptions = {
             existingUser.avatar = user.image;
           }
           await existingUser.save();
+        } else if (!existingUser.profileCompleted) {
+          // Existing OAuth user without completed profile
+          (user as any).isNewUser = true;
         }
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (user) {
         await connectDB();
         const dbUser = await User.findOne({ email: user.email ?? undefined });
@@ -91,15 +97,37 @@ export const authOptions: NextAuthOptions = {
         token.id = dbUser?._id.toString() || user.id;
         token.role = dbUser?.role || 'user';
         token.provider = account?.provider;
+        token.profileCompleted = dbUser?.profileCompleted ?? true;
+        token.isNewUser = (user as any).isNewUser || false;
       }
+      
+      // Handle session update (when profile is completed)
+      if (trigger === 'update') {
+        await connectDB();
+        const dbUser = await User.findOne({ email: token.email ?? undefined });
+        if (dbUser) {
+          token.profileCompleted = dbUser.profileCompleted;
+          token.isNewUser = false;
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        (session as any).profileCompleted = token.profileCompleted;
+        (session as any).isNewUser = token.isNewUser;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // If it's a new user (first time Google sign-up), redirect to complete profile
+      // This is handled client-side now, so we just return the default URL
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (url.startsWith(baseUrl)) return url;
+      return baseUrl;
     },
   },
   pages: {

@@ -120,7 +120,7 @@ export default function RegisterPage() {
   const handleGoogleSignUp = async () => {
     try {
       setIsGoogleLoading(true);
-      await signIn('google', { callbackUrl: '/' });
+      await signIn('google', { callbackUrl: '/auth/complete-profile' });
     } catch (error) {
       console.error('Google signup error:', error);
       toast.error('Google бүртгүүлэхэд алдаа гарлаа');

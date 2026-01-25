@@ -7,10 +7,12 @@ export interface IUser extends Document {
   password?: string;
   full_name: string;
   phone?: string;
+  address?: string;
   avatar?: string;
   role: 'user' | 'admin';
   provider?: 'google';
   providerId?: string;
+  profileCompleted?: boolean;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
@@ -21,10 +23,12 @@ const UserSchema = new Schema<IUser>({
   password: { type: String },
   full_name: { type: String, required: true },
   phone: { type: String },
+  address: { type: String },
   avatar: { type: String },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   provider: { type: String, enum: ['google'] },
   providerId: { type: String },
+  profileCompleted: { type: Boolean, default: false },
   is_active: { type: Boolean, default: true },
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
