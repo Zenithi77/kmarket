@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X } from 'lucide-react';
 import { useCartStore, useWishlistStore, useAuthStore } from '@/store';
 
@@ -21,11 +22,15 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const cartItems = useCartStore((state) => state.getTotalItems());
   const wishlistItems = useWishlistStore((state) => state.getTotalItems());
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated: zustandAuth } = useAuthStore();
   const openCart = useCartStore((state) => state.openCart);
+  
+  // Check both NextAuth session and Zustand store
+  const isAuthenticated = !!session || zustandAuth;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

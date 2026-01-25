@@ -141,10 +141,10 @@ export default function Footer() {
             <p className="text-sm text-gray-500">
               © {currentYear} KMarket. Бүх эрх хуулиар хамгаалагдсан.
             </p>
-            <div className="flex items-center space-x-4">
-              <img src="/payment/visa.svg" alt="Visa" className="h-6 opacity-50" />
-              <img src="/payment/mastercard.svg" alt="Mastercard" className="h-6 opacity-50" />
-              <img src="/payment/khan.svg" alt="Khan Bank" className="h-6 opacity-50" />
+            <div className="flex items-center space-x-3">
+              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">VISA</span>
+              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">MasterCard</span>
+              <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">QPay</span>
             </div>
           </div>
         </div>
