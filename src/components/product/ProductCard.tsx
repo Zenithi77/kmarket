@@ -48,9 +48,9 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/product/${product.slug}`}>
-      <div className="product-card group bg-white rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300">
+      <div className="product-card group bg-white rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 h-full flex flex-col">
         {/* Image Container */}
-        <div className="relative aspect-square bg-gray-50">
+        <div className="relative aspect-square bg-gray-50 flex-shrink-0">
           <Image
             src={product.images[0] || '/placeholder.png'}
             alt={product.name}
@@ -101,21 +101,23 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-grow">
           {/* Brand */}
-          {product.brand && (
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-              {product.brand}
-            </p>
-          )}
+          <div className="h-4 mb-1">
+            {product.brand && (
+              <p className="text-xs text-gray-500 uppercase tracking-wider truncate">
+                {product.brand}
+              </p>
+            )}
+          </div>
 
           {/* Name */}
-          <h3 className="font-medium text-gray-900 line-clamp-2 mb-2 group-hover:text-primary-500 transition-colors">
+          <h3 className="font-medium text-gray-900 line-clamp-2 mb-2 group-hover:text-primary-500 transition-colors h-12">
             {product.name}
           </h3>
 
           {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1 mb-2 h-5">
             <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <Star
@@ -134,7 +136,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Price */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 h-7 mt-auto">
             <span className="text-lg font-bold text-gray-900">
               {formatPrice(product.sale_price || product.price)}
             </span>
@@ -146,23 +148,25 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Sizes */}
-          {product.sizes && product.sizes.length > 0 && (
-            <div className="flex items-center gap-1 mt-2 flex-wrap">
-              {product.sizes.slice(0, 4).map((size) => (
-                <span
-                  key={size}
-                  className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"
-                >
-                  {size}
-                </span>
-              ))}
-              {product.sizes.length > 4 && (
-                <span className="text-xs text-gray-400">
-                  +{product.sizes.length - 4}
-                </span>
-              )}
-            </div>
-          )}
+          <div className="h-7 mt-2">
+            {product.sizes && product.sizes.length > 0 && (
+              <div className="flex items-center gap-1 flex-wrap overflow-hidden">
+                {product.sizes.slice(0, 4).map((size) => (
+                  <span
+                    key={size}
+                    className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"
+                  >
+                    {size}
+                  </span>
+                ))}
+                {product.sizes.length > 4 && (
+                  <span className="text-xs text-gray-400">
+                    +{product.sizes.length - 4}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Link>

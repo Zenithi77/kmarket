@@ -7,15 +7,12 @@ import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X } from 'lucide-
 import { useCartStore, useWishlistStore, useAuthStore } from '@/store';
 
 const CATEGORIES = [
-  { id: '1', name: 'Clearance', slug: 'clearance', color: 'text-red-500' },
-  { id: '2', name: 'Хямдрал', slug: 'sale', color: 'text-orange-500' },
-  { id: '3', name: 'Эмэгтэй', slug: 'women', color: '' },
-  { id: '4', name: 'Эрэгтэй', slug: 'men', color: '' },
-  { id: '5', name: 'Beauty', slug: 'beauty', color: '' },
-  { id: '6', name: 'Lifestyle', slug: 'lifestyle', color: '' },
-  { id: '7', name: 'Хүүхдийн', slug: 'kids', color: '' },
-  { id: '8', name: 'Trending', slug: 'trending', color: '' },
-  { id: '9', name: 'Брэндүүд', slug: 'brands', color: '' },
+  { id: '1', name: 'Beauty', slug: 'beauty', color: '' },
+  { id: '2', name: 'Fashion', slug: 'fashion', color: '' },
+  { id: '3', name: 'Shoes', slug: 'shoes', color: '' },
+  { id: '4', name: 'Dyson', slug: 'dyson', color: '' },
+  { id: '5', name: 'Trendy', slug: 'trendy', color: 'text-pink-500' },
+  { id: '6', name: 'Best', slug: 'best', color: 'text-orange-500' },
 ];
 
 export default function Header() {
