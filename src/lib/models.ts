@@ -8,6 +8,7 @@ export interface IUser extends Document {
   full_name: string;
   phone?: string;
   address?: string;
+  gender?: 'male' | 'female' | 'other';
   avatar?: string;
   role: 'user' | 'admin';
   provider?: 'google';
@@ -24,6 +25,7 @@ const UserSchema = new Schema<IUser>({
   full_name: { type: String, required: true },
   phone: { type: String },
   address: { type: String },
+  gender: { type: String, enum: ['male', 'female', 'other'] },
   avatar: { type: String },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   provider: { type: String, enum: ['google'] },

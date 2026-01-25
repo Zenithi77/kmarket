@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { full_name, phone, address } = await request.json();
+    const { full_name, phone, address, gender } = await request.json();
 
     // Validate required fields
     if (!full_name?.trim()) {
@@ -28,6 +28,20 @@ export async function POST(request: NextRequest) {
     if (!phone?.trim()) {
       return NextResponse.json(
         { error: 'Утасны дугаар оруулна уу' },
+        { status: 400 }
+      );
+    }
+
+    if (!address?.trim()) {
+      return NextResponse.json(
+        { error: 'Хаяг оруулна уу' },
+        { status: 400 }
+      );
+    }
+
+    if (!gender || !['male', 'female', 'other'].includes(gender)) {
+      return NextResponse.json(
+        { error: 'Хүйс сонгоно уу' },
         { status: 400 }
       );
     }
@@ -56,11 +70,9 @@ export async function POST(request: NextRequest) {
     // Update user profile
     user.full_name = full_name.trim();
     user.phone = cleanPhone;
+    user.address = address.trim();
+    user.gender = gender;
     user.profileCompleted = true;
-    
-    if (address?.trim()) {
-      user.address = address.trim();
-    }
 
     await user.save();
 
@@ -72,6 +84,8 @@ export async function POST(request: NextRequest) {
         email: user.email,
         full_name: user.full_name,
         phone: user.phone,
+        address: user.address,
+        gender: user.gender,
         profileCompleted: user.profileCompleted,
       }
     });

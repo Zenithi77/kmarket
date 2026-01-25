@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { User, Phone, MapPin } from 'lucide-react';
+import { User, Phone, MapPin, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function CompleteProfilePage() {
@@ -16,6 +16,7 @@ export default function CompleteProfilePage() {
     full_name: '',
     phone: '',
     address: '',
+    gender: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -48,6 +49,14 @@ export default function CompleteProfilePage() {
       newErrors.phone = 'Утасны дугаар буруу байна (8 эсвэл 9-ээр эхэлсэн 8 оронтой)';
     }
 
+    if (!formData.address.trim()) {
+      newErrors.address = 'Хаяг оруулна уу';
+    }
+
+    if (!formData.gender) {
+      newErrors.gender = 'Хүйс сонгоно уу';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -77,6 +86,7 @@ export default function CompleteProfilePage() {
           full_name: formData.full_name,
           phone: formData.phone,
           address: formData.address,
+          gender: formData.gender,
         }),
       });
 
@@ -184,10 +194,39 @@ export default function CompleteProfilePage() {
               )}
             </div>
 
-            {/* Address (Optional) */}
+            {/* Gender */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Хаяг <span className="text-gray-400 text-xs">(Сонголттой)</span>
+                Хүйс <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, gender: e.target.value }));
+                    if (errors.gender) setErrors(prev => ({ ...prev, gender: '' }));
+                  }}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none bg-white ${
+                    errors.gender ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Сонгох</option>
+                  <option value="male">Эрэгтэй</option>
+                  <option value="female">Эмэгтэй</option>
+                  <option value="other">Бусад</option>
+                </select>
+              </div>
+              {errors.gender && (
+                <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+              )}
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Хаяг <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -196,10 +235,15 @@ export default function CompleteProfilePage() {
                   value={formData.address}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none ${
+                    errors.address ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Хүргэлтийн хаяг"
                 />
               </div>
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              )}
             </div>
 
             <button
@@ -214,13 +258,6 @@ export default function CompleteProfilePage() {
               )}
             </button>
 
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="w-full text-gray-500 py-2 text-sm hover:text-gray-700 transition-colors"
-            >
-              Дараа бөглөх
-            </button>
           </form>
         </div>
       </div>
