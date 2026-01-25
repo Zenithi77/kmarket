@@ -39,9 +39,9 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4">Хурдан холбоос</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/about" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Бидний тухай
-                </Link>
+                </span>
               </li>
               <li>
                 <Link href="/products" className="text-sm hover:text-primary-500 transition-colors">
@@ -49,24 +49,24 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/sale" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Хямдрал
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/faq" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Түгээмэл асуулт
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/terms" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Үйлчилгээний нөхцөл
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/privacy" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Нууцлалын бодлого
-                </Link>
+                </span>
               </li>
             </ul>
           </div>
@@ -76,29 +76,29 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4">Хэрэглэгчийн үйлчилгээ</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/help" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Тусламж
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/shipping" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Хүргэлтийн мэдээлэл
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/returns" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Буцаалт & Солилт
-                </Link>
+                </span>
               </li>
               <li>
-                <Link href="/order-tracking" className="text-sm hover:text-primary-500 transition-colors">
+                <Link href="/profile/orders" className="text-sm hover:text-primary-500 transition-colors">
                   Захиалга хайх
                 </Link>
               </li>
               <li>
-                <Link href="/size-guide" className="text-sm hover:text-primary-500 transition-colors">
+                <span className="text-sm text-gray-400 cursor-default">
                   Размерийн заавар
-                </Link>
+                </span>
               </li>
             </ul>
           </div>

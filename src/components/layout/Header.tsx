@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -21,16 +21,22 @@ export default function Header() {
   const [searchCategory, setSearchCategory] = useState('All');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const cartItems = useCartStore((state) => state.getTotalItems());
   const wishlistItems = useWishlistStore((state) => state.getTotalItems());
   const { isAuthenticated: zustandAuth } = useAuthStore();
   const openCart = useCartStore((state) => state.openCart);
   
-  // Check both NextAuth session and Zustand store
-  const isAuthenticated = !!session || zustandAuth;
+  // Prevent hydration mismatch by only rendering auth state after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  // Check both NextAuth session and Zustand store (only after mounted)
+  const isAuthenticated = mounted && (!!session || zustandAuth);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
