@@ -41,13 +41,18 @@ export async function GET(request: NextRequest) {
         price: item.price,
         image: item.image || null,
       })),
-      total: order.total_amount,
-      status: order.status,
-      paymentRef: order.payment_ref || order._id.toString().slice(-8).toUpperCase(),
-      delivery: order.delivery_type || 'city',
-      address: order.shipping_address || '',
+      total: order.final_amount,
+      status: order.status === 'pending' ? 'Pending' : 
+              order.status === 'confirmed' ? 'Processing' :
+              order.status === 'processing' ? 'Processing' :
+              order.status === 'shipped' ? 'Shipped' :
+              order.status === 'delivered' ? 'Delivered' :
+              order.status === 'cancelled' ? 'Cancelled' : order.status,
+      paymentRef: order.order_number,
+      delivery: 'city',
+      address: `${order.shipping_address}, ${order.shipping_district}, ${order.shipping_city}`,
       createdAt: order.created_at,
-      deliveredAt: order.delivered_at || null,
+      deliveredAt: null,
     }));
 
     return NextResponse.json({
