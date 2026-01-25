@@ -4,11 +4,13 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
-  password: string;
+  password?: string;
   full_name: string;
   phone?: string;
   avatar?: string;
   role: 'user' | 'admin';
+  provider?: 'google';
+  providerId?: string;
   is_active: boolean;
   created_at: Date;
   updated_at: Date;
@@ -16,11 +18,13 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>({
   email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true },
+  password: { type: String },
   full_name: { type: String, required: true },
   phone: { type: String },
   avatar: { type: String },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  provider: { type: String, enum: ['google'] },
+  providerId: { type: String },
   is_active: { type: Boolean, default: true },
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 

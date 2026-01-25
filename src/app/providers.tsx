@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 
 interface ProvidersProps {
@@ -9,7 +10,7 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <>
+    <SessionProvider>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -35,6 +36,6 @@ export function Providers({ children }: ProvidersProps) {
         }}
       />
       {children}
-    </>
+    </SessionProvider>
   );
 }
