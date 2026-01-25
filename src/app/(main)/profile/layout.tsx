@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import {
   User,
   ShoppingBag,
@@ -12,6 +13,8 @@ import {
   LogOut,
   ChevronRight
 } from 'lucide-react';
+import { useAuthStore } from '@/store';
+import toast from 'react-hot-toast';
 
 const sidebarItems = [
   { icon: User, label: 'Профайл', href: '/profile' },
@@ -27,6 +30,32 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout: zustandLogout } = useAuthStore();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      
+      // Clear Zustand store
+      zustandLogout();
+      
+      // Clear localStorage
+      localStorage.removeItem('token');
+      
+      // Sign out from NextAuth
+      await signOut({ redirect: false });
+      
+      toast.success('Амжилттай гарлаа');
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Гарахад алдаа гарлаа');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -68,9 +97,17 @@ export default function ProfileLayout({
                 );
               })}
               
-              <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors">
-                <LogOut className="w-5 h-5" />
-                <span className="font-medium">Гарах</span>
+              <button 
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                {isLoggingOut ? (
+                  <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <LogOut className="w-5 h-5" />
+                )}
+                <span className="font-medium">{isLoggingOut ? 'Гарж байна...' : 'Гарах'}</span>
               </button>
             </nav>
           </div>

@@ -101,10 +101,9 @@ const ProductSchema = new Schema<IProduct>({
   review_count: { type: Number, default: 0 },
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
-// Index for search
+// Index for search (slug index is auto-created by unique: true)
 ProductSchema.index({ name: 'text', description: 'text', brand: 'text' });
 ProductSchema.index({ category_id: 1 });
-ProductSchema.index({ slug: 1 });
 
 export const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
