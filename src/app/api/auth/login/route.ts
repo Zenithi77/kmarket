@@ -19,6 +19,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Имэйл эсвэл нууц үг буруу' }, { status: 401 });
     }
 
+    // Check if user has password (OAuth users don't have password)
+    if (!user.password) {
+      return NextResponse.json({ error: 'Та Google-ээр бүртгүүлсэн байна. Google-ээр нэвтэрнэ үү.' }, { status: 401 });
+    }
+
     // Check password
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
