@@ -54,8 +54,8 @@ export default function Header() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
-              <span className="text-2xl font-light tracking-widest text-orange-500">
-                KMARKET
+              <span className="text-2xl font-bold tracking-widest text-white bg-orange-500 px-3 py-1 rounded">
+                K MARKET
               </span>
             </Link>
 
@@ -94,12 +94,12 @@ export default function Header() {
 
             {/* Right Icons */}
             <div className="flex items-center space-x-4">
-              {/* Sign In */}
+              {/* Sign In / Profile */}
               <Link 
                 href={isAuthenticated ? "/profile" : "/auth/login"}
-                className="hidden sm:flex items-center text-sm text-gray-700 hover:text-gray-900"
+                className="hidden sm:flex items-center p-2 text-gray-600 hover:text-gray-900"
               >
-                <span>{isAuthenticated ? 'Профайл' : 'Нэвтрэх / Бүртгүүлэх'}</span>
+                <User className="w-6 h-6" />
               </Link>
 
               {/* Wishlist */}

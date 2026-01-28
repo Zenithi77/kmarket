@@ -34,7 +34,7 @@ export default function CheckoutPage() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
+  const [createdOrder, setCreatedOrder] = useState<any | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -111,29 +111,19 @@ export default function CheckoutPage() {
 
     try {
       const orderData = {
-        customer_name: formData.customer_name,
-        customer_email: formData.customer_email,
-        customer_phone: formData.customer_phone,
-        shipping_address: {
-          city: formData.city,
-          district: formData.district,
-          address: formData.address,
-          notes: formData.notes
-        },
+        shipping_name: formData.customer_name,
+        shipping_phone: formData.customer_phone,
+        shipping_address: formData.address,
+        shipping_city: formData.city,
+        shipping_district: formData.district,
+        shipping_fee: shippingFee,
         delivery_type: deliveryType,
+        notes: formData.notes,
         items: items.map(item => ({
           product_id: item.product.id,
-          product_name: item.product.name,
-          product_image: item.product.images[0],
-          price: item.product.sale_price || item.product.price,
           quantity: item.quantity,
           size: item.size
-        })),
-        subtotal,
-        shipping_fee: shippingFee,
-        total,
-        user_id: user?.id || null,
-        notes: formData.notes
+        }))
       };
 
       const response = await fetch('/api/orders', {
@@ -148,7 +138,8 @@ export default function CheckoutPage() {
         throw new Error(data.error || 'Захиалга үүсгэхэд алдаа гарлаа');
       }
 
-      setCreatedOrder(data.order);
+      // API returns the order directly
+      setCreatedOrder(data);
       setShowPaymentModal(true);
 
     } catch (error: any) {
@@ -161,7 +152,7 @@ export default function CheckoutPage() {
   const handlePaymentSuccess = () => {
     clearCart();
     setShowPaymentModal(false);
-    router.push(`/order-success?id=${createdOrder?.id}`);
+    router.push(`/order-success?id=${createdOrder?._id || createdOrder?.order_number}`);
   };
 
   if (items.length === 0 && !showPaymentModal) {

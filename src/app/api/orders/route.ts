@@ -42,7 +42,11 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const body = await request.json();
 
-    const { items, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district, discount_code, notes } = body;
+    const { items, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district, shipping_fee: clientShippingFee, discount_code, notes } = body;
+
+    if (!items || items.length === 0) {
+      return NextResponse.json({ error: 'Сагс хоосон байна' }, { status: 400 });
+    }
 
     // Calculate totals
     let total_amount = 0;
@@ -106,7 +110,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const shipping_fee = 5000;
+    const shipping_fee = clientShippingFee || 5000;
     const final_amount = total_amount + shipping_fee - discount_amount;
 
     // Generate order number

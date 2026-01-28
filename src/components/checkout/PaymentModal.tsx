@@ -5,11 +5,10 @@ import confetti from 'canvas-confetti';
 import { Copy, Check, Clock, CheckCircle, Building2, CreditCard, AlertCircle } from 'lucide-react';
 import { BANK_ACCOUNTS, formatPrice, copyToClipboard } from '@/lib/constants';
 import { Button } from '@/components/ui';
-import { Order } from '@/types';
 
 interface PaymentModalProps {
   isOpen: boolean;
-  order: Order | null;
+  order: any | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -32,10 +31,11 @@ export default function PaymentModal({ isOpen, order, onClose, onSuccess }: Paym
     // Start polling for payment status
     const pollPaymentStatus = async () => {
       try {
-        const response = await fetch(`/api/payment/status/${order.id}`);
+        const orderId = order._id || order.id;
+        const response = await fetch(`/api/orders/${orderId}`);
         const data = await response.json();
 
-        if (data.payment_status === 'Paid') {
+        if (data.payment_status === 'paid') {
           setPaymentStatus('paid');
           
           // Trigger confetti
@@ -117,7 +117,7 @@ export default function PaymentModal({ isOpen, order, onClose, onSuccess }: Paym
               Таны захиалга баталгаажлаа. Удахгүй хүргэлт хийгдэнэ.
             </p>
             <p className="text-sm text-gray-500">
-              Захиалгын дугаар: <span className="font-mono font-bold">{order.payment_ref}</span>
+              Захиалгын дугаар: <span className="font-mono font-bold">{order.order_number}</span>
             </p>
           </div>
         ) : (
@@ -134,7 +134,7 @@ export default function PaymentModal({ isOpen, order, onClose, onSuccess }: Paym
               </div>
               <div className="text-center">
                 <p className="text-primary-100 text-sm mb-1">Төлөх дүн</p>
-                <p className="text-3xl font-bold">{formatPrice(order.total)}</p>
+                <p className="text-3xl font-bold">{formatPrice(order.final_amount)}</p>
               </div>
             </div>
 
@@ -153,10 +153,10 @@ export default function PaymentModal({ isOpen, order, onClose, onSuccess }: Paym
                 <p className="text-sm text-gray-600 mb-2">Гүйлгээний утга (ЗААВАЛ)</p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-mono font-bold text-primary-600">
-                    {order.payment_ref}
+                    {order.order_number}
                   </span>
                   <button
-                    onClick={() => handleCopy(order.payment_ref, 'ref')}
+                    onClick={() => handleCopy(order.order_number, 'ref')}
                     className="flex items-center space-x-2 px-3 py-1.5 bg-white rounded-lg border border-gray-200 hover:border-primary-500 transition-colors"
                   >
                     {copied === 'ref' ? (
