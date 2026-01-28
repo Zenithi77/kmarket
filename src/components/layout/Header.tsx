@@ -53,9 +53,12 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
-              <span className="text-2xl font-bold tracking-widest text-white bg-orange-500 px-3 py-1 rounded">
-                K MARKET
+            <Link href="/" className="flex-shrink-0 flex items-center">
+              <span className="text-3xl font-black bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent" style={{ fontFamily: 'system-ui' }}>
+                K
+              </span>
+              <span className="text-2xl font-bold text-gray-800 tracking-tight">
+                market
               </span>
             </Link>
 
