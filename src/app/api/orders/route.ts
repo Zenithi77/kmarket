@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import { Order, Product, Discount } from '@/lib/models';
 
@@ -48,11 +49,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Сагс хоосон байна' }, { status: 400 });
     }
 
+    // Validate required fields
+    if (!shipping_name || !shipping_phone || !shipping_address || !shipping_city || !shipping_district) {
+      return NextResponse.json({ error: 'Хүргэлтийн мэдээлэл дутуу байна' }, { status: 400 });
+    }
+
     // Calculate totals
     let total_amount = 0;
     const orderItems = [];
 
     for (const item of items) {
+      // Validate ObjectId
+      if (!mongoose.Types.ObjectId.isValid(item.product_id)) {
+        return NextResponse.json({ error: `Буруу бараа ID: ${item.product_id}` }, { status: 400 });
+      }
+      
       const product = await Product.findById(item.product_id);
       if (!product) {
         return NextResponse.json({ error: `Бараа олдсонгүй: ${item.product_id}` }, { status: 400 });
@@ -132,8 +143,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(order, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Orders POST error:', error);
-    return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Алдаа гарлаа', 
+      details: error.message 
+    }, { status: 500 });
   }
 }
