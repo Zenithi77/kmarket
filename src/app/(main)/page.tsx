@@ -1,32 +1,54 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight, Truck, Shield, RefreshCw, Headphones } from 'lucide-react';
 import { ProductCard } from '@/components/product';
 import { Product } from '@/types';
 
-// Hero Banner Slides
-const heroSlides = [
+// Banner type
+interface Banner {
+  _id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image: string;
+  link?: string;
+  bg_color: string;
+  text_color: string;
+}
+
+// Category type
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  image?: string;
+  order: number;
+}
+
+// Default Hero Banner Slides (fallback)
+const defaultSlides: Banner[] = [
   {
-    id: 1,
+    _id: '1',
     title: 'K-BEAUTY',
     subtitle: 'DEALS',
     description: 'Солонгос гоо сайхны бүтээгдэхүүн',
-    cta: 'SHOP NOW',
-    bgColor: 'bg-pink-100',
-    textColor: 'text-purple-300',
+    link: '/products',
+    bg_color: '#FCE7F3',
+    text_color: '#C084FC',
     image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
   },
   {
-    id: 2,
+    _id: '2',
     title: 'NEW',
     subtitle: 'ARRIVALS',
     description: 'Шинэ ирсэн бүтээгдэхүүнүүд',
-    cta: 'SHOP NOW',
-    bgColor: 'bg-orange-50',
-    textColor: 'text-orange-200',
+    link: '/products?new=true',
+    bg_color: '#FEF3C7',
+    text_color: '#F97316',
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
   },
 ];
@@ -232,89 +254,217 @@ const features = [
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [banners, setBanners] = useState<Banner[]>(defaultSlides);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Fetch banners and categories from API
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const res = await fetch('/api/banners');
+        const data = await res.json();
+        if (data.banners && data.banners.length > 0) {
+          setBanners(data.banners);
+        }
+      } catch (error) {
+        console.log('Using default banners');
+      }
+    };
+    
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.log('Failed to fetch categories');
+      }
+    };
+    
+    fetchBanners();
+    fetchCategories();
+  }, []);
+
+  // Auto-slide with transition
+  const goToSlide = useCallback((index: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide(index);
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [isTransitioning]);
+
+  const nextSlide = useCallback(() => {
+    goToSlide((currentSlide + 1) % banners.length);
+  }, [currentSlide, banners.length, goToSlide]);
+
+  const prevSlide = useCallback(() => {
+    goToSlide((currentSlide - 1 + banners.length) % banners.length);
+  }, [currentSlide, banners.length, goToSlide]);
 
   useEffect(() => {
+    if (isPaused || banners.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
+      nextSlide();
+    }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isPaused, banners.length, nextSlide]);
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section - KOODING Style */}
-      <section className="relative">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-0">
-          {/* Left Images */}
-          <div className="hidden lg:grid grid-rows-2 gap-0">
-            <div className="relative h-[250px] overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600"
-                alt="Beauty Product 1"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="relative h-[250px] overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=600"
-                alt="Beauty Product 2"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-          </div>
-
-          {/* Center Banner */}
-          <div className="lg:col-span-2 relative h-[400px] lg:h-[500px] bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center overflow-hidden">
-            <div className="text-center z-10 px-8">
-              <h1 className="text-6xl lg:text-8xl font-bold text-purple-200 tracking-wider mb-2">
-                K-BEAUTY
-              </h1>
-              <h2 className="text-5xl lg:text-7xl font-bold text-purple-300 tracking-wider mb-8">
-                DEALS
-              </h2>
-              <div className="relative w-48 h-48 lg:w-64 lg:h-64 mx-auto mb-8">
-                <Image
-                  src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400"
-                  alt="Featured Product"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <Link
-                href="/products"
-                className="inline-flex items-center text-gray-700 font-medium hover:text-orange-500 transition-colors"
-              >
-                SHOP NOW <ArrowRight className="ml-2 w-5 h-5" />
+      {/* Hero Banner Slider - Coupang Style */}
+      <section 
+        className="relative overflow-hidden"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Slides Container */}
+        <div 
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {banners.map((banner, index) => (
+            <div 
+              key={banner._id} 
+              className="w-full flex-shrink-0 relative"
+              style={{ backgroundColor: banner.bg_color }}
+            >
+              <Link href={banner.link || '/products'} className="block">
+                <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+                  <div className="flex items-center justify-between">
+                    {/* Text Content */}
+                    <div className="w-full lg:w-1/2 text-center lg:text-left z-10">
+                      {banner.subtitle && (
+                        <p 
+                          className="text-lg lg:text-xl font-medium mb-2 opacity-80"
+                          style={{ color: banner.text_color }}
+                        >
+                          {banner.subtitle}
+                        </p>
+                      )}
+                      <h1 
+                        className="text-4xl lg:text-6xl xl:text-7xl font-bold mb-4 tracking-wide"
+                        style={{ color: banner.text_color }}
+                      >
+                        {banner.title}
+                      </h1>
+                      {banner.description && (
+                        <p className="text-gray-600 text-lg mb-6">{banner.description}</p>
+                      )}
+                      <span 
+                        className="inline-flex items-center font-medium hover:opacity-80 transition-opacity"
+                        style={{ color: banner.text_color }}
+                      >
+                        SHOP NOW <ArrowRight className="ml-2 w-5 h-5" />
+                      </span>
+                    </div>
+                    
+                    {/* Image */}
+                    <div className="hidden lg:block w-1/2 relative h-[350px]">
+                      <Image
+                        src={banner.image}
+                        alt={banner.title}
+                        fill
+                        className="object-contain"
+                        priority={index === 0}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Mobile Image */}
+                <div className="lg:hidden relative h-[250px] mt-4">
+                  <Image
+                    src={banner.image}
+                    alt={banner.title}
+                    fill
+                    className="object-contain"
+                    priority={index === 0}
+                  />
+                </div>
               </Link>
             </div>
-            {/* Decorative Elements */}
-            <div className="absolute -right-20 -top-20 w-64 h-64 bg-purple-200 rounded-full opacity-30" />
-            <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-pink-200 rounded-full opacity-40" />
-          </div>
-
-          {/* Right Images */}
-          <div className="hidden lg:grid grid-rows-2 gap-0">
-            <div className="relative h-[250px] overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600"
-                alt="Beauty Product 3"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div className="relative h-[250px] overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1617897903246-719242758050?w=600"
-                alt="Beauty Product 4"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-          </div>
+          ))}
         </div>
+
+        {/* Navigation Arrows */}
+        {banners.length > 1 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-110 z-20"
+              style={{ opacity: 1 }}
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-700" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-110 z-20"
+              style={{ opacity: 1 }}
+            >
+              <ChevronRight className="w-6 h-6 text-gray-700" />
+            </button>
+          </>
+        )}
+
+        {/* Dots Indicator */}
+        {banners.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  index === currentSlide 
+                    ? 'w-8 h-2 bg-orange-500' 
+                    : 'w-2 h-2 bg-gray-400 hover:bg-gray-600'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </section>
+
+      {/* Mobile Category Grid - Coupang Style */}
+      {categories.length > 0 && (
+        <section className="bg-white py-4 border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid grid-cols-5 md:grid-cols-10 gap-2 md:gap-4">
+              {categories.slice(0, 10).map((category) => (
+                <Link
+                  key={category._id}
+                  href={`/category/${category.slug}`}
+                  className="flex flex-col items-center group"
+                >
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform shadow-sm overflow-hidden">
+                    {category.icon ? (
+                      <Image
+                        src={category.icon}
+                        alt={category.name}
+                        width={48}
+                        height={48}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-pink-400 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">
+                          {category.name.charAt(0)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-700 text-center line-clamp-1 group-hover:text-orange-500 transition-colors">
+                    {category.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features Bar */}
       <section className="bg-gray-50 py-6 border-y border-gray-100">

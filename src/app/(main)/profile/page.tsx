@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Camera, Mail, Phone, Users } from 'lucide-react';
+import Link from 'next/link';
+import { Camera, Mail, Phone, Users, Shield } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
 import toast from 'react-hot-toast';
 
@@ -14,6 +15,7 @@ interface UserProfile {
   address: string;
   gender: string;
   avatar: string;
+  role: string;
 }
 
 export default function ProfilePage() {
@@ -143,6 +145,22 @@ export default function ProfilePage() {
                 <Users className="w-4 h-4 inline mr-1" />
                 {genderLabel}
               </p>
+            )}
+            {/* Admin Badge & Button */}
+            {userData?.role === 'admin' && (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                  <Shield className="w-3 h-3" />
+                  Админ
+                </span>
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-orange-500 text-white text-xs font-medium rounded-full hover:bg-orange-600 transition-colors"
+                >
+                  <Shield className="w-3 h-3" />
+                  Админ хуудас
+                </Link>
+              </div>
             )}
           </div>
         </div>

@@ -16,11 +16,13 @@ import {
   X,
   LogOut,
   Bell,
-  Search
+  Search,
+  Image
 } from 'lucide-react';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Хяналтын самбар', href: '/admin' },
+  { icon: Image, label: 'Banner', href: '/admin/banners' },
   { icon: Package, label: 'Бүтээгдэхүүн', href: '/admin/products' },
   { icon: ShoppingCart, label: 'Захиалга', href: '/admin/orders' },
   { icon: Users, label: 'Хэрэглэгчид', href: '/admin/users' },

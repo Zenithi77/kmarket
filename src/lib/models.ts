@@ -288,3 +288,33 @@ const WishlistSchema = new Schema<IWishlist>({
 WishlistSchema.index({ user_id: 1, product_id: 1 }, { unique: true });
 
 export const Wishlist: Model<IWishlist> = mongoose.models.Wishlist || mongoose.model<IWishlist>('Wishlist', WishlistSchema);
+
+// ============ BANNER MODEL ============
+export interface IBanner extends Document {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image: string;
+  link?: string;
+  bg_color: string;
+  text_color: string;
+  order: number;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+const BannerSchema = new Schema<IBanner>({
+  title: { type: String, required: true },
+  subtitle: { type: String },
+  description: { type: String },
+  image: { type: String, required: true },
+  link: { type: String },
+  bg_color: { type: String, default: '#FEE2E2' },
+  text_color: { type: String, default: '#F97316' },
+  order: { type: Number, default: 0 },
+  is_active: { type: Boolean, default: true },
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
+
+export const Banner: Model<IBanner> = mongoose.models.Banner || mongoose.model<IBanner>('Banner', BannerSchema);
