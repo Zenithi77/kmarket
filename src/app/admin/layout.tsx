@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { useAuthStore } from '@/store';
 import {
   LayoutDashboard,
   Package,
@@ -17,7 +19,8 @@ import {
   LogOut,
   Bell,
   Search,
-  Image
+  Image,
+  Loader2
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -38,7 +41,45 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  
+  const { data: session, status } = useSession();
+  const { user, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    // Wait for auth state to be determined
+    if (status === 'loading') return;
+    
+    // Check if user is authenticated and is admin
+    const isAdmin = user?.role === 'admin' || (session?.user as any)?.role === 'admin';
+    const isLoggedIn = isAuthenticated || !!session;
+    
+    if (!isLoggedIn) {
+      router.replace('/auth/login');
+      return;
+    }
+    
+    if (!isAdmin) {
+      router.replace('/');
+      return;
+    }
+    
+    setIsChecking(false);
+  }, [status, session, user, isAuthenticated, router]);
+
+  // Show loading while checking auth
+  if (isChecking || status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-orange-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Шалгаж байна...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -143,12 +184,14 @@ export default function AdminLayout({
 
             {/* User */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-medium text-sm">A</span>
+              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-medium text-sm">
+                  {(user?.full_name || session?.user?.name || 'A').charAt(0).toUpperCase()}
+                </span>
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-medium">Admin</p>
-                <p className="text-xs text-gray-500">Super Admin</p>
+                <p className="text-sm font-medium">{user?.full_name || session?.user?.name || 'Admin'}</p>
+                <p className="text-xs text-gray-500">Админ</p>
               </div>
             </div>
           </div>
