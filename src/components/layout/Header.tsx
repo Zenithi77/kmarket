@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X, Shield } from 'lucide-react';
 import { useCartStore, useWishlistStore, useAuthStore } from '@/store';
 
 const CATEGORIES = [
@@ -27,7 +27,7 @@ export default function Header() {
 
   const cartItems = useCartStore((state) => state.getTotalItems());
   const wishlistItems = useWishlistStore((state) => state.getTotalItems());
-  const { isAuthenticated: zustandAuth } = useAuthStore();
+  const { isAuthenticated: zustandAuth, user } = useAuthStore();
   const openCart = useCartStore((state) => state.openCart);
   
   // Prevent hydration mismatch by only rendering auth state after mount
@@ -76,6 +76,17 @@ export default function Header() {
 
             {/* Right Icons */}
             <div className="flex items-center space-x-1 md:space-x-3">
+              {/* Admin Button */}
+              {mounted && isAuthenticated && user?.role === 'admin' && (
+                <Link 
+                  href="/admin"
+                  className="flex items-center p-2 text-orange-500 hover:text-orange-600"
+                  title="Админ"
+                >
+                  <Shield className="w-6 h-6" />
+                </Link>
+              )}
+
               {/* Login/Register or Profile */}
               {mounted && isAuthenticated ? (
                 <Link 
@@ -238,6 +249,16 @@ export default function Header() {
               >
                 🔥 Хямдрал
               </Link>
+              {mounted && isAuthenticated && user?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 px-5 py-3 text-sm text-orange-600 font-medium hover:bg-orange-50"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Shield className="w-4 h-4" />
+                  Админ хэсэг
+                </Link>
+              )}
             </div>
           </div>
         </div>
