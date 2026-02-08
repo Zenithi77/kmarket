@@ -97,7 +97,7 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
                 );
               })}
             </div>
-            {/* Row 2 */}}
+            {/* Row 2 */}
             <div className="grid grid-cols-5 gap-2 md:gap-4">
               {defaultCategoryIcons.slice(5, 10).map((item) => {
                 const IconComponent = item.icon;
