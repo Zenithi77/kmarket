@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight, Truck, Shield, RefreshCw, Headphones } from 'lucide-react';
 import { ProductCard } from '@/components/product';
+import { CategorySlider, ProductSlider } from '@/components/home';
 import { Product } from '@/types';
 
 // Banner type
@@ -37,8 +38,8 @@ const defaultSlides: Banner[] = [
     subtitle: 'DEALS',
     description: 'Солонгос гоо сайхны бүтээгдэхүүн',
     link: '/products',
-    bg_color: '#FCE7F3',
-    text_color: '#C084FC',
+    bg_color: '#E9D5FF',
+    text_color: '#7C3AED',
     image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
   },
   {
@@ -428,54 +429,34 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Mobile Category Grid - Coupang Style */}
-      {categories.length > 0 && (
-        <section className="bg-white py-4 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-5 md:grid-cols-10 gap-2 md:gap-4">
-              {categories.slice(0, 10).map((category) => (
-                <Link
-                  key={category._id}
-                  href={`/category/${category.slug}`}
-                  className="flex flex-col items-center group"
-                >
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform shadow-sm overflow-hidden">
-                    {category.icon ? (
-                      <Image
-                        src={category.icon}
-                        alt={category.name}
-                        width={48}
-                        height={48}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-pink-400 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">
-                          {category.name.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-700 text-center line-clamp-1 group-hover:text-orange-500 transition-colors">
-                    {category.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Category Icons Slider - Coupang Style */}
+      <CategorySlider categories={categories.length > 0 ? categories.map(c => ({
+        id: c._id,
+        name: c.name,
+        slug: c.slug,
+        icon: c.icon,
+        image: c.image
+      })) : undefined} />
+
+      {/* Today's Deal - Product Slider */}
+      <ProductSlider
+        title="오늘의 특가"
+        badge="특가진행중"
+        badgeColor="bg-red-500"
+        products={mockProducts.slice(0, 8)}
+        viewAllLink="/products?sale=true"
+      />
 
       {/* Features Bar */}
-      <section className="bg-gray-50 py-6 border-y border-gray-100">
+      <section className="bg-gray-50 py-4 border-y border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-center justify-center space-x-3">
-                <feature.icon className="w-8 h-8 text-orange-500" />
+              <div key={index} className="flex items-center justify-center space-x-2">
+                <feature.icon className="w-6 h-6 text-orange-500" />
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">{feature.title}</p>
-                  <p className="text-xs text-gray-500">{feature.desc}</p>
+                  <p className="font-medium text-gray-900 text-xs md:text-sm">{feature.title}</p>
+                  <p className="text-xs text-gray-500 hidden md:block">{feature.desc}</p>
                 </div>
               </div>
             ))}
@@ -483,29 +464,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trending Products */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Trending Now</h2>
-              <p className="text-gray-500 text-sm mt-1">Одоо эрэлттэй байгаа бүтээгдэхүүн</p>
-            </div>
-            <Link
-              href="/products?featured=true"
-              className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center"
-            >
-              Бүгдийг харах <ArrowRight className="ml-1 w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-            {mockProducts.slice(0, 8).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Trending Products - Slider Style */}
+      <ProductSlider
+        title="Trending Now"
+        subtitle="Одоо эрэлттэй байгаа"
+        products={mockProducts.slice(0, 8)}
+        viewAllLink="/products?featured=true"
+      />
 
       {/* Category Banners */}
       <section className="py-12 bg-gray-50">
@@ -559,47 +524,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* New Arrivals */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">New Arrivals</h2>
-              <p className="text-gray-500 text-sm mt-1">Шинэ ирсэн бүтээгдэхүүн</p>
-            </div>
-            <Link
-              href="/products?new=true"
-              className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center"
-            >
-              Бүгдийг харах <ArrowRight className="ml-1 w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-            {mockProducts.slice(0, 4).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* New Arrivals - Slider Style */}
+      <ProductSlider
+        title="New Arrivals"
+        subtitle="Шинэ ирсэн"
+        products={mockProducts.slice(0, 6)}
+        viewAllLink="/products?new=true"
+      />
 
       {/* Sale Banner */}
-      <section className="py-12">
+      <section className="py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden bg-gradient-to-r from-orange-500 to-pink-500">
-            <div className="absolute inset-0 flex items-center justify-between px-8 md:px-16">
+          <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-orange-500 to-pink-500">
+            <div className="absolute inset-0 flex items-center justify-between px-6 md:px-12">
               <div className="text-white">
-                <p className="text-sm font-medium mb-2">Limited Time Offer</p>
-                <h2 className="text-4xl md:text-5xl font-bold mb-4">50% OFF</h2>
-                <p className="text-lg opacity-90 mb-6">Сонгогдсон бараанууд дээр</p>
+                <p className="text-xs font-medium mb-1">Limited Time Offer</p>
+                <h2 className="text-3xl md:text-4xl font-bold mb-2">50% OFF</h2>
+                <p className="text-sm opacity-90 mb-4">Сонгогдсон бараанууд дээр</p>
                 <Link
                   href="/sale"
-                  className="inline-flex items-center bg-white text-orange-500 px-6 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors"
+                  className="inline-flex items-center bg-white text-orange-500 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
                 >
-                  SHOP SALE <ArrowRight className="ml-2 w-5 h-5" />
+                  SHOP SALE <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </div>
-              <div className="hidden md:block relative w-64 h-64">
+              <div className="hidden md:block relative w-48 h-48">
                 <Image
                   src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400"
                   alt="Sale"
@@ -631,21 +580,21 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter */}
-      <section className="py-16 bg-gray-900">
+      <section className="py-12 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Join Our Newsletter</h2>
-          <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+          <h2 className="text-2xl font-bold text-white mb-3">Join Our Newsletter</h2>
+          <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
             Шинэ бүтээгдэхүүн, хямдрал урамшууллын мэдээллийг хамгийн түрүүнд хүлээн аваарай
           </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input
               type="email"
               placeholder="И-мэйл хаяг"
-              className="flex-1 px-6 py-3 rounded-full bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:border-orange-500 focus:outline-none"
+              className="flex-1 px-5 py-2.5 rounded-full bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:border-orange-500 focus:outline-none text-sm"
             />
             <button
               type="submit"
-              className="px-8 py-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors"
+              className="px-6 py-2.5 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors text-sm"
             >
               Бүртгүүлэх
             </button>

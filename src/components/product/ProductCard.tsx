@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
@@ -13,9 +14,16 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const [mounted, setMounted] = useState(false);
   const addToCart = useCartStore((state) => state.addItem);
   const { toggleItem, isInWishlist } = useWishlistStore();
-  const isWishlisted = isInWishlist(product.id);
+  
+  // Prevent hydration mismatch by only checking wishlist after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  const isWishlisted = mounted && isInWishlist(product.id);
   
   const discountPercent = calculateDiscountPercent(product.price, product.sale_price || 0);
   const isOnSale = discountPercent > 0;
@@ -82,12 +90,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleToggleWishlist}
             className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
-              isWishlisted
+              mounted && isWishlisted
                 ? 'bg-red-500 text-white'
                 : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:text-red-500'
             }`}
           >
-            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+            <Heart className={`w-4 h-4 ${mounted && isWishlisted ? 'fill-current' : ''}`} />
           </button>
 
           {/* Quick Add to Cart */}

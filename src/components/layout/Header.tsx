@@ -18,7 +18,7 @@ const CATEGORIES = [
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchCategory, setSearchCategory] = useState('All');
+  const [searchCategory, setSearchCategory] = useState('전체');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -48,65 +48,57 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white">
-      {/* Top Header */}
+      {/* Main Header - Coupang Style with 2 rows */}
       <div className="border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-3xl font-black bg-gradient-to-r from-orange-500 to-amber-400 bg-clip-text text-transparent" style={{ fontFamily: 'system-ui' }}>
+          {/* Row 1: Logo and Icons */}
+          <div className="flex items-center justify-between h-12">
+            {/* Left: Hamburger + Logo */}
+            <div className="flex items-center gap-1">
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="md:hidden p-1 text-gray-600"
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+
+              {/* Logo - Coupang Style with Orange */}
+              <Link href="/" className="flex-shrink-0 flex items-center">
+              <span className="text-2xl md:text-3xl font-black text-orange-500" style={{ fontFamily: 'system-ui' }}>
                 K
               </span>
-              <span className="text-2xl font-bold text-gray-800 tracking-tight">
+              <span className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
                 market
               </span>
-            </Link>
-
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-              <form onSubmit={handleSearch} className="w-full flex">
-                <div className="relative">
-                  <select
-                    value={searchCategory}
-                    onChange={(e) => setSearchCategory(e.target.value)}
-                    className="h-10 pl-3 pr-8 border border-r-0 border-gray-300 rounded-l-md bg-white text-sm text-gray-600 focus:outline-none focus:border-gray-400 appearance-none cursor-pointer"
-                  >
-                    <option value="All">Бүгд</option>
-                    <option value="Women">Эмэгтэй</option>
-                    <option value="Men">Эрэгтэй</option>
-                    <option value="Beauty">Beauty</option>
-                    <option value="Kids">Хүүхэд</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Хайх..."
-                  className="flex-1 h-10 px-4 border border-gray-300 text-sm focus:outline-none focus:border-gray-400"
-                />
-                <button
-                  type="submit"
-                  className="h-10 px-4 bg-white border border-l-0 border-gray-300 rounded-r-md hover:bg-gray-50"
-                >
-                  <Search className="w-5 h-5 text-gray-500" />
-                </button>
-              </form>
+              </Link>
             </div>
 
             {/* Right Icons */}
-            <div className="flex items-center space-x-4">
-              {/* Sign In / Profile */}
-              <Link 
-                href={isAuthenticated ? "/profile" : "/auth/login"}
-                className="hidden sm:flex items-center p-2 text-gray-600 hover:text-gray-900"
-              >
-                <User className="w-6 h-6" />
-              </Link>
+            <div className="flex items-center space-x-1 md:space-x-3">
+              {/* Login/Register or Profile */}
+              {mounted && isAuthenticated ? (
+                <Link 
+                  href="/profile"
+                  className="flex items-center p-2 text-gray-600 hover:text-orange-500"
+                  title="Профайл"
+                >
+                  <User className="w-6 h-6" />
+                </Link>
+              ) : (
+                <>
+                  <Link 
+                    href="/auth/login"
+                    className="flex items-center p-2 text-gray-600 hover:text-orange-500"
+                    title="Нэвтрэх"
+                  >
+                    <User className="w-6 h-6" />
+                  </Link>
+                </>
+              )}
 
               {/* Wishlist */}
-              <Link href="/wishlist" className="relative p-2 text-gray-600 hover:text-gray-900">
+              <Link href="/wishlist" className="relative p-2 text-gray-600 hover:text-orange-500">
                 <Heart className="w-6 h-6" />
                 {mounted && wishlistItems > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -118,7 +110,7 @@ export default function Header() {
               {/* Cart */}
               <button
                 onClick={openCart}
-                className="relative p-2 text-gray-600 hover:text-gray-900"
+                className="relative p-2 text-gray-600 hover:text-orange-500"
               >
                 <ShoppingCart className="w-6 h-6" />
                 {mounted && cartItems > 0 && (
@@ -127,23 +119,55 @@ export default function Header() {
                   </span>
                 )}
               </button>
-
-              {/* Mobile Menu */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-gray-600"
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
             </div>
+          </div>
+
+          {/* Row 2: Search Bar - Full Width */}
+          <div className="pb-3">
+            <form onSubmit={handleSearch} className="w-full flex items-center">
+              {/* Category Dropdown */}
+              <div className="relative hidden sm:block">
+                <select
+                  value={searchCategory}
+                  onChange={(e) => setSearchCategory(e.target.value)}
+                  className="h-10 pl-3 pr-8 border-2 border-r-0 border-orange-500 rounded-l-lg bg-white text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
+                >
+                  <option value="전체">Бүгд</option>
+                  <option value="Beauty">Beauty</option>
+                  <option value="Fashion">Fashion</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Home">Home</option>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
+              
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Хайх бүтээгдэхүүний нэрийг оруулна уу!"
+                  className="w-full h-10 px-4 pr-4 border-2 border-orange-500 sm:border-l-0 sm:rounded-l-none rounded-l-lg text-sm focus:outline-none placeholder:text-gray-400"
+                />
+              </div>
+              
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="h-10 px-5 bg-orange-500 text-white rounded-r-lg hover:bg-orange-600 transition-colors flex items-center justify-center"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            </form>
           </div>
         </div>
       </div>
 
-      {/* Category Navigation */}
-      <div className="border-b border-gray-100 hidden md:block">
+      {/* Category Navigation - Hidden for cleaner Coupang look, keeping mobile menu */}
+      <div className="border-b border-gray-100 hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-center space-x-8 h-12">
+          <nav className="flex items-center justify-center space-x-8 h-11">
             {CATEGORIES.map((category) => (
               <div
                 key={category.id}
@@ -170,53 +194,51 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Modern Minimal Style */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200">
-          {/* Mobile Search */}
-          <div className="p-4 border-b border-gray-100">
-            <form onSubmit={handleSearch} className="flex">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Хайх..."
-                className="flex-1 h-10 px-4 border border-gray-300 rounded-l-md text-sm focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="h-10 px-4 bg-orange-500 text-white rounded-r-md"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-            </form>
-          </div>
+        <div className="md:hidden fixed inset-0 top-[104px] z-40">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          
+          {/* Menu Panel */}
+          <div className="relative bg-white w-full max-w-sm shadow-xl animate-slide-down">
+            {/* Categories */}
+            <div className="py-2">
+              {CATEGORIES.map((category, index) => (
+                <Link
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  className={`flex items-center justify-between px-5 py-3.5 text-sm font-medium transition-colors hover:bg-gray-50 ${
+                    category.color || 'text-gray-800'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span>{category.name}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90" />
+                </Link>
+              ))}
+            </div>
 
-          {/* Mobile Categories */}
-          <div className="py-2">
-            {CATEGORIES.map((category) => (
+            {/* Quick Links */}
+            <div className="border-t border-gray-100 py-2">
               <Link
-                key={category.id}
-                href={`/category/${category.slug}`}
-                className={`block px-4 py-3 text-sm font-medium border-b border-gray-50 ${
-                  category.color || 'text-gray-700'
-                }`}
+                href="/products"
+                className="flex items-center px-5 py-3 text-sm text-gray-600 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {category.name}
+                Бүх бараа
               </Link>
-            ))}
-          </div>
-
-          {/* Mobile Auth */}
-          <div className="p-4 border-t border-gray-100">
-            <Link
-              href={isAuthenticated ? "/profile" : "/auth/login"}
-              className="block w-full py-2 text-center text-sm font-medium text-orange-500"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {isAuthenticated ? 'Профайл' : 'Нэвтрэх / Бүртгүүлэх'}
-            </Link>
+              <Link
+                href="/products?sale=true"
+                className="flex items-center px-5 py-3 text-sm text-orange-500 font-medium hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🔥 Хямдрал
+              </Link>
+            </div>
           </div>
         </div>
       )}

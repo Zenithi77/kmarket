@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
 
@@ -59,10 +59,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Store token in localStorage
       localStorage.setItem('token', data.token);
 
-      // Set user in store
       setUser({
         id: data.user._id,
         email: data.user.email,
@@ -76,7 +74,6 @@ export default function LoginPage() {
 
       toast.success('Амжилттай нэвтэрлээ');
       
-      // Redirect based on role
       if (data.user.role === 'admin') {
         router.push('/admin');
       } else {
@@ -103,46 +100,58 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-200 rounded-full opacity-20 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Back to Store */}
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-500 mb-6 transition-colors group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm font-medium">Дэлгүүр рүү буцах</span>
+        </Link>
+
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">K</span>
+          <Link href="/" className="inline-flex items-center gap-2">
+            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+              <span className="text-white font-black text-3xl">K</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">KMarket</span>
           </Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-4">Тавтай морил!</h1>
+          <p className="text-gray-500 mt-1">Бүртгэлрүүгээ нэвтэрнэ үү</p>
         </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
-            Тавтай морил
-          </h1>
-          <p className="text-gray-500 text-center mb-8">
-            Бүртгэлтэй бол нэвтэрнэ үү
-          </p>
-
+        {/* Form Card */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl shadow-gray-200/50 p-8 border border-white">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                И-мэйл хаяг
+                И-мэйл
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                    errors.email ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="example@email.com"
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full" />
+                  {errors.email}
+                </p>
               )}
             </div>
 
@@ -151,35 +160,38 @@ export default function LoginPage() {
                 Нууц үг
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                    errors.password ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-red-500 text-sm mt-1.5 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full" />
+                  {errors.password}
+                </p>
               )}
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500" />
+              <label className="flex items-center cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2" />
                 <span className="ml-2 text-sm text-gray-600">Намайг сана</span>
               </label>
-              <Link href="/auth/forgot-password" className="text-sm text-orange-500 hover:underline">
+              <Link href="/auth/forgot-password" className="text-sm text-orange-500 hover:text-orange-600 font-medium">
                 Нууц үг мартсан?
               </Link>
             </div>
@@ -187,7 +199,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -206,7 +218,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">Эсвэл</span>
+                <span className="px-4 bg-white text-gray-400">эсвэл</span>
               </div>
             </div>
 
@@ -215,7 +227,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={isGoogleLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white border-2 border-gray-100 rounded-xl hover:bg-gray-50 hover:border-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGoogleLoading ? (
                   <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -232,12 +244,23 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-center text-gray-500 mt-8">
+          <p className="text-center text-gray-500 mt-8 text-sm">
             Бүртгэл байхгүй юу?{' '}
-            <Link href="/auth/register" className="text-orange-500 font-semibold hover:underline">
+            <Link href="/auth/register" className="text-orange-500 font-semibold hover:text-orange-600">
               Бүртгүүлэх
             </Link>
           </p>
+        </div>
+
+        {/* Continue Shopping */}
+        <div className="text-center mt-6">
+          <Link 
+            href="/products" 
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-orange-500 text-sm transition-colors"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            <span>Дэлгүүрээр үзэх</span>
+          </Link>
         </div>
       </div>
     </div>
