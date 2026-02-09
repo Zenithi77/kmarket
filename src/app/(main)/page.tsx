@@ -327,7 +327,7 @@ export default function HomePage() {
               style={{ backgroundColor: banner.bg_color }}
             >
               <Link href={banner.link || '/products'} className="block">
-                <div className="max-w-7xl mx-auto px-4 py-4 lg:py-6">
+                <div className="max-w-7xl mx-auto px-4 py-2 lg:py-4">
                   <div className="flex items-center justify-between">
                     {/* Text Content */}
                     <div className="w-full lg:w-1/2 text-center lg:text-left z-10">
@@ -357,7 +357,7 @@ export default function HomePage() {
                     </div>
                     
                     {/* Image */}
-                    <div className="hidden lg:block w-1/2 relative h-[250px]">
+                    <div className="hidden lg:block w-1/2 relative h-[200px]">
                       <Image
                         src={banner.image}
                         alt={banner.title}
@@ -370,7 +370,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Mobile Image */}
-                <div className="lg:hidden relative h-[180px] mt-2">
+                <div className="lg:hidden relative h-[120px] mt-2">
                   <Image
                     src={banner.image}
                     alt={banner.title}
@@ -389,15 +389,13 @@ export default function HomePage() {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-110 z-20"
-              style={{ opacity: 1 }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center transition-all hover:scale-110 z-20"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:scale-110 z-20"
-              style={{ opacity: 1 }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center transition-all hover:scale-110 z-20"
             >
               <ChevronRight className="w-6 h-6 text-gray-700" />
             </button>
