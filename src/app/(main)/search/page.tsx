@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ProductCard } from '@/components/product';
 import { Button, LoadingSpinner } from '@/components/ui';
 
@@ -78,12 +78,10 @@ const mockProducts = [
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const [searchQuery, setSearchQuery] = useState(query);
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<typeof mockProducts>([]);
 
   useEffect(() => {
-    setSearchQuery(query);
     // Simulate search
     setLoading(true);
     setTimeout(() => {
@@ -102,30 +100,6 @@ function SearchContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Search Header */}
-      <div className="mb-8">
-        <form action="/search" method="GET" className="relative max-w-2xl mx-auto">
-          <input
-            type="text"
-            name="q"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Бараа хайх..."
-            className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-lg"
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
-            >
-              <X className="w-5 h-5 text-gray-400" />
-            </button>
-          )}
-        </form>
-      </div>
-
       {/* Results */}
       {loading ? (
         <div className="flex justify-center py-16">

@@ -327,7 +327,7 @@ export default function HomePage() {
               style={{ backgroundColor: banner.bg_color }}
             >
               <Link href={banner.link || '/products'} className="block">
-                <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+                <div className="max-w-7xl mx-auto px-4 py-4 lg:py-6">
                   <div className="flex items-center justify-between">
                     {/* Text Content */}
                     <div className="w-full lg:w-1/2 text-center lg:text-left z-10">
@@ -357,7 +357,7 @@ export default function HomePage() {
                     </div>
                     
                     {/* Image */}
-                    <div className="hidden lg:block w-1/2 relative h-[350px]">
+                    <div className="hidden lg:block w-1/2 relative h-[250px]">
                       <Image
                         src={banner.image}
                         alt={banner.title}
@@ -370,7 +370,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Mobile Image */}
-                <div className="lg:hidden relative h-[250px] mt-4">
+                <div className="lg:hidden relative h-[180px] mt-2">
                   <Image
                     src={banner.image}
                     alt={banner.title}
