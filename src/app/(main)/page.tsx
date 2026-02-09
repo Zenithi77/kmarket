@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Truck, Shield, RefreshCw, Headphones } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProductCard } from '@/components/product';
 import { CategorySlider, ProductSlider } from '@/components/home';
 import { Product } from '@/types';
@@ -246,13 +246,6 @@ const mockProducts: Product[] = [
   },
 ];
 
-const features = [
-  { icon: Truck, title: 'Үнэгүй хүргэлт', desc: '100,000₮-с дээш' },
-  { icon: Shield, title: '100% Жинхэнэ', desc: 'Баталгаат бараа' },
-  { icon: RefreshCw, title: 'Буцаалт', desc: '14 хоногийн дотор' },
-  { icon: Headphones, title: '24/7 Дэмжлэг', desc: 'Тусламж үзүүлнэ' },
-];
-
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [banners, setBanners] = useState<Banner[]>(defaultSlides);
@@ -446,23 +439,6 @@ export default function HomePage() {
         products={mockProducts.slice(0, 8)}
         viewAllLink="/products?sale=true"
       />
-
-      {/* Features Bar */}
-      <section className="bg-gray-50 py-4 border-y border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center justify-center space-x-2">
-                <feature.icon className="w-6 h-6 text-orange-500" />
-                <div>
-                  <p className="font-medium text-gray-900 text-xs md:text-sm">{feature.title}</p>
-                  <p className="text-xs text-gray-500 hidden md:block">{feature.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Trending Products - Slider Style */}
       <ProductSlider
