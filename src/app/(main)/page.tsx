@@ -440,8 +440,8 @@ export default function HomePage() {
 
       {/* Today's Deal - Product Slider */}
       <ProductSlider
-        title="오늘의 특가"
-        badge="특가진행중"
+        title="Today's Deal"
+        badge="On Sale"
         badgeColor="bg-red-500"
         products={mockProducts.slice(0, 8)}
         viewAllLink="/products?sale=true"

@@ -18,7 +18,7 @@ const CATEGORIES = [
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchCategory, setSearchCategory] = useState('전체');
+  const [searchCategory, setSearchCategory] = useState('All');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -143,7 +143,7 @@ export default function Header() {
                   onChange={(e) => setSearchCategory(e.target.value)}
                   className="h-10 pl-3 pr-8 border-2 border-r-0 border-orange-500 rounded-l-lg bg-white text-sm text-gray-700 focus:outline-none appearance-none cursor-pointer font-medium"
                 >
-                  <option value="전체">Бүгд</option>
+                  <option value="All">All</option>
                   <option value="Beauty">Beauty</option>
                   <option value="Fashion">Fashion</option>
                   <option value="Electronics">Electronics</option>

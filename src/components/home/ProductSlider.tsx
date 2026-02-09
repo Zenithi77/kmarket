@@ -152,7 +152,7 @@ export default function ProductSlider({
                       {/* Badge */}
                       {isOnSale && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded">
-                          특가진행중
+                          On Sale
                         </span>
                       )}
                       {/* Wishlist */}
@@ -186,7 +186,7 @@ export default function ProductSlider({
                       {isOnSale && (
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-red-500 font-bold text-sm">
-                            할인 {discountPercent}%
+                            {discountPercent}% OFF
                           </span>
                         </div>
                       )}
