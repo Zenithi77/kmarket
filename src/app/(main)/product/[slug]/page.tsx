@@ -9,12 +9,9 @@ import {
   ShoppingCart, 
   Minus, 
   Plus, 
-  Star, 
   Truck, 
   Shield, 
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   Share2
 } from 'lucide-react';
 import { Product } from '@/types';
@@ -97,6 +94,35 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setStartX(clientX);
+  };
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragOffset(clientX - startX);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    if (Math.abs(dragOffset) > 50) {
+      if (dragOffset > 0) {
+        setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length);
+      } else {
+        setSelectedImage((prev) => (prev + 1) % product.images.length);
+      }
+    }
+    setDragOffset(0);
+  };
   
   const addToCart = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
@@ -160,13 +186,24 @@ export default function ProductDetailPage() {
           {/* Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden">
+            <div 
+              className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
+              onMouseDown={handleDragStart}
+              onMouseMove={handleDragMove}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+              onTouchStart={handleDragStart}
+              onTouchMove={handleDragMove}
+              onTouchEnd={handleDragEnd}
+            >
               <Image
                 src={product.images[selectedImage]}
                 alt={product.name}
                 fill
-                className="object-cover"
+                className="object-cover pointer-events-none"
+                style={{ transform: `translateX(${dragOffset}px)` }}
                 priority
+                draggable={false}
               />
               
               {/* Badges */}
@@ -176,22 +213,18 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Navigation */}
+              {/* Image indicators */}
               {product.images.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setSelectedImage((prev) => (prev - 1 + product.images.length) % product.images.length)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setSelectedImage((prev) => (prev + 1) % product.images.length)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {product.images.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        selectedImage === index ? 'bg-white' : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
               )}
             </div>
 
@@ -227,25 +260,6 @@ export default function ProductDetailPage() {
 
             {/* Name */}
             <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-
-            {/* Rating */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(product.rating)
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-gray-200'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-gray-600">
-                {product.rating} ({product.review_count} үнэлгээ)
-              </span>
-            </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-4">

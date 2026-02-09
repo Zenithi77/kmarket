@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Star, ShoppingCart, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingCart, Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore, useWishlistStore } from '@/store';
 import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
@@ -201,14 +201,6 @@ export default function ProductSlider({
                             {formatPrice(product.price)}
                           </span>
                         )}
-                      </div>
-
-                      {/* Rating */}
-                      <div className="flex items-center gap-1 mt-2 h-4">
-                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                        <span className="text-xs text-gray-500">
-                          {product.rating} ({product.review_count.toLocaleString()})
-                        </span>
                       </div>
                     </div>
                   </div>
