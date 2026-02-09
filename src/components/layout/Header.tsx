@@ -4,16 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X, Shield } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X, Shield, Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Percent } from 'lucide-react';
 import { useCartStore, useWishlistStore, useAuthStore } from '@/store';
 
 const CATEGORIES = [
-  { id: '1', name: 'Beauty', slug: 'beauty', color: '' },
-  { id: '2', name: 'Fashion', slug: 'fashion', color: '' },
-  { id: '3', name: 'Shoes', slug: 'shoes', color: '' },
-  { id: '4', name: 'Dyson', slug: 'dyson', color: '' },
-  { id: '5', name: 'Trendy', slug: 'trendy', color: 'text-pink-500' },
-  { id: '6', name: 'Best', slug: 'best', color: 'text-orange-500' },
+  { id: '1', name: 'Beauty', slug: 'beauty', color: '', icon: Sparkles },
+  { id: '2', name: 'Fashion', slug: 'fashion', color: '', icon: Shirt },
+  { id: '3', name: 'Shoes', slug: 'shoes', color: '', icon: Footprints },
+  { id: '4', name: 'Dyson', slug: 'dyson', color: '', icon: Wind },
+  { id: '5', name: 'Trendy', slug: 'trendy', color: 'text-pink-500', icon: TrendingUp },
+  { id: '6', name: 'Best', slug: 'best', color: 'text-orange-500', icon: Award },
 ];
 
 export default function Header() {
@@ -58,9 +58,9 @@ export default function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-1 text-gray-600"
+                className="md:hidden p-2 text-gray-700 hover:text-orange-500 transition-colors"
               >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
               </button>
 
               {/* Logo - Coupang Style with Orange */}
@@ -205,58 +205,67 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu - Modern Minimal Style */}
+      {/* Mobile Menu - Coupang Style with Icons */}
       {isMenuOpen && (
         <div className="md:hidden fixed inset-0 top-[104px] z-40">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40"
             onClick={() => setIsMenuOpen(false)}
           />
           
-          {/* Menu Panel */}
-          <div className="relative bg-white w-full max-w-sm shadow-xl animate-slide-down">
-            {/* Categories */}
-            <div className="py-2">
-              {CATEGORIES.map((category, index) => (
-                <Link
-                  key={category.id}
-                  href={`/category/${category.slug}`}
-                  className={`flex items-center justify-between px-5 py-3.5 text-sm font-medium transition-colors hover:bg-gray-50 ${
-                    category.color || 'text-gray-800'
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <span>{category.name}</span>
-                  <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90" />
-                </Link>
-              ))}
+          {/* Menu Panel - Half screen width */}
+          <div className="absolute left-0 top-0 bottom-0 bg-white w-[70%] max-w-[280px] shadow-2xl overflow-y-auto">
+            {/* Categories with Icons */}
+            <div className="py-3">
+              {CATEGORIES.map((category) => {
+                const IconComponent = category.icon;
+                return (
+                  <Link
+                    key={category.id}
+                    href={`/category/${category.slug}`}
+                    className={`flex items-center gap-4 px-5 py-3.5 text-sm font-medium transition-colors hover:bg-gray-50 ${
+                      category.color || 'text-gray-800'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <IconComponent className="w-5 h-5 text-gray-500" />
+                    <span>{category.name}</span>
+                    <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90 ml-auto" />
+                  </Link>
+                );
+              })}
             </div>
 
-            {/* Quick Links */}
-            <div className="border-t border-gray-100 py-2">
+            {/* Divider */}
+            <div className="border-t border-gray-100" />
+
+            {/* Quick Links with Icons */}
+            <div className="py-3">
               <Link
                 href="/products"
-                className="flex items-center px-5 py-3 text-sm text-gray-600 hover:bg-gray-50"
+                className="flex items-center gap-4 px-5 py-3.5 text-sm text-gray-700 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Бүх бараа
+                <Package className="w-5 h-5 text-gray-500" />
+                <span>Бүх бараа</span>
               </Link>
               <Link
                 href="/products?sale=true"
-                className="flex items-center px-5 py-3 text-sm text-orange-500 font-medium hover:bg-gray-50"
+                className="flex items-center gap-4 px-5 py-3.5 text-sm text-red-500 font-medium hover:bg-red-50"
                 onClick={() => setIsMenuOpen(false)}
               >
-                🔥 Хямдрал
+                <Percent className="w-5 h-5" />
+                <span>Хямдрал</span>
               </Link>
               {mounted && isAuthenticated && user?.role === 'admin' && (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-2 px-5 py-3 text-sm text-orange-600 font-medium hover:bg-orange-50"
+                  className="flex items-center gap-4 px-5 py-3.5 text-sm text-orange-600 font-medium hover:bg-orange-50"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Shield className="w-4 h-4" />
-                  Админ хэсэг
+                  <Shield className="w-5 h-5" />
+                  <span>Админ хэсэг</span>
                 </Link>
               )}
             </div>
