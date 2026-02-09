@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore, useWishlistStore } from '@/store';
 import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
@@ -123,25 +123,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="font-medium text-gray-900 line-clamp-2 mb-2 group-hover:text-primary-500 transition-colors h-12">
             {product.name}
           </h3>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-2 h-5">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-3.5 h-3.5 ${
-                    i < Math.floor(product.rating)
-                      ? 'text-yellow-400 fill-yellow-400'
-                      : 'text-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-gray-500">
-              ({product.review_count})
-            </span>
-          </div>
 
           {/* Price */}
           <div className="flex items-center gap-2 h-7 mt-auto">
