@@ -138,9 +138,9 @@ export default function ProductSlider({
                 <Link
                   key={product.id}
                   href={`/product/${product.slug}`}
-                  className="flex-shrink-0 w-44 md:w-48 group/card"
+                  className="flex-shrink-0 w-44 md:w-48 group/card h-[320px]"
                 >
-                  <div className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
+                  <div className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow h-full flex flex-col">
                     {/* Image */}
                     <div className="relative aspect-square bg-gray-50">
                       <Image
@@ -176,23 +176,23 @@ export default function ProductSlider({
                     </div>
 
                     {/* Content */}
-                    <div className="p-3">
+                    <div className="p-3 flex flex-col flex-grow">
                       {/* Name */}
                       <h3 className="text-sm text-gray-800 line-clamp-2 mb-2 h-10">
                         {product.name}
                       </h3>
 
                       {/* Discount */}
-                      {isOnSale && (
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="h-5 mb-1">
+                        {isOnSale && (
                           <span className="text-red-500 font-bold text-sm">
                             {discountPercent}% OFF
                           </span>
-                        </div>
-                      )}
+                        )}
+                      </div>
 
                       {/* Price */}
-                      <div className="flex items-baseline gap-2">
+                      <div className="flex items-baseline gap-2 mt-auto">
                         <span className="text-lg font-bold text-gray-900">
                           {formatPrice(product.sale_price || product.price)}
                         </span>
@@ -204,7 +204,7 @@ export default function ProductSlider({
                       </div>
 
                       {/* Rating */}
-                      <div className="flex items-center gap-1 mt-2">
+                      <div className="flex items-center gap-1 mt-2 h-4">
                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                         <span className="text-xs text-gray-500">
                           {product.rating} ({product.review_count.toLocaleString()})

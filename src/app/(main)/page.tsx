@@ -370,7 +370,7 @@ export default function HomePage() {
                 </div>
                 
                 {/* Mobile Image */}
-                <div className="lg:hidden relative h-[120px] mt-2">
+                <div className="lg:hidden relative h-[100px] mt-2">
                   <Image
                     src={banner.image}
                     alt={banner.title}
