@@ -67,7 +67,7 @@ export default function CartSidebar() {
                   {/* Product Image */}
                   <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-white">
                     <Image
-                      src={item.product.images[0] || '/placeholder.png'}
+                      src={item.product.images[0] || '/placeholder.svg'}
                       alt={item.product.name}
                       fill
                       className="object-cover"

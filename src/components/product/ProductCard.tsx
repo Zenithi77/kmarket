@@ -60,7 +60,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Image Container */}
         <div className="relative aspect-square bg-gray-50 flex-shrink-0">
           <Image
-            src={product.images[0] || '/placeholder.png'}
+            src={product.images[0] || '/placeholder.svg'}
             alt={product.name}
             fill
             className="product-image object-cover"

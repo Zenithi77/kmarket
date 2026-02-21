@@ -144,7 +144,7 @@ export default function ProductSlider({
                     {/* Image */}
                     <div className="relative aspect-square bg-gray-50">
                       <Image
-                        src={product.images[0] || '/placeholder.png'}
+                        src={product.images[0] || '/placeholder.svg'}
                         alt={product.name}
                         fill
                         className="object-cover group-hover/card:scale-105 transition-transform duration-300"
