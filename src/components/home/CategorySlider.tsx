@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Truck, Leaf, RefreshCw, Building2, Globe, Sparkles, Tag, Gift, Percent, Crown } from 'lucide-react';
+import { Truck, Sparkles, Flower2, Shirt, Briefcase, Globe, Package, Tag, Percent, Crown } from 'lucide-react';
 
 interface CategoryItem {
   id: string;
@@ -21,17 +21,17 @@ interface CategorySliderProps {
 // Default category icons - Coupang style (2 rows)
 const defaultCategoryIcons = [
   // Row 1
-  { id: '1', name: 'Хүргэлттэй', slug: 'delivery', icon: Truck, bgColor: 'bg-blue-100', color: 'text-blue-600' },
-  { id: '2', name: 'Шинэ ирсэн', slug: 'new', icon: Sparkles, bgColor: 'bg-orange-100', color: 'text-orange-600' },
-  { id: '3', name: 'Beauty', slug: 'beauty', icon: Leaf, bgColor: 'bg-green-100', color: 'text-green-600' },
-  { id: '4', name: 'Fashion', slug: 'fashion', icon: Crown, bgColor: 'bg-pink-100', color: 'text-pink-600' },
-  { id: '5', name: 'Бизнес', slug: 'business', icon: Building2, bgColor: 'bg-orange-100', color: 'text-orange-600' },
+  { id: '1', name: 'Хүргэлттэй', slug: 'delivery', icon: Truck, bgColor: 'bg-blue-100', color: 'text-blue-500' },
+  { id: '2', name: 'Шинэ ирсэн', slug: 'new', icon: Sparkles, bgColor: 'bg-amber-100', color: 'text-amber-500' },
+  { id: '3', name: 'Beauty', slug: 'beauty', icon: Flower2, bgColor: 'bg-green-100', color: 'text-green-500' },
+  { id: '4', name: 'Fashion', slug: 'fashion', icon: Shirt, bgColor: 'bg-pink-100', color: 'text-pink-500' },
+  { id: '5', name: 'Бизнес', slug: 'business', icon: Briefcase, bgColor: 'bg-sky-100', color: 'text-sky-500' },
   // Row 2
-  { id: '6', name: 'Импорт', slug: 'import', icon: Globe, bgColor: 'bg-indigo-100', color: 'text-indigo-600' },
-  { id: '7', name: 'Шинэ бараа', slug: 'new-arrivals', icon: Gift, bgColor: 'bg-red-100', color: 'text-red-600' },
-  { id: '8', name: 'Хямдрал', slug: 'sale', icon: Tag, bgColor: 'bg-yellow-100', color: 'text-yellow-600' },
-  { id: '9', name: 'Урамшуулал', slug: 'promo', icon: Percent, bgColor: 'bg-teal-100', color: 'text-teal-600' },
-  { id: '10', name: 'VIP', slug: 'vip', icon: Crown, bgColor: 'bg-amber-100', color: 'text-amber-600' },
+  { id: '6', name: 'Импорт', slug: 'import', icon: Globe, bgColor: 'bg-indigo-100', color: 'text-indigo-500' },
+  { id: '7', name: 'Шинэ бараа', slug: 'new-arrivals', icon: Package, bgColor: 'bg-orange-100', color: 'text-orange-500' },
+  { id: '8', name: 'Хямдрал', slug: 'sale', icon: Tag, bgColor: 'bg-rose-100', color: 'text-rose-500' },
+  { id: '9', name: 'Урамшуулал', slug: 'promo', icon: Percent, bgColor: 'bg-lime-100', color: 'text-lime-600' },
+  { id: '10', name: 'VIP', slug: 'vip', icon: Crown, bgColor: 'bg-yellow-100', color: 'text-yellow-500' },
 ];
 
 export default function CategorySlider({ categories }: CategorySliderProps) {

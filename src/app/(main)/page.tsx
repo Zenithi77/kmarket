@@ -506,53 +506,6 @@ export default function HomePage() {
         viewAllLink="/products?new=true"
       />
 
-      {/* Sale Banner */}
-      <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="relative h-48 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-orange-500 to-pink-500">
-            <div className="absolute inset-0 flex items-center justify-between px-6 md:px-12">
-              <div className="text-white">
-                <p className="text-xs font-medium mb-1">Limited Time Offer</p>
-                <h2 className="text-3xl md:text-4xl font-bold mb-2">50% OFF</h2>
-                <p className="text-sm opacity-90 mb-4">Сонгогдсон бараанууд дээр</p>
-                <Link
-                  href="/sale"
-                  className="inline-flex items-center bg-white text-orange-500 px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-100 transition-colors"
-                >
-                  SHOP SALE <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </div>
-              <div className="hidden md:block relative w-48 h-48">
-                <Image
-                  src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400"
-                  alt="Sale"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Brands */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Popular Brands</h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-8">
-            {['COSRX', 'Innisfree', 'Laneige', 'Etude', 'SOME BY MI', 'Klairs'].map((brand) => (
-              <Link
-                key={brand}
-                href={`/products?brand=${brand}`}
-                className="flex items-center justify-center h-20 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <span className="text-gray-700 font-medium">{brand}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Newsletter */}
       <section className="py-12 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
