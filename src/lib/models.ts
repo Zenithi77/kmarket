@@ -133,9 +133,10 @@ export interface IOrder extends Document {
   payment_method: string;
   shipping_name: string;
   shipping_phone: string;
-  shipping_address: string;
-  shipping_city: string;
-  shipping_district: string;
+  shipping_address?: string;
+  shipping_city?: string;
+  shipping_district?: string;
+  delivery_type?: 'city' | 'province' | 'pickup';
   notes?: string;
   created_at: Date;
   updated_at: Date;
@@ -171,9 +172,10 @@ const OrderSchema = new Schema<IOrder>({
   payment_method: { type: String, default: 'bank_transfer' },
   shipping_name: { type: String, required: true },
   shipping_phone: { type: String, required: true },
-  shipping_address: { type: String, required: true },
-  shipping_city: { type: String, required: true },
-  shipping_district: { type: String, required: true },
+  shipping_address: { type: String, default: '' },
+  shipping_city: { type: String, default: '' },
+  shipping_district: { type: String, default: '' },
+  delivery_type: { type: String, enum: ['city', 'province', 'pickup'], default: 'city' },
   notes: { type: String },
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 

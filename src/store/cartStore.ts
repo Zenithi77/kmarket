@@ -109,6 +109,18 @@ export const useCartStore = create<CartStore>()(
       name: 'kmarket-cart',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Clean up invalid cart items (e.g. old mock IDs that aren't valid MongoDB ObjectIds)
+          const validItems = state.items.filter((item) => {
+            const id = item.product?.id;
+            return id && /^[0-9a-fA-F]{24}$/.test(id);
+          });
+          if (validItems.length !== state.items.length) {
+            state.items = validItems;
+          }
+        }
+      },
     }
   )
 );

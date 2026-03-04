@@ -122,16 +122,28 @@ export default function CheckoutPage() {
     setIsLoading(true);
 
     try {
+      // Filter out any cart items with invalid product IDs
+      const validItems = items.filter(item => 
+        item.product.id && /^[0-9a-fA-F]{24}$/.test(item.product.id)
+      );
+
+      if (validItems.length === 0) {
+        toast.error('Сагсан дахь бараанууд хүчингүй байна. Дахин нэмнэ үү.');
+        clearCart();
+        setIsLoading(false);
+        return;
+      }
+
       const orderData = {
         shipping_name: formData.customer_name,
         shipping_phone: formData.customer_phone,
-        shipping_address: formData.address,
-        shipping_city: formData.city,
-        shipping_district: formData.district,
+        shipping_address: deliveryType === 'pickup' ? 'Өөрөө ирж авна' : formData.address,
+        shipping_city: deliveryType === 'pickup' ? formData.city || 'Улаанбаатар' : formData.city,
+        shipping_district: deliveryType === 'pickup' ? 'Өөрөө авах' : formData.district,
         shipping_fee: shippingFee,
         delivery_type: deliveryType,
         notes: formData.notes,
-        items: items.map(item => ({
+        items: validItems.map(item => ({
           product_id: item.product.id,
           quantity: item.quantity,
           size: item.size

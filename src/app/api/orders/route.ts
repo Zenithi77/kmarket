@@ -43,15 +43,20 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const body = await request.json();
 
-    const { items, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district, shipping_fee: clientShippingFee, discount_code, notes } = body;
+    const { items, shipping_name, shipping_phone, shipping_address, shipping_city, shipping_district, shipping_fee: clientShippingFee, discount_code, delivery_type, notes } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'Сагс хоосон байна' }, { status: 400 });
     }
 
     // Validate required fields
-    if (!shipping_name || !shipping_phone || !shipping_address || !shipping_city || !shipping_district) {
-      return NextResponse.json({ error: 'Хүргэлтийн мэдээлэл дутуу байна' }, { status: 400 });
+    if (!shipping_name || !shipping_phone) {
+      return NextResponse.json({ error: 'Нэр болон утасны дугаар шаардлагатай' }, { status: 400 });
+    }
+
+    // For non-pickup delivery, require address fields
+    if (delivery_type !== 'pickup' && (!shipping_address || !shipping_city || !shipping_district)) {
+      return NextResponse.json({ error: 'Хүргэлтийн хаяг мэдээлэл дутуу байна' }, { status: 400 });
     }
 
     // Calculate totals
@@ -136,9 +141,10 @@ export async function POST(request: NextRequest) {
       final_amount,
       shipping_name,
       shipping_phone,
-      shipping_address,
-      shipping_city,
-      shipping_district,
+      shipping_address: shipping_address || '',
+      shipping_city: shipping_city || '',
+      shipping_district: shipping_district || '',
+      delivery_type: delivery_type || 'city',
       notes,
     });
 
