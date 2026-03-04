@@ -12,7 +12,8 @@ import {
   Truck, 
   Shield, 
   RefreshCw,
-  Share2
+  Share2,
+  Loader2
 } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore, useWishlistStore } from '@/store';
@@ -21,82 +22,86 @@ import { ProductGrid } from '@/components/product';
 import { Button } from '@/components/ui';
 import toast from 'react-hot-toast';
 
-// Mock product data
-const mockProduct: Product = {
-  id: '1',
-  name: 'Dyson Airwrap Complete Long',
-  slug: 'dyson-airwrap-complete-long',
-  description: `Dyson Airwrap™ стайлер нь агаарын урсгалыг ашиглан үсийг гэмтээхгүйгээр загварчлах боломжтой. 
-
-Онцлог шинж чанарууд:
-• Coanda эффект технологи
-• Олон төрлийн хавсралтууд
-• Бүх үсний төрөлд тохиромжтой
-• Өндөр температураас хамгаална
-
-Багц агу|улга:
-- 30mm Airwrap барал
-- 40mm Airwrap барал  
-- Soft smoothing brush
-- Firm smoothing brush
-- Round volumizing brush
-- Pre-styling dryer
-- Storage case`,
-  price: 2500000,
-  sale_price: 2200000,
-  sku: 'DYS-001',
-  brand: 'Dyson',
-  weight: 500,
-  category_id: 'dyson',
-  images: [
-    'https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=800',
-    'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=800',
-    'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
-    'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800'
-  ],
-  sizes: [],
-  stock: 10,
-  is_active: true,
-  is_featured: true,
-  rating: 4.8,
-  review_count: 124,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString()
-};
-
-const relatedProducts: Product[] = [
-  {
-    id: '8',
-    name: 'Dyson V15 Detect',
-    slug: 'dyson-v15-detect',
-    description: 'Лазер технологитой тоос сорогч',
-    price: 3500000,
-    sale_price: 3200000,
-    sku: 'DYS-002',
-    brand: 'Dyson',
-    weight: 3000,
-    category_id: 'dyson',
-    images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400'],
-    sizes: [],
-    stock: 8,
-    is_active: true,
-    is_featured: true,
-    rating: 4.8,
-    review_count: 76,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
+// Helper to map API response (_id) to frontend Product type (id)
+function mapProduct(p: any): Product {
+  return {
+    id: p._id || p.id,
+    name: p.name,
+    slug: p.slug,
+    description: p.description,
+    price: p.price,
+    sale_price: p.sale_price,
+    sku: p.sku || '',
+    brand: p.brand,
+    weight: p.weight,
+    category_id: typeof p.category_id === 'object' ? p.category_id._id : p.category_id,
+    category: p.category_id && typeof p.category_id === 'object' ? { id: p.category_id._id, name: p.category_id.name, slug: p.category_id.slug, is_active: true, created_at: '' } : undefined,
+    images: p.images || [],
+    sizes: p.sizes || [],
+    stock: p.stock ?? 0,
+    is_active: p.is_active ?? true,
+    is_featured: p.is_featured ?? false,
+    rating: p.rating ?? 0,
+    review_count: p.review_count ?? 0,
+    created_at: p.created_at || '',
+    updated_at: p.updated_at || '',
+  };
+}
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const [product, setProduct] = useState<Product>(mockProduct);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+
+  // Fetch product from API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await fetch(`/api/products/${params.slug}`);
+        if (!res.ok) {
+          throw new Error('Бараа олдсонгүй');
+        }
+        const data = await res.json();
+        const mapped = mapProduct(data);
+        setProduct(mapped);
+
+        // Fetch related products by same brand or category
+        try {
+          const categoryId = typeof data.category_id === 'object' ? data.category_id._id : data.category_id;
+          const relRes = await fetch(`/api/products?limit=4&category=${categoryId}`);
+          const relData = await relRes.json();
+          if (relData.products) {
+            setRelatedProducts(
+              relData.products
+                .filter((p: any) => (p._id || p.id) !== (data._id || data.id))
+                .slice(0, 4)
+                .map(mapProduct)
+            );
+          }
+        } catch {
+          // Ignore related products error
+        }
+      } catch (err: any) {
+        setError(err.message || 'Алдаа гарлаа');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (params.slug) {
+      fetchProduct();
+    }
+  }, [params.slug]);
 
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
@@ -111,7 +116,7 @@ export default function ProductDetailPage() {
   };
 
   const handleDragEnd = () => {
-    if (!isDragging) return;
+    if (!isDragging || !product) return;
     setIsDragging(false);
     
     if (Math.abs(dragOffset) > 50) {
@@ -127,13 +132,14 @@ export default function ProductDetailPage() {
   const addToCart = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
   const { toggleItem, isInWishlist } = useWishlistStore();
-  const isWishlisted = isInWishlist(product.id);
+  const isWishlisted = product ? isInWishlist(product.id) : false;
 
-  const discountPercent = calculateDiscountPercent(product.price, product.sale_price || 0);
+  const discountPercent = product ? calculateDiscountPercent(product.price, product.sale_price || 0) : 0;
   const isOnSale = discountPercent > 0;
-  const isOutOfStock = product.stock === 0;
+  const isOutOfStock = product ? product.stock === 0 : true;
 
   const handleAddToCart = () => {
+    if (!product) return;
     if (product.sizes.length > 0 && !selectedSize) {
       toast.error('Размер сонгоно уу');
       return;
@@ -145,6 +151,7 @@ export default function ProductDetailPage() {
   };
 
   const handleBuyNow = () => {
+    if (!product) return;
     if (product.sizes.length > 0 && !selectedSize) {
       toast.error('Размер сонгоно уу');
       return;
@@ -155,6 +162,7 @@ export default function ProductDetailPage() {
   };
 
   const handleShare = async () => {
+    if (!product) return;
     try {
       await navigator.share({
         title: product.name,
@@ -165,6 +173,27 @@ export default function ProductDetailPage() {
       toast.success('Холбоос хуулагдлаа');
     }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{error || 'Бараа олдсонгүй'}</h2>
+          <Link href="/products" className="text-primary-500 hover:underline">Бүтээгдэхүүн үзэх</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -253,7 +282,7 @@ export default function ProductDetailPage() {
           <div className="space-y-6">
             {/* Brand */}
             {product.brand && (
-              <Link href={`/brand/${product.brand}`} className="text-sm text-primary-500 font-medium uppercase tracking-wider hover:underline">
+              <Link href={`/products?brand=${encodeURIComponent(product.brand)}`} className="text-sm text-primary-500 font-medium uppercase tracking-wider hover:underline">
                 {product.brand}
               </Link>
             )}

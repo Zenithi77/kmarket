@@ -8,6 +8,32 @@ import { ProductCard } from '@/components/product';
 import { CategorySlider, ProductSlider } from '@/components/home';
 import { Product } from '@/types';
 
+// Helper to map API response (_id) to frontend Product type (id)
+function mapProduct(p: any): Product {
+  return {
+    id: p._id || p.id,
+    name: p.name,
+    slug: p.slug,
+    description: p.description,
+    price: p.price,
+    sale_price: p.sale_price,
+    sku: p.sku || '',
+    brand: p.brand,
+    weight: p.weight,
+    category_id: typeof p.category_id === 'object' ? p.category_id._id : p.category_id,
+    category: p.category_id && typeof p.category_id === 'object' ? { id: p.category_id._id, name: p.category_id.name, slug: p.category_id.slug, is_active: true, created_at: '' } : undefined,
+    images: p.images || [],
+    sizes: p.sizes || [],
+    stock: p.stock ?? 0,
+    is_active: p.is_active ?? true,
+    is_featured: p.is_featured ?? false,
+    rating: p.rating ?? 0,
+    review_count: p.review_count ?? 0,
+    created_at: p.created_at || '',
+    updated_at: p.updated_at || '',
+  };
+}
+
 // Banner type
 interface Banner {
   _id: string;
@@ -86,174 +112,17 @@ const categoryGrid = [
   },
 ];
 
-// Mock Products
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'MARY&MAY Vegan Peptide Bakuchiol Sun Stick',
-    slug: 'mary-may-sun-stick',
-    description: 'SPF50+ PA++++ нарны хамгаалалттай',
-    price: 85000,
-    sale_price: 68000,
-    sku: 'MM-001',
-    brand: 'MARY&MAY',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400'],
-    sizes: [],
-    stock: 50,
-    is_active: true,
-    is_featured: true,
-    rating: 4.8,
-    review_count: 124,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '2',
-    name: 'manyo Bifida Cica Herb Toner',
-    slug: 'manyo-bifida-toner',
-    description: 'Арьс тайвшруулах тонер',
-    price: 125000,
-    sku: 'MN-001',
-    brand: 'manyo',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400'],
-    sizes: [],
-    stock: 30,
-    is_active: true,
-    is_featured: true,
-    rating: 4.9,
-    review_count: 89,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '3',
-    name: 'AHA BHA PHA 30 Days Miracle Serum',
-    slug: 'some-by-mi-serum',
-    description: 'Арьсыг цэвэрлэх сэрүм',
-    price: 95000,
-    sale_price: 75000,
-    sku: 'SBM-001',
-    brand: 'SOME BY MI',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400'],
-    sizes: [],
-    stock: 45,
-    is_active: true,
-    is_featured: false,
-    rating: 4.7,
-    review_count: 156,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '4',
-    name: 'Innisfree Green Tea Seed Serum',
-    slug: 'innisfree-green-tea-serum',
-    description: 'Ногоон цайны сэрүм',
-    price: 115000,
-    sku: 'INF-001',
-    brand: 'Innisfree',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1617897903246-719242758050?w=400'],
-    sizes: [],
-    stock: 35,
-    is_active: true,
-    is_featured: true,
-    rating: 4.6,
-    review_count: 78,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '5',
-    name: 'COSRX Advanced Snail Mucin Essence',
-    slug: 'cosrx-snail-essence',
-    description: 'Мэлхийн шүүсний эссенс',
-    price: 89000,
-    sale_price: 72000,
-    sku: 'CRX-001',
-    brand: 'COSRX',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400'],
-    sizes: [],
-    stock: 60,
-    is_active: true,
-    is_featured: true,
-    rating: 4.9,
-    review_count: 312,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '6',
-    name: 'Laneige Water Sleeping Mask',
-    slug: 'laneige-sleeping-mask',
-    description: 'Шөнийн чийгшүүлэгч маск',
-    price: 135000,
-    sku: 'LNG-001',
-    brand: 'Laneige',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1570194065650-d99fb4b38b15?w=400'],
-    sizes: [],
-    stock: 25,
-    is_active: true,
-    is_featured: false,
-    rating: 4.8,
-    review_count: 198,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '7',
-    name: 'Etude House SoonJung 2x Barrier',
-    slug: 'etude-soonjung-barrier',
-    description: 'Мэдрэмтгий арьсанд зориулсан крем',
-    price: 78000,
-    sale_price: 62000,
-    sku: 'ETD-001',
-    brand: 'Etude House',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400'],
-    sizes: [],
-    stock: 40,
-    is_active: true,
-    is_featured: true,
-    rating: 4.7,
-    review_count: 145,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '8',
-    name: 'Klairs Supple Preparation Toner',
-    slug: 'klairs-supple-toner',
-    description: 'Чийгшүүлэгч тонер',
-    price: 98000,
-    sku: 'KLR-001',
-    brand: 'Klairs',
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400'],
-    sizes: [],
-    stock: 55,
-    is_active: true,
-    is_featured: false,
-    rating: 4.8,
-    review_count: 267,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-];
-
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [banners, setBanners] = useState<Banner[]>(defaultSlides);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [saleProducts, setSaleProducts] = useState<Product[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Fetch banners and categories from API
+  // Fetch banners, categories, and products from API
   useEffect(() => {
     const fetchBanners = async () => {
       try {
@@ -278,9 +147,33 @@ export default function HomePage() {
         console.log('Failed to fetch categories');
       }
     };
+
+    const fetchProducts = async () => {
+      try {
+        // Fetch featured products
+        const [featuredRes, newRes, saleRes] = await Promise.all([
+          fetch('/api/products?featured=true&limit=8'),
+          fetch('/api/products?new=true&limit=6'),
+          fetch('/api/products?sale=true&limit=8'),
+        ]);
+
+        const [featuredData, newData, saleData] = await Promise.all([
+          featuredRes.json(),
+          newRes.json(),
+          saleRes.json(),
+        ]);
+
+        if (featuredData.products) setFeaturedProducts(featuredData.products.map(mapProduct));
+        if (newData.products) setNewProducts(newData.products.map(mapProduct));
+        if (saleData.products) setSaleProducts(saleData.products.map(mapProduct));
+      } catch (error) {
+        console.log('Failed to fetch products');
+      }
+    };
     
     fetchBanners();
     fetchCategories();
+    fetchProducts();
   }, []);
 
   // Auto-slide with transition
@@ -430,21 +323,25 @@ export default function HomePage() {
       })) : undefined} />
 
       {/* Today's Deal - Product Slider */}
-      <ProductSlider
-        title="Today's Deal"
-        badge="On Sale"
-        badgeColor="bg-red-500"
-        products={mockProducts.slice(0, 8)}
-        viewAllLink="/products?sale=true"
-      />
+      {saleProducts.length > 0 && (
+        <ProductSlider
+          title="Today's Deal"
+          badge="On Sale"
+          badgeColor="bg-red-500"
+          products={saleProducts}
+          viewAllLink="/products?sale=true"
+        />
+      )}
 
       {/* Trending Products - Slider Style */}
-      <ProductSlider
-        title="Trending Now"
-        subtitle="Одоо эрэлттэй байгаа"
-        products={mockProducts.slice(0, 8)}
-        viewAllLink="/products?featured=true"
-      />
+      {featuredProducts.length > 0 && (
+        <ProductSlider
+          title="Trending Now"
+          subtitle="Одоо эрэлттэй байгаа"
+          products={featuredProducts}
+          viewAllLink="/products?featured=true"
+        />
+      )}
 
       {/* Category Banners */}
       <section className="py-12 bg-gray-50">
@@ -499,12 +396,14 @@ export default function HomePage() {
       </section>
 
       {/* New Arrivals - Slider Style */}
-      <ProductSlider
-        title="New Arrivals"
-        subtitle="Шинэ ирсэн"
-        products={mockProducts.slice(0, 6)}
-        viewAllLink="/products?new=true"
-      />
+      {newProducts.length > 0 && (
+        <ProductSlider
+          title="New Arrivals"
+          subtitle="Шинэ ирсэн"
+          products={newProducts}
+          viewAllLink="/products?new=true"
+        />
+      )}
 
       {/* Newsletter */}
       <section className="py-12 bg-gray-900">

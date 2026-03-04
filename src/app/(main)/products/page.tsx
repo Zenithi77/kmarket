@@ -1,179 +1,37 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import { ProductGrid } from '@/components/product';
 import { Product } from '@/types';
 import { CATEGORIES, BRANDS, SIZES } from '@/lib/constants';
 
-// Mock products (same as home page for demo)
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Dyson Airwrap Complete Long',
-    slug: 'dyson-airwrap-complete-long',
-    description: 'Олон төрлийн үсний загвар хийх боломжтой Dyson Airwrap',
-    price: 2500000,
-    sale_price: 2200000,
-    sku: 'DYS-001',
-    brand: 'Dyson',
-    weight: 500,
-    category_id: 'dyson',
-    images: ['https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=400'],
-    sizes: [],
-    stock: 10,
-    is_active: true,
-    is_featured: true,
-    rating: 4.8,
-    review_count: 124,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '2',
-    name: 'Nike Air Force 1 White',
-    slug: 'nike-air-force-1-white',
-    description: 'Классик Nike Air Force 1 цагаан өнгө',
-    price: 450000,
-    sku: 'NIKE-001',
-    brand: 'Nike',
-    weight: 400,
-    category_id: 'shoes',
-    images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400'],
-    sizes: ['38', '39', '40', '41', '42', '43', '44'],
-    stock: 25,
-    is_active: true,
-    is_featured: true,
-    rating: 4.9,
-    review_count: 89,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '3',
-    name: 'Зуны загварлаг даашинз',
-    slug: 'summer-fashion-dress',
-    description: 'Зуны улирлын загварлаг даашинз',
-    price: 180000,
-    sale_price: 129000,
-    sku: 'DRESS-001',
-    brand: 'Zara',
-    weight: 200,
-    category_id: 'fashion',
-    images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    stock: 15,
-    is_active: true,
-    is_featured: false,
-    rating: 4.5,
-    review_count: 45,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '4',
-    name: 'MAC Lipstick Ruby Woo',
-    slug: 'mac-lipstick-ruby-woo',
-    description: 'MAC-ийн хамгийн алдартай улаан уруулын будаг',
-    price: 95000,
-    sku: 'MAC-001',
-    brand: 'MAC',
-    weight: 50,
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400'],
-    sizes: [],
-    stock: 50,
-    is_active: true,
-    is_featured: true,
-    rating: 4.7,
-    review_count: 234,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '5',
-    name: 'Adidas Ultraboost 22',
-    slug: 'adidas-ultraboost-22',
-    description: 'Гүйлтийн хамгийн тав тухтай пүүз',
-    price: 520000,
-    sale_price: 450000,
-    sku: 'ADI-001',
-    brand: 'Adidas',
-    weight: 350,
-    category_id: 'shoes',
-    images: ['https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400'],
-    sizes: ['39', '40', '41', '42', '43', '44', '45'],
-    stock: 20,
-    is_active: true,
-    is_featured: true,
-    rating: 4.6,
-    review_count: 156,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '6',
-    name: 'Дулаан цамц Oversize',
-    slug: 'warm-oversize-hoodie',
-    description: 'Өвлийн улиралд тохирсон дулаан oversize цамц',
-    price: 150000,
-    sku: 'HOOD-001',
-    brand: 'H&M',
-    weight: 400,
-    category_id: 'fashion',
-    images: ['https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400'],
-    sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    stock: 30,
-    is_active: true,
-    is_featured: false,
-    rating: 4.4,
-    review_count: 67,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '7',
-    name: 'Charlotte Tilbury Pillow Talk',
-    slug: 'charlotte-tilbury-pillow-talk',
-    description: 'Алдартай Pillow Talk өнгө уруулын будаг',
-    price: 120000,
-    sku: 'CT-001',
-    brand: 'Charlotte Tilbury',
-    weight: 50,
-    category_id: 'beauty',
-    images: ['https://images.unsplash.com/photo-1631214503567-1e75fba3d673?w=400'],
-    sizes: [],
-    stock: 40,
-    is_active: true,
-    is_featured: true,
-    rating: 4.9,
-    review_count: 189,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: '8',
-    name: 'Dyson V15 Detect',
-    slug: 'dyson-v15-detect',
-    description: 'Лазер технологитой тоос сорогч',
-    price: 3500000,
-    sale_price: 3200000,
-    sku: 'DYS-002',
-    brand: 'Dyson',
-    weight: 3000,
-    category_id: 'dyson',
-    images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400'],
-    sizes: [],
-    stock: 8,
-    is_active: true,
-    is_featured: true,
-    rating: 4.8,
-    review_count: 76,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
+// Helper to map API response (_id) to frontend Product type (id)
+function mapProduct(p: any): Product {
+  return {
+    id: p._id || p.id,
+    name: p.name,
+    slug: p.slug,
+    description: p.description,
+    price: p.price,
+    sale_price: p.sale_price,
+    sku: p.sku || '',
+    brand: p.brand,
+    weight: p.weight,
+    category_id: typeof p.category_id === 'object' ? p.category_id._id : p.category_id,
+    category: p.category_id && typeof p.category_id === 'object' ? { id: p.category_id._id, name: p.category_id.name, slug: p.category_id.slug, is_active: true, created_at: '' } : undefined,
+    images: p.images || [],
+    sizes: p.sizes || [],
+    stock: p.stock ?? 0,
+    is_active: p.is_active ?? true,
+    is_featured: p.is_featured ?? false,
+    rating: p.rating ?? 0,
+    review_count: p.review_count ?? 0,
+    created_at: p.created_at || '',
+    updated_at: p.updated_at || '',
+  };
+}
 
 const sortOptions = [
   { value: 'newest', label: 'Шинэ нь эхэнд' },
@@ -185,58 +43,83 @@ const sortOptions = [
 
 function ProductsContent() {
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   
   // Filters state
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || '');
+  const [selectedBrand, setSelectedBrand] = useState<string>(searchParams.get('brand') || '');
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000000]);
   const [sortBy, setSortBy] = useState('newest');
 
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      
+      if (selectedCategory) params.set('category', selectedCategory);
+      if (selectedBrand) params.set('brand', selectedBrand);
+      if (priceRange[0] > 0) params.set('min_price', priceRange[0].toString());
+      if (priceRange[1] < 5000000) params.set('max_price', priceRange[1].toString());
+      
+      // Map sort options to API params
+      switch (sortBy) {
+        case 'price_asc':
+          params.set('sort', 'price');
+          params.set('order', 'asc');
+          break;
+        case 'price_desc':
+          params.set('sort', 'price');
+          params.set('order', 'desc');
+          break;
+        case 'popular':
+          params.set('sort', 'review_count');
+          params.set('order', 'desc');
+          break;
+        case 'rating':
+          params.set('sort', 'rating');
+          params.set('order', 'desc');
+          break;
+        default:
+          params.set('sort', 'created_at');
+          params.set('order', 'desc');
+      }
+
+      // Check URL search params for special filters
+      if (searchParams.get('featured') === 'true') params.set('featured', 'true');
+      if (searchParams.get('new') === 'true') params.set('new', 'true');
+      if (searchParams.get('sale') === 'true') params.set('sale', 'true');
+      if (searchParams.get('search')) params.set('search', searchParams.get('search')!);
+
+      params.set('limit', '40');
+
+      const res = await fetch(`/api/products?${params.toString()}`);
+      const data = await res.json();
+
+      if (data.products) {
+        let mapped = data.products.map(mapProduct);
+        
+        // Client-side size filter (API doesn't support it)
+        if (selectedSize) {
+          mapped = mapped.filter((p: Product) => p.sizes.includes(selectedSize));
+        }
+        
+        setProducts(mapped);
+        setTotalProducts(data.pagination?.total || mapped.length);
+      }
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, selectedBrand, selectedSize, priceRange, sortBy, searchParams]);
+
   useEffect(() => {
-    // Filter products based on selected filters
-    let filtered = [...mockProducts];
-
-    if (selectedCategory) {
-      filtered = filtered.filter(p => p.category_id === selectedCategory);
-    }
-
-    if (selectedBrand) {
-      filtered = filtered.filter(p => p.brand === selectedBrand);
-    }
-
-    if (selectedSize) {
-      filtered = filtered.filter(p => p.sizes.includes(selectedSize));
-    }
-
-    filtered = filtered.filter(p => {
-      const price = p.sale_price || p.price;
-      return price >= priceRange[0] && price <= priceRange[1];
-    });
-
-    // Sort
-    switch (sortBy) {
-      case 'price_asc':
-        filtered.sort((a, b) => (a.sale_price || a.price) - (b.sale_price || b.price));
-        break;
-      case 'price_desc':
-        filtered.sort((a, b) => (b.sale_price || b.price) - (a.sale_price || a.price));
-        break;
-      case 'popular':
-        filtered.sort((a, b) => b.review_count - a.review_count);
-        break;
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    }
-
-    setProducts(filtered);
-  }, [selectedCategory, selectedBrand, selectedSize, priceRange, sortBy]);
+    fetchProducts();
+  }, [fetchProducts]);
 
   const clearFilters = () => {
     setSelectedCategory('');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -49,6 +49,18 @@ export default function CheckoutPage() {
   
   const [deliveryType, setDeliveryType] = useState<DeliveryType>('city');
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Auto-fill user info when auth loads or user changes
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setFormData(prev => ({
+        ...prev,
+        customer_name: prev.customer_name || user.full_name || '',
+        customer_email: prev.customer_email || user.email || '',
+        customer_phone: prev.customer_phone || user.phone || '',
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   const subtotal = getTotalPrice();
   const shippingFee = SHIPPING_COSTS[deliveryType];
