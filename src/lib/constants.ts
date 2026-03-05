@@ -121,6 +121,17 @@ export function isValidPhone(phone: string): boolean {
   return phoneRegex.test(phone.replace(/\s/g, ''));
 }
 
+// Check if a URL is a video (Cloudinary video URLs or common video extensions)
+export function isVideoUrl(url: string): boolean {
+  if (!url) return false;
+  // Cloudinary video URLs contain /video/upload/
+  if (url.includes('/video/upload/')) return true;
+  // Common video extensions
+  const videoExts = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+  const lowerUrl = url.toLowerCase().split('?')[0];
+  return videoExts.some(ext => lowerUrl.endsWith(ext));
+}
+
 // Truncate text
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;

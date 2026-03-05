@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore, useWishlistStore } from '@/store';
-import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
+import { formatPrice, calculateDiscountPercent, isVideoUrl } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
 interface ProductCardProps {
@@ -28,6 +28,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const discountPercent = calculateDiscountPercent(product.price, product.sale_price || 0);
   const isOnSale = discountPercent > 0;
   const isOutOfStock = product.stock === 0;
+  const firstMedia = product.images[0] || '/placeholder.svg';
+  const isFirstMediaVideo = isVideoUrl(firstMedia);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -57,14 +59,30 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/product/${product.slug}`}>
       <div className="product-card group bg-white rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 h-full flex flex-col">
-        {/* Image Container */}
-        <div className="relative aspect-square bg-gray-50 flex-shrink-0">
-          <Image
-            src={product.images[0] || '/placeholder.svg'}
-            alt={product.name}
-            fill
-            className="product-image object-cover"
-          />
+        {/* Image/Video Container */}
+        <div className="relative aspect-square bg-gray-50 flex-shrink-0 overflow-hidden">
+          {isFirstMediaVideo ? (
+            <video
+              src={firstMedia}
+              className="w-full h-full object-cover product-image"
+              muted
+              playsInline
+              loop
+              onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
+              onMouseLeave={(e) => {
+                const v = e.target as HTMLVideoElement;
+                v.pause();
+                v.currentTime = 0;
+              }}
+            />
+          ) : (
+            <Image
+              src={firstMedia}
+              alt={product.name}
+              fill
+              className="product-image object-cover"
+            />
+          )}
           <div className="product-overlay" />
           
           {/* Badges */}

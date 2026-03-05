@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore, useWishlistStore } from '@/store';
-import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
+import { formatPrice, calculateDiscountPercent, isVideoUrl } from '@/lib/constants';
 import { ProductGrid } from '@/components/product';
 import { Button } from '@/components/ui';
 import toast from 'react-hot-toast';
@@ -214,7 +214,7 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images */}
           <div className="space-y-4">
-            {/* Main Image */}
+            {/* Main Image/Video */}
             <div 
               className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
               onMouseDown={handleDragStart}
@@ -225,15 +225,28 @@ export default function ProductDetailPage() {
               onTouchMove={handleDragMove}
               onTouchEnd={handleDragEnd}
             >
-              <Image
-                src={product.images[selectedImage]}
-                alt={product.name}
-                fill
-                className="object-cover pointer-events-none"
-                style={{ transform: `translateX(${dragOffset}px)` }}
-                priority
-                draggable={false}
-              />
+              {isVideoUrl(product.images[selectedImage]) ? (
+                <video
+                  src={product.images[selectedImage]}
+                  className="w-full h-full object-cover pointer-events-none"
+                  style={{ transform: `translateX(${dragOffset}px)` }}
+                  autoPlay
+                  muted
+                  playsInline
+                  loop
+                  controls
+                />
+              ) : (
+                <Image
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  fill
+                  className="object-cover pointer-events-none"
+                  style={{ transform: `translateX(${dragOffset}px)` }}
+                  priority
+                  draggable={false}
+                />
+              )}
               
               {/* Badges */}
               {isOnSale && (
@@ -267,12 +280,28 @@ export default function ProductDetailPage() {
                     selectedImage === index ? 'border-primary-500' : 'border-transparent'
                   }`}
                 >
-                  <Image
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
+                  {isVideoUrl(image) ? (
+                    <>
+                      <video
+                        src={image}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
+                          <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-gray-800 border-b-[5px] border-b-transparent ml-0.5" />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <Image
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                 </button>
               ))}
             </div>

@@ -29,9 +29,44 @@ export async function uploadImage(file: string, folder: string = 'kmarket') {
   }
 }
 
+// Upload video to Cloudinary
+export async function uploadVideo(file: string, folder: string = 'kmarket/videos') {
+  try {
+    const result = await cloudinary.uploader.upload(file, {
+      folder,
+      resource_type: 'video',
+      eager: [
+        { width: 720, crop: 'limit', quality: 'auto', format: 'mp4' },
+      ],
+      eager_async: true,
+    });
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      duration: result.duration,
+      format: result.format,
+      resourceType: 'video' as const,
+    };
+  } catch (error) {
+    console.error('Cloudinary video upload алдаа:', error);
+    throw error;
+  }
+}
+
 // Upload multiple images
 export async function uploadImages(files: string[], folder: string = 'kmarket/products') {
   const uploadPromises = files.map((file) => uploadImage(file, folder));
+  return Promise.all(uploadPromises);
+}
+
+// Upload multiple media files (images and videos)
+export async function uploadMedia(files: { data: string; type: 'image' | 'video' }[], folder: string = 'kmarket/products') {
+  const uploadPromises = files.map((file) => {
+    if (file.type === 'video') {
+      return uploadVideo(file.data, folder);
+    }
+    return uploadImage(file.data, folder);
+  });
   return Promise.all(uploadPromises);
 }
 
@@ -46,21 +81,13 @@ export async function deleteImage(publicId: string) {
   }
 }
 
-// Generate optimized URL
-export function getOptimizedUrl(publicId: string, options?: {
-  width?: number;
-  height?: number;
-  crop?: string;
-}) {
-  return cloudinary.url(publicId, {
-    transformation: [
-      {
-        width: options?.width || 800,
-        height: options?.height || 800,
-        crop: options?.crop || 'fill',
-      },
-      { quality: 'auto' },
-      { fetch_format: 'auto' },
-    ],
-  });
+// Delete video from Cloudinary
+export async function deleteVideo(publicId: string) {
+  try {
+    await cloudinary.uploader.destroy(publicId, { resource_type: 'video' });
+    return true;
+  } catch (error) {
+    console.error('Cloudinary video delete алдаа:', error);
+    throw error;
+  }
 }
