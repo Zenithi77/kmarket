@@ -80,37 +80,7 @@ const defaultSlides: Banner[] = [
   },
 ];
 
-// Categories Grid
-const categoryGrid = [
-  {
-    id: 1,
-    name: 'Skincare',
-    image: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b15?w=400',
-    link: '/category/beauty',
-    span: 'col-span-1 row-span-2',
-  },
-  {
-    id: 2,
-    name: 'Makeup',
-    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400',
-    link: '/category/beauty',
-    span: 'col-span-1 row-span-1',
-  },
-  {
-    id: 3,
-    name: 'Hair Care',
-    image: 'https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=400',
-    link: '/category/beauty',
-    span: 'col-span-1 row-span-1',
-  },
-  {
-    id: 4,
-    name: 'Fashion',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400',
-    link: '/category/women',
-    span: 'col-span-1 row-span-2',
-  },
-];
+
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -119,6 +89,7 @@ export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [newProducts, setNewProducts] = useState<Product[]>([]);
   const [saleProducts, setSaleProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -151,21 +122,24 @@ export default function HomePage() {
     const fetchProducts = async () => {
       try {
         // Fetch featured products
-        const [featuredRes, newRes, saleRes] = await Promise.all([
+        const [featuredRes, newRes, saleRes, allRes] = await Promise.all([
           fetch('/api/products?featured=true&limit=8'),
           fetch('/api/products?new=true&limit=6'),
           fetch('/api/products?sale=true&limit=8'),
+          fetch('/api/products?limit=12'),
         ]);
 
-        const [featuredData, newData, saleData] = await Promise.all([
+        const [featuredData, newData, saleData, allData] = await Promise.all([
           featuredRes.json(),
           newRes.json(),
           saleRes.json(),
+          allRes.json(),
         ]);
 
         if (featuredData.products) setFeaturedProducts(featuredData.products.map(mapProduct));
         if (newData.products) setNewProducts(newData.products.map(mapProduct));
         if (saleData.products) setSaleProducts(saleData.products.map(mapProduct));
+        if (allData.products) setAllProducts(allData.products.map(mapProduct));
       } catch (error) {
         console.log('Failed to fetch products');
       }
@@ -343,58 +317,6 @@ export default function HomePage() {
         />
       )}
 
-      {/* Category Banners */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Beauty Banner */}
-            <Link href="/category/beauty" className="group relative h-80 rounded-2xl overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800"
-                alt="Beauty"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-6 left-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Beauty</h3>
-                <p className="text-sm opacity-90">Гоо сайхны бүтээгдэхүүн</p>
-              </div>
-            </Link>
-
-            {/* Fashion Banner */}
-            <Link href="/category/women" className="group relative h-80 rounded-2xl overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
-                alt="Fashion"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-6 left-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Fashion</h3>
-                <p className="text-sm opacity-90">Загварлаг хувцас</p>
-              </div>
-            </Link>
-
-            {/* Lifestyle Banner */}
-            <Link href="/category/lifestyle" className="group relative h-80 rounded-2xl overflow-hidden">
-              <Image
-                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800"
-                alt="Lifestyle"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              <div className="absolute bottom-6 left-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Lifestyle</h3>
-                <p className="text-sm opacity-90">Амьдралын хэв маяг</p>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* New Arrivals - Slider Style */}
       {newProducts.length > 0 && (
         <ProductSlider
@@ -402,6 +324,16 @@ export default function HomePage() {
           subtitle="Шинэ ирсэн"
           products={newProducts}
           viewAllLink="/products?new=true"
+        />
+      )}
+
+      {/* All Products fallback - shows when other sections are empty */}
+      {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length > 0 && (
+        <ProductSlider
+          title="Бүтээгдэхүүн"
+          subtitle="Бүх бараанууд"
+          products={allProducts}
+          viewAllLink="/products"
         />
       )}
 

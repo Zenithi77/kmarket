@@ -11,7 +11,8 @@ import {
   MapPin,
   Settings,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from 'lucide-react';
 import { useAuthStore } from '@/store';
 import toast from 'react-hot-toast';
@@ -129,6 +130,20 @@ export default function ProfileLayout({
                 )}
                 <span className="font-medium">{isLoggingOut ? 'Гарж байна...' : 'Гарах'}</span>
               </button>
+
+              {/* Admin Panel Link */}
+              {(session?.user as any)?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors mt-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-5 h-5" />
+                    <span className="font-medium">Админ хуудас</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              )}
             </nav>
           </div>
         </div>
