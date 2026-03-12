@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -11,21 +11,14 @@ import {
   Image as ImageIcon,
   Film,
   Loader2,
-  Play
+  Play,
+  Palette,
+  Pipette,
+  Ruler,
 } from 'lucide-react';
 import { Button, Input, Textarea } from '@/components/ui';
+import { SIZE_PRESETS, SIZE_TYPE_LABELS, COMMON_COLORS } from '@/lib/constants';
 import toast from 'react-hot-toast';
-
-const categories = [
-  { id: '1', name: 'Гоо сайхан' },
-  { id: '2', name: 'Хувцас' },
-  { id: '3', name: 'Гутал' },
-  { id: '4', name: 'Dyson' },
-  { id: '5', name: 'Trend' },
-  { id: '6', name: 'Best' },
-];
-
-const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
 
 interface MediaItem {
   url: string;
@@ -36,11 +29,31 @@ interface MediaItem {
   localPreview?: string;
 }
 
+interface ProductColor {
+  name: string;
+  hex: string;
+}
+
+interface CategoryOption {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
+type SizeType = 'none' | 'clothing' | 'shoes' | 'bags' | 'ring' | 'custom';
+
 export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [sizeType, setSizeType] = useState<SizeType>('none');
+  const [customSizeInput, setCustomSizeInput] = useState('');
+  const [selectedColors, setSelectedColors] = useState<ProductColor[]>([]);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [customColorHex, setCustomColorHex] = useState('#FF0000');
+  const [customColorName, setCustomColorName] = useState('');
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -58,6 +71,32 @@ export default function NewProductPage() {
     isFeatured: false,
     isOnSale: false
   });
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          // Flatten parent + subcategories
+          const flat: CategoryOption[] = [];
+          data.forEach((cat: any) => {
+            flat.push({ _id: cat._id, name: cat.name, slug: cat.slug });
+            if (cat.subcategories) {
+              cat.subcategories.forEach((sub: any) => {
+                flat.push({ _id: sub._id, name: `  └ ${sub.name}`, slug: sub.slug });
+              });
+            }
+          });
+          setCategories(flat);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -84,6 +123,53 @@ export default function NewProductPage() {
         ? prev.filter(s => s !== size)
         : [...prev, size]
     );
+  };
+
+  const handleSizeTypeChange = (type: SizeType) => {
+    setSizeType(type);
+    setSelectedSizes([]);
+    setCustomSizeInput('');
+  };
+
+  const addCustomSize = () => {
+    const trimmed = customSizeInput.trim();
+    if (trimmed && !selectedSizes.includes(trimmed)) {
+      setSelectedSizes(prev => [...prev, trimmed]);
+      setCustomSizeInput('');
+    }
+  };
+
+  const removeSize = (size: string) => {
+    setSelectedSizes(prev => prev.filter(s => s !== size));
+  };
+
+  const toggleCommonColor = (color: { name: string; hex: string }) => {
+    const exists = selectedColors.find(c => c.hex === color.hex);
+    if (exists) {
+      setSelectedColors(prev => prev.filter(c => c.hex !== color.hex));
+    } else {
+      setSelectedColors(prev => [...prev, { name: color.name, hex: color.hex }]);
+    }
+  };
+
+  const addCustomColor = () => {
+    const name = customColorName.trim();
+    if (!name) {
+      toast.error('Өнгөний нэр оруулна уу');
+      return;
+    }
+    if (selectedColors.find(c => c.hex.toLowerCase() === customColorHex.toLowerCase())) {
+      toast.error('Энэ өнгө аль хэдийн нэмэгдсэн');
+      return;
+    }
+    setSelectedColors(prev => [...prev, { name, hex: customColorHex }]);
+    setCustomColorName('');
+    setCustomColorHex('#FF0000');
+    setShowColorPicker(false);
+  };
+
+  const removeColor = (hex: string) => {
+    setSelectedColors(prev => prev.filter(c => c.hex !== hex));
   };
 
   const isVideoFile = (file: File) => file.type.startsWith('video/');
@@ -212,6 +298,8 @@ export default function NewProductPage() {
         price: Number(formData.price),
         sale_price: formData.originalPrice ? Number(formData.originalPrice) : undefined,
         images: media.filter(m => m.url).map(m => m.url),
+        colors: selectedColors.length > 0 ? selectedColors : undefined,
+        size_type: sizeType,
         sizes: selectedSizes,
         category_id: formData.category,
         brand: formData.brand,
@@ -419,26 +507,248 @@ export default function NewProductPage() {
             </div>
           </div>
 
+          {/* Colors */}
+          <div className="bg-white rounded-xl card-shadow p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-gray-600" />
+                <h2 className="text-lg font-semibold">Өнгө</h2>
+              </div>
+              {selectedColors.length > 0 && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                  {selectedColors.length} өнгө сонгосон
+                </span>
+              )}
+            </div>
+
+            {/* Selected Colors */}
+            {selectedColors.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selectedColors.map((color) => (
+                  <div
+                    key={color.hex}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50"
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full border border-gray-300 shadow-inner"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <span className="text-sm text-gray-700">{color.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeColor(color.hex)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Common Colors Grid */}
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Түгээмэл өнгөнүүд:</p>
+              <div className="flex flex-wrap gap-2">
+                {COMMON_COLORS.map((color) => {
+                  const isSelected = selectedColors.some(c => c.hex === color.hex);
+                  return (
+                    <button
+                      key={color.hex}
+                      type="button"
+                      onClick={() => toggleCommonColor(color)}
+                      className={`group relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+                        isSelected
+                          ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:shadow-sm'
+                      }`}
+                      title={color.name}
+                    >
+                      <div
+                        className="w-4 h-4 rounded-full border border-gray-300"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      <span>{color.name}</span>
+                      {isSelected && (
+                        <span className="text-orange-500 text-[10px]">✓</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Color */}
+            <div>
+              {!showColorPicker ? (
+                <button
+                  type="button"
+                  onClick={() => setShowColorPicker(true)}
+                  className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  <Pipette className="w-4 h-4" />
+                  Өөр өнгө нэмэх
+                </button>
+              ) : (
+                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+                  <p className="text-sm font-medium text-gray-700">Өнгө сонгох:</p>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={customColorHex}
+                        onChange={(e) => setCustomColorHex(e.target.value)}
+                        className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                      />
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="text"
+                        value={customColorName}
+                        onChange={(e) => setCustomColorName(e.target.value)}
+                        placeholder="Өнгөний нэр (жнь: Тэнгэрийн цэнхэр)"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomColor())}
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={customColorHex}
+                          onChange={(e) => setCustomColorHex(e.target.value)}
+                          className="w-28 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-mono focus:border-orange-500 outline-none"
+                        />
+                        <div
+                          className="w-8 h-8 rounded-lg border border-gray-300"
+                          style={{ backgroundColor: customColorHex }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={addCustomColor}
+                      className="px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      Нэмэх
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowColorPicker(false)}
+                      className="px-4 py-1.5 text-gray-500 text-sm rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      Болих
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Sizes */}
           <div className="bg-white rounded-xl card-shadow p-6 space-y-4">
-            <h2 className="text-lg font-semibold">Хэмжээ</h2>
-
-            <div className="flex flex-wrap gap-2">
-              {sizes.map(size => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => toggleSize(size)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    selectedSizes.includes(size)
-                      ? 'bg-primary-500 text-white border-primary-500'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-primary-500'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <Ruler className="w-5 h-5 text-gray-600" />
+              <h2 className="text-lg font-semibold">Хэмжээ</h2>
             </div>
+
+            {/* Size Type Selector */}
+            <div>
+              <p className="text-sm text-gray-500 mb-2">Хэмжээний төрөл:</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {(Object.keys(SIZE_TYPE_LABELS) as SizeType[]).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => handleSizeTypeChange(type)}
+                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                      sizeType === type
+                        ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                    }`}
+                  >
+                    {SIZE_TYPE_LABELS[type]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Size Options based on type */}
+            {sizeType !== 'none' && sizeType !== 'custom' && SIZE_PRESETS[sizeType] && (
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Хэмжээ сонгох:</p>
+                <div className="flex flex-wrap gap-2">
+                  {SIZE_PRESETS[sizeType].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => toggleSize(size)}
+                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                        selectedSizes.includes(size)
+                          ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-orange-400'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+                {selectedSizes.length > 0 && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    Сонгосон: {selectedSizes.join(', ')}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Custom Size Input */}
+            {sizeType === 'custom' && (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customSizeInput}
+                    onChange={(e) => setCustomSizeInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSize())}
+                    placeholder="Хэмжээ оруулах (жнь: One Size, 160cm)"
+                    className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomSize}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {selectedSizes.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedSizes.map((size) => (
+                      <div
+                        key={size}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-sm text-orange-700"
+                      >
+                        {size}
+                        <button
+                          type="button"
+                          onClick={() => removeSize(size)}
+                          className="text-orange-400 hover:text-red-500"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {sizeType === 'none' && (
+              <p className="text-sm text-gray-400 italic">
+                Хэмжээгүй бараа — хэрэв хэмжээ байгаа бол дээрх төрлөөс сонгоно уу
+              </p>
+            )}
           </div>
         </div>
 
@@ -497,7 +807,7 @@ export default function NewProductPage() {
             >
               <option value="">Сонгоно уу</option>
               {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option key={cat._id} value={cat._id}>{cat.name}</option>
               ))}
             </select>
           </div>

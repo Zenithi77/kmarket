@@ -62,6 +62,13 @@ const CategorySchema = new Schema<ICategory>({
 export const Category: Model<ICategory> = mongoose.models.Category || mongoose.model<ICategory>('Category', CategorySchema);
 
 // ============ PRODUCT MODEL ============
+export interface IProductColor {
+  name: string;
+  hex: string;
+}
+
+export type SizeType = 'none' | 'clothing' | 'shoes' | 'bags' | 'ring' | 'custom';
+
 export interface IProduct extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -70,6 +77,8 @@ export interface IProduct extends Document {
   price: number;
   sale_price?: number;
   images: string[];
+  colors?: IProductColor[];
+  size_type?: SizeType;
   sizes?: string[];
   weight?: number;
   brand?: string;
@@ -84,6 +93,11 @@ export interface IProduct extends Document {
   updated_at: Date;
 }
 
+const ProductColorSchema = new Schema<IProductColor>({
+  name: { type: String, required: true },
+  hex: { type: String, required: true },
+}, { _id: false });
+
 const ProductSchema = new Schema<IProduct>({
   name: { type: String, required: true },
   slug: { type: String, required: true, unique: true },
@@ -91,6 +105,8 @@ const ProductSchema = new Schema<IProduct>({
   price: { type: Number, required: true },
   sale_price: { type: Number },
   images: [{ type: String }],
+  colors: [ProductColorSchema],
+  size_type: { type: String, enum: ['none', 'clothing', 'shoes', 'bags', 'ring', 'custom'], default: 'none' },
   sizes: [{ type: String }],
   weight: { type: Number },
   brand: { type: String },

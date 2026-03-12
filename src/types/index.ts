@@ -25,6 +25,14 @@ export interface Category {
   subcategories?: Category[];
 }
 
+// Product Color
+export interface ProductColor {
+  name: string;
+  hex: string;
+}
+
+export type SizeType = 'none' | 'clothing' | 'shoes' | 'bags' | 'ring' | 'custom';
+
 // Product Types
 export interface Product {
   id: string;
@@ -39,6 +47,8 @@ export interface Product {
   category_id: string;
   category?: Category;
   images: string[];
+  colors?: ProductColor[];
+  size_type?: SizeType;
   sizes: string[];
   stock: number;
   is_active: boolean;

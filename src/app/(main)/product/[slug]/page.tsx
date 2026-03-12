@@ -37,6 +37,8 @@ function mapProduct(p: any): Product {
     category_id: typeof p.category_id === 'object' ? p.category_id._id : p.category_id,
     category: p.category_id && typeof p.category_id === 'object' ? { id: p.category_id._id, name: p.category_id.name, slug: p.category_id.slug, is_active: true, created_at: '' } : undefined,
     images: p.images || [],
+    colors: p.colors || [],
+    size_type: p.size_type || 'none',
     sizes: p.sizes || [],
     stock: p.stock ?? 0,
     is_active: p.is_active ?? true,
@@ -56,6 +58,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -343,6 +346,33 @@ export default function ProductDetailPage() {
                 <span className="text-green-500 font-medium">Бэлэн байгаа</span>
               )}
             </div>
+
+            {/* Colors */}
+            {product.colors && product.colors.length > 0 && (
+              <div>
+                <h3 className="font-medium text-gray-900 mb-3">Өнгө сонгох</h3>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((color) => (
+                    <button
+                      key={color.hex}
+                      onClick={() => setSelectedColor(color.hex)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border-2 font-medium transition-all ${
+                        selectedColor === color.hex
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-gray-200 hover:border-primary-400'
+                      }`}
+                      title={color.name}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-full border ${color.hex === '#FFFFFF' ? 'border-gray-300' : 'border-transparent'}`}
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      <span className="text-sm">{color.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Sizes */}
             {product.sizes.length > 0 && (

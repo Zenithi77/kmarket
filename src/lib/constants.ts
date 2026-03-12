@@ -59,6 +59,46 @@ export const CATEGORIES = [
 // Sizes
 export const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'] as const;
 
+// Size Presets by Type
+export const SIZE_PRESETS: Record<string, string[]> = {
+  clothing: ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'],
+  shoes: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'],
+  bags: ['Small', 'Medium', 'Large', 'XL'],
+  ring: ['5', '6', '7', '8', '9', '10', '11', '12', '13'],
+};
+
+// Size Type Labels
+export const SIZE_TYPE_LABELS: Record<string, string> = {
+  none: 'Хэмжээгүй',
+  clothing: 'Хувцас (XS-4XL)',
+  shoes: 'Гутал (35-46)',
+  bags: 'Цүнх (S/M/L/XL)',
+  ring: 'Бөгж (5-13)',
+  custom: 'Өөрөө нэмэх',
+};
+
+// Common Colors
+export const COMMON_COLORS: { name: string; hex: string }[] = [
+  { name: 'Хар', hex: '#000000' },
+  { name: 'Цагаан', hex: '#FFFFFF' },
+  { name: 'Улаан', hex: '#EF4444' },
+  { name: 'Шар', hex: '#EAB308' },
+  { name: 'Ногоон', hex: '#22C55E' },
+  { name: 'Цэнхэр', hex: '#3B82F6' },
+  { name: 'Хөх', hex: '#1D4ED8' },
+  { name: 'Ягаан', hex: '#EC4899' },
+  { name: 'Нил ягаан', hex: '#A855F7' },
+  { name: 'Улбар шар', hex: '#F97316' },
+  { name: 'Саарал', hex: '#6B7280' },
+  { name: 'Хүрэн', hex: '#92400E' },
+  { name: 'Бэж', hex: '#D2B48C' },
+  { name: 'Алтан', hex: '#DAA520' },
+  { name: 'Мөнгөн', hex: '#C0C0C0' },
+  { name: 'Сүүн', hex: '#FFFDD0' },
+  { name: 'Чийрэг ногоон', hex: '#065F46' },
+  { name: 'Будаа өнгө', hex: '#F5F5DC' },
+];
+
 // Brands
 export const BRANDS = [
   'Nike', 'Adidas', 'Zara', 'H&M', 'Dyson', 'Samsung', 
