@@ -1,339 +1,469 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Plus,
-  Edit,
-  Trash2,
-  Calendar,
+  Search,
   Percent,
   Tag,
-  Copy
+  Package,
+  Save,
+  X,
+  Check,
+  BadgeDollarSign,
+  Undo2,
 } from 'lucide-react';
-import { formatPrice, formatDate } from '@/lib/constants';
-import { Button, Modal, Input } from '@/components/ui';
+import { formatPrice } from '@/lib/constants';
+import { Button, LoadingSpinner } from '@/components/ui';
 
-// Mock discounts data
-const mockDiscounts = [
-  {
-    id: '1',
-    code: 'WELCOME10',
-    type: 'percentage',
-    value: 10,
-    minPurchase: 50000,
-    maxDiscount: 100000,
-    usageLimit: 100,
-    usedCount: 45,
-    startDate: '2024-01-01',
-    endDate: '2024-02-28',
-    isActive: true
-  },
-  {
-    id: '2',
-    code: 'NEWYEAR2024',
-    type: 'percentage',
-    value: 20,
-    minPurchase: 100000,
-    maxDiscount: 200000,
-    usageLimit: 50,
-    usedCount: 50,
-    startDate: '2024-01-01',
-    endDate: '2024-01-15',
-    isActive: false
-  },
-  {
-    id: '3',
-    code: 'SHIP0',
-    type: 'fixed',
-    value: 5000,
-    minPurchase: 30000,
-    maxDiscount: null,
-    usageLimit: null,
-    usedCount: 234,
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
-    isActive: true
-  },
-  {
-    id: '4',
-    code: 'VIP50',
-    type: 'percentage',
-    value: 50,
-    minPurchase: 500000,
-    maxDiscount: 500000,
-    usageLimit: 10,
-    usedCount: 3,
-    startDate: '2024-01-01',
-    endDate: '2024-03-31',
-    isActive: true
-  }
-];
+interface ProductDiscount {
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  sale_price?: number | null;
+  images: string[];
+  stock: number;
+  brand?: string;
+  category_id?: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
+}
+
+interface Stats {
+  total: number;
+  onSale: number;
+  noSale: number;
+}
+
+type FilterType = 'all' | 'on_sale' | 'no_sale';
 
 export default function DiscountsPage() {
-  const [discounts, setDiscounts] = useState(mockDiscounts);
-  const [editModal, setEditModal] = useState<any>(null);
-  const [deleteModal, setDeleteModal] = useState<{ id: string, code: string } | null>(null);
+  const [products, setProducts] = useState<ProductDiscount[]>([]);
+  const [stats, setStats] = useState<Stats>({ total: 0, onSale: 0, noSale: 0 });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [changes, setChanges] = useState<Record<string, number | null>>({});
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (filter !== 'all') params.set('filter', filter);
+
+      const res = await fetch(`/api/admin/discounts?${params.toString()}`);
+      const data = await res.json();
+
+      if (data.products) {
+        setProducts(data.products);
+        setStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [search, filter]);
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      fetchProducts();
+    }, 300);
+    return () => clearTimeout(debounce);
+  }, [fetchProducts]);
+
+  const setSalePrice = (productId: string, value: string) => {
+    const numValue = value === '' ? null : parseInt(value);
+    setChanges(prev => ({
+      ...prev,
+      [productId]: numValue,
+    }));
   };
 
-  const handleSave = (data: any) => {
-    console.log('Save:', data);
-    setEditModal(null);
+  const removeSalePrice = (productId: string) => {
+    setChanges(prev => ({
+      ...prev,
+      [productId]: null,
+    }));
   };
 
-  const handleDelete = (id: string) => {
-    console.log('Delete:', id);
-    setDeleteModal(null);
+  const undoChange = (productId: string) => {
+    setChanges(prev => {
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
   };
 
-  const toggleActive = (id: string) => {
-    setDiscounts(prev => prev.map(d => 
-      d.id === id ? { ...d, isActive: !d.isActive } : d
-    ));
+  const getDisplaySalePrice = (product: ProductDiscount): number | null => {
+    if (product._id in changes) {
+      return changes[product._id];
+    }
+    return product.sale_price ?? null;
+  };
+
+  const hasChanges = Object.keys(changes).length > 0;
+
+  const getDiscountPercent = (price: number, salePrice: number | null): number => {
+    if (!salePrice || salePrice <= 0 || salePrice >= price) return 0;
+    return Math.round(((price - salePrice) / price) * 100);
+  };
+
+  const handleSaveAll = async () => {
+    if (!hasChanges) return;
+
+    try {
+      setSaving(true);
+      const updates = Object.entries(changes).map(([productId, salePrice]) => ({
+        productId,
+        salePrice,
+      }));
+
+      const res = await fetch('/api/admin/discounts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updates }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setChanges({});
+        setSuccessMessage(`${data.modified} бүтээгдэхүүний хямдрал шинэчлэгдлээ`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+        fetchProducts();
+      }
+    } catch (error) {
+      console.error('Error saving discounts:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {/* Success Message */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in-up">
+          <Check className="w-5 h-5" />
+          {successMessage}
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Хямдрал & Купон</h1>
-          <p className="text-gray-500 mt-1">Нийт {discounts.length} хямдралын код</p>
+          <h1 className="text-2xl font-bold text-gray-900">Хямдрал удирдах</h1>
+          <p className="text-gray-500 mt-1">Бүтээгдэхүүнүүдийн хямдралын үнийг тохируулах</p>
         </div>
-        <Button onClick={() => setEditModal({})}>
-          <Plus className="w-4 h-4 mr-2" />
-          Код нэмэх
-        </Button>
+        {hasChanges && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-amber-600 font-medium">
+              {Object.keys(changes).length} өөрчлөлт хадгалаагүй
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setChanges({})}
+            >
+              <Undo2 className="w-4 h-4 mr-2" />
+              Буцаах
+            </Button>
+            <Button onClick={handleSaveAll} disabled={saving}>
+              {saving ? (
+                <LoadingSpinner />
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Хадгалах
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Discounts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {discounts.map((discount) => (
-          <div
-            key={discount.id}
-            className={`bg-white rounded-xl card-shadow p-6 relative overflow-hidden ${
-              !discount.isActive ? 'opacity-60' : ''
-            }`}
-          >
-            {/* Status Badge */}
-            <div className="absolute top-4 right-4">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl card-shadow p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Package className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Нийт бараа</p>
+              <p className="text-xl font-bold text-gray-900">{stats.total}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl card-shadow p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+              <BadgeDollarSign className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Хямдралтай</p>
+              <p className="text-xl font-bold text-red-600">{stats.onSale}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl card-shadow p-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Tag className="w-5 h-5 text-gray-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Хямдралгүй</p>
+              <p className="text-xl font-bold text-gray-900">{stats.noSale}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Filter */}
+      <div className="bg-white rounded-xl card-shadow p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Бараа хайх..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
+            />
+          </div>
+          <div className="flex gap-2">
+            {(['all', 'on_sale', 'no_sale'] as FilterType[]).map((f) => (
               <button
-                onClick={() => toggleActive(discount.id)}
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  discount.isActive
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  filter === f
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                {discount.isActive ? 'Идэвхтэй' : 'Идэвхгүй'}
+                {f === 'all' ? 'Бүгд' : f === 'on_sale' ? 'Хямдралтай' : 'Хямдралгүй'}
               </button>
-            </div>
-
-            {/* Discount Info */}
-            <div className="flex items-start gap-4">
-              <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                discount.type === 'percentage' 
-                  ? 'bg-primary-100'
-                  : 'bg-blue-100'
-              }`}>
-                {discount.type === 'percentage' ? (
-                  <Percent className="w-7 h-7 text-primary-500" />
-                ) : (
-                  <Tag className="w-7 h-7 text-blue-500" />
-                )}
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-lg text-gray-900">{discount.code}</h3>
-                  <button
-                    onClick={() => copyCode(discount.code)}
-                    className="p-1 hover:bg-gray-100 rounded"
-                  >
-                    <Copy className="w-4 h-4 text-gray-400" />
-                  </button>
-                </div>
-                
-                <p className="text-2xl font-bold text-primary-500 mt-1">
-                  {discount.type === 'percentage' 
-                    ? `${discount.value}%`
-                    : formatPrice(discount.value)
-                  }
-                  <span className="text-sm font-normal text-gray-500 ml-2">хямдрал</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Details */}
-            <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500">Хамгийн бага дүн</p>
-                <p className="font-medium">{formatPrice(discount.minPurchase)}</p>
-              </div>
-              {discount.maxDiscount && (
-                <div>
-                  <p className="text-gray-500">Хамгийн их хямдрал</p>
-                  <p className="font-medium">{formatPrice(discount.maxDiscount)}</p>
-                </div>
-              )}
-              <div>
-                <p className="text-gray-500">Хэрэглэсэн</p>
-                <p className="font-medium">
-                  {discount.usedCount}
-                  {discount.usageLimit && ` / ${discount.usageLimit}`}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Хугацаа</p>
-                <p className="font-medium">
-                  {discount.startDate} - {discount.endDate}
-                </p>
-              </div>
-            </div>
-
-            {/* Progress bar for usage */}
-            {discount.usageLimit && (
-              <div className="mt-4">
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary-500 rounded-full"
-                    style={{ width: `${(discount.usedCount / discount.usageLimit) * 100}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                onClick={() => setEditModal(discount)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <Edit className="w-4 h-4 text-gray-500" />
-              </button>
-              <button
-                onClick={() => setDeleteModal({ id: discount.id, code: discount.code })}
-                className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 className="w-4 h-4 text-red-500" />
-              </button>
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Edit/Add Modal */}
-      <Modal
-        isOpen={!!editModal}
-        onClose={() => setEditModal(null)}
-        title={editModal?.id ? 'Код засах' : 'Шинэ код нэмэх'}
-      >
-        {editModal && (
-          <form onSubmit={(e) => { e.preventDefault(); handleSave({}); }} className="space-y-4">
-            <Input
-              label="Хямдралын код"
-              defaultValue={editModal.code || ''}
-              placeholder="WELCOME10"
-              required
-            />
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Төрөл
-              </label>
-              <select
-                defaultValue={editModal.type || 'percentage'}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
+      {/* Products Table */}
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <LoadingSpinner />
+        </div>
+      ) : products.length === 0 ? (
+        <div className="bg-white rounded-xl card-shadow p-12 text-center">
+          <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500">Бараа олдсонгүй</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl card-shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Бараа</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Ангилал</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Үнэ</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase w-48">Хямдралын үнэ</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase w-32">Хувь %</th>
+                  <th className="text-center px-6 py-3 text-xs font-semibold text-gray-500 uppercase w-24">Үйлдэл</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {products.map((product) => {
+                  const currentSalePrice = getDisplaySalePrice(product);
+                  const discountPct = getDiscountPercent(product.price, currentSalePrice);
+                  const isChanged = product._id in changes;
+                  const hasDiscount = currentSalePrice !== null && currentSalePrice > 0 && currentSalePrice < product.price;
+
+                  return (
+                    <tr
+                      key={product._id}
+                      className={`hover:bg-gray-50 transition-colors ${
+                        isChanged ? 'bg-amber-50' : ''
+                      }`}
+                    >
+                      {/* Product Info */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            {product.images?.[0] ? (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Package className="w-6 h-6 text-gray-300" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 truncate max-w-[200px]">
+                              {product.name}
+                            </p>
+                            {product.brand && (
+                              <p className="text-xs text-gray-400">{product.brand}</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Category */}
+                      <td className="px-6 py-4">
+                        <span className="text-sm text-gray-600">
+                          {product.category_id?.name || '-'}
+                        </span>
+                      </td>
+
+                      {/* Original Price */}
+                      <td className="px-6 py-4 text-right">
+                        <span className={`font-medium ${hasDiscount ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                          {formatPrice(product.price)}
+                        </span>
+                      </td>
+
+                      {/* Sale Price Input */}
+                      <td className="px-6 py-4 text-right">
+                        <input
+                          type="number"
+                          placeholder="Хямдралын үнэ"
+                          value={
+                            product._id in changes
+                              ? (changes[product._id] ?? '')
+                              : (product.sale_price ?? '')
+                          }
+                          onChange={(e) => setSalePrice(product._id, e.target.value)}
+                          className={`w-full max-w-[160px] px-3 py-1.5 text-right rounded-lg border text-sm ${
+                            isChanged
+                              ? 'border-amber-400 bg-amber-50'
+                              : hasDiscount
+                              ? 'border-red-200 bg-red-50'
+                              : 'border-gray-200'
+                          } focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none`}
+                          min={0}
+                          max={product.price - 1}
+                        />
+                      </td>
+
+                      {/* Discount Percent */}
+                      <td className="px-6 py-4 text-right">
+                        {hasDiscount ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                            <Percent className="w-3 h-3" />
+                            {discountPct}%
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 text-sm">—</span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          {isChanged && (
+                            <button
+                              onClick={() => undoChange(product._id)}
+                              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                              title="Буцаах"
+                            >
+                              <Undo2 className="w-4 h-4 text-gray-500" />
+                            </button>
+                          )}
+                          {(hasDiscount || (product.sale_price && product.sale_price > 0)) && (
+                            <button
+                              onClick={() => removeSalePrice(product._id)}
+                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Хямдрал арилгах"
+                            >
+                              <X className="w-4 h-4 text-red-500" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Quick Discount Actions */}
+          <div className="border-t px-6 py-4 bg-gray-50">
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span className="font-medium">Түргэн хямдрал:</span>
+              {[10, 20, 30, 50].map((pct) => (
+                <button
+                  key={pct}
+                  onClick={() => {
+                    const newChanges: Record<string, number | null> = { ...changes };
+                    products.forEach((p) => {
+                      if (!p.sale_price && !(p._id in changes)) {
+                        newChanges[p._id] = Math.round(p.price * (1 - pct / 100));
+                      }
+                    });
+                    setChanges(newChanges);
+                  }}
+                  className="px-3 py-1 bg-white border border-gray-200 rounded-lg hover:bg-primary-50 hover:border-primary-300 hover:text-primary-600 transition-colors font-medium"
+                >
+                  -{pct}%
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  const newChanges: Record<string, number | null> = { ...changes };
+                  products.forEach((p) => {
+                    if (p.sale_price || p._id in changes) {
+                      newChanges[p._id] = null;
+                    }
+                  });
+                  setChanges(newChanges);
+                }}
+                className="px-3 py-1 bg-white border border-red-200 rounded-lg hover:bg-red-50 text-red-500 transition-colors font-medium"
               >
-                <option value="percentage">Хувиар (%)</option>
-                <option value="fixed">Тогтмол дүн (₮)</option>
-              </select>
+                Бүгдийг арилгах
+              </button>
             </div>
+          </div>
+        </div>
+      )}
 
-            <Input
-              label="Хямдралын хэмжээ"
-              type="number"
-              defaultValue={editModal.value || ''}
-              placeholder="10"
-              required
-            />
-
-            <Input
-              label="Хамгийн бага худалдан авалт (₮)"
-              type="number"
-              defaultValue={editModal.minPurchase || ''}
-              placeholder="50000"
-            />
-
-            <Input
-              label="Хамгийн их хямдрал (₮)"
-              type="number"
-              defaultValue={editModal.maxDiscount || ''}
-              placeholder="100000"
-            />
-
-            <Input
-              label="Хэрэглэх тоо хязгаар"
-              type="number"
-              defaultValue={editModal.usageLimit || ''}
-              placeholder="Хязгааргүй бол хоосон"
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Эхлэх огноо"
-                type="date"
-                defaultValue={editModal.startDate || ''}
-                required
-              />
-              <Input
-                label="Дуусах огноо"
-                type="date"
-                defaultValue={editModal.endDate || ''}
-                required
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setEditModal(null)}>
-                Болих
-              </Button>
-              <Button type="submit">
-                Хадгалах
-              </Button>
-            </div>
-          </form>
-        )}
-      </Modal>
-
-      {/* Delete Modal */}
-      <Modal
-        isOpen={!!deleteModal}
-        onClose={() => setDeleteModal(null)}
-        title="Код устгах"
-      >
-        {deleteModal && (
-          <div className="space-y-4">
-            <p className="text-gray-600">
-              <strong>{deleteModal.code}</strong> кодыг устгахдаа итгэлтэй байна уу?
+      {/* Floating Save Bar */}
+      {hasChanges && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-40">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              <span className="font-bold text-amber-600">{Object.keys(changes).length}</span> бүтээгдэхүүний хямдрал өөрчлөгдсөн
             </p>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setDeleteModal(null)}>
-                Болих
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setChanges({})}>
+                Буцаах
               </Button>
-              <Button 
-                onClick={() => handleDelete(deleteModal.id)}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                Устгах
+              <Button onClick={handleSaveAll} disabled={saving}>
+                {saving ? (
+                  <LoadingSpinner />
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Бүгдийг хадгалах
+                  </>
+                )}
               </Button>
             </div>
           </div>
-        )}
-      </Modal>
+        </div>
+      )}
     </div>
   );
 }
