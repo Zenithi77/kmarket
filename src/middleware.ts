@@ -2,40 +2,45 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-// Coming Soon: Production domain дээр Coming Soon page харуулна
-// Local (localhost) дээр бүтэн website ажиллана
-const COMING_SOON_DOMAINS = ['kmarket.mn', 'www.kmarket.mn'];
+// Coming Soon mode: бүх хэрэглэгчид Coming Soon хуудас харна
+// Зөвхөн admin role-тэй хүмүүс бүтэн сайтыг харна
+const COMING_SOON_ENABLED = true;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hostname = request.headers.get('host') || '';
 
-  // Coming Soon check - only on production domain
-  const isProductionDomain = COMING_SOON_DOMAINS.some(domain => hostname.includes(domain));
-  const isComingSoon = process.env.NEXT_PUBLIC_COMING_SOON === 'true' && isProductionDomain;
-
-  if (isComingSoon) {
-    // Allow API routes and static assets to work
-    if (
-      pathname.startsWith('/api/') ||
-      pathname.startsWith('/_next/') ||
-      pathname.startsWith('/favicon') ||
-      pathname === '/coming-soon'
-    ) {
-      return NextResponse.next();
-    }
-
-    // Redirect everything else to coming-soon page
-    return NextResponse.rewrite(new URL('/coming-soon', request.url));
+  // Always allow these paths
+  if (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon') ||
+    pathname === '/coming-soon' ||
+    pathname.startsWith('/auth/')
+  ) {
+    return NextResponse.next();
   }
 
-  // Protect /admin routes
-  if (pathname.startsWith('/admin')) {
-    const token = await getToken({ 
-      req: request, 
-      secret: process.env.NEXTAUTH_SECRET 
-    });
+  const token = await getToken({ 
+    req: request, 
+    secret: process.env.NEXTAUTH_SECRET 
+  });
 
+  // Coming Soon check
+  if (COMING_SOON_ENABLED) {
+    const isAdmin = token?.role === 'admin';
+
+    // Admin can access everything - bypass coming soon
+    if (!isAdmin) {
+      // Non-admin or not logged in → show coming soon
+      if (pathname !== '/coming-soon') {
+        return NextResponse.rewrite(new URL('/coming-soon', request.url));
+      }
+      return NextResponse.next();
+    }
+  }
+
+  // Protect /admin routes (for when coming soon is disabled)
+  if (pathname.startsWith('/admin')) {
     // Not logged in - redirect to login
     if (!token) {
       const loginUrl = new URL('/auth/login', request.url);

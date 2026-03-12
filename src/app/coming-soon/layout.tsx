@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'KMarket - Удахгүй нээгдэж байна',
-  description: 'KMarket удахгүй нээгдэж байна. Монголын шилдэг онлайн дэлгүүрийг хүлээнэ үү!',
+  title: 'KMarket - Coming Soon',
+  description: 'KMarket Online Shop is launching soon. Stay tuned for an amazing shopping experience!',
 };
 
 export default function ComingSoonLayout({

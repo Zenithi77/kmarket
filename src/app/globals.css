@@ -144,6 +144,10 @@ body {
   animation: fadeIn 0.3s ease-out;
 }
 
+.animate-fade-in-up {
+  animation: slideUp 1.2s ease-out forwards;
+}
+
 .animate-slide-up {
   animation: slideUp 0.4s ease-out;
 }
