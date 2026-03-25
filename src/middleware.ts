@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt';
 
 // Coming Soon mode: бүх хэрэглэгчид Coming Soon хуудас харна
 // Зөвхөн admin role-тэй хүмүүс бүтэн сайтыг харна
-const COMING_SOON_ENABLED = true;
+const COMING_SOON_ENABLED = false;
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
