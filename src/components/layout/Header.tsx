@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X, Shield, Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Percent, LogOut, Settings, ShoppingBag, ChevronRight } from 'lucide-react';
@@ -85,13 +86,15 @@ export default function Header() {
 
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 flex items-center group">
-                <div className="relative">
-                  <span className="text-3xl md:text-4xl font-black bg-gradient-to-br from-orange-500 via-orange-400 to-amber-500 bg-clip-text text-transparent drop-shadow-sm">
-                    K
-                  </span>
-                  <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-amber-400 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-                </div>
-                <span className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight ml-0.5 group-hover:text-gray-900 transition-colors">
+                <Image
+                  src="/logo.svg"
+                  alt="KMarket"
+                  width={40}
+                  height={40}
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-xl"
+                  priority
+                />
+                <span className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight ml-1.5 group-hover:text-gray-900 transition-colors">
                   market
                 </span>
               </Link>

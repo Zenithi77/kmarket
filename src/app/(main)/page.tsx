@@ -337,28 +337,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* Newsletter */}
-      <section className="py-12 bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-3">Join Our Newsletter</h2>
-          <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            Шинэ бүтээгдэхүүн, хямдрал урамшууллын мэдээллийг хамгийн түрүүнд хүлээн аваарай
-          </p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="И-мэйл хаяг"
-              className="flex-1 px-5 py-2.5 rounded-full bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:border-orange-500 focus:outline-none text-sm"
-            />
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors text-sm"
-            >
-              Бүртгүүлэх
-            </button>
-          </form>
-        </div>
-      </section>
+
     </div>
   );
 }

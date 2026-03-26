@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, Phone, Mail, Facebook, Instagram, Twitter } from 'lucide-react';
 
 export default function Footer() {
@@ -12,9 +13,13 @@ export default function Footer() {
           {/* Company Info */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-xl">K</span>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="KMarket"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-xl"
+              />
               <span className="text-xl font-bold text-white">KMarket</span>
             </div>
             <p className="text-sm text-gray-400 mb-4">
