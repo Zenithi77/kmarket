@@ -12,14 +12,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="flex items-center space-x-3 mb-4">
               <Image
                 src="/1.jpg"
                 alt="KMarket"
-                width={40}
-                height={40}
-                className="w-10 h-10"
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-full object-cover"
+                unoptimized
               />
+              <span className="text-xl font-bold text-white">KMarket</span>
+            </div>
             </div>
             <p className="text-sm text-gray-400 mb-4">
               Монголын хамгийн том онлайн худалдааны платформ. 

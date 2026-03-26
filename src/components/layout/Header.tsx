@@ -89,10 +89,11 @@ export default function Header() {
                 <Image
                   src="/1.jpg"
                   alt="KMarket"
-                  width={40}
-                  height={40}
-                  className="w-9 h-9 md:w-10 md:h-10"
+                  width={48}
+                  height={48}
+                  className="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover"
                   priority
+                  unoptimized
                 />
               </Link>
             </div>
