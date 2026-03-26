@@ -23,7 +23,6 @@ export default function Footer() {
               />
               <span className="text-xl font-bold text-white">KMarket</span>
             </div>
-            </div>
             <p className="text-sm text-gray-400 mb-4">
               Монголын хамгийн том онлайн худалдааны платформ. 
               Таны хэрэгцээнд нийцсэн бүтээгдэхүүнийг хамгийн сайн үнээр санал болгож байна.
