@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
     // ---- Core Stats ----
-    const [\ ,
+    const [
       totalOrders,
       totalProducts,
       totalUsers,
