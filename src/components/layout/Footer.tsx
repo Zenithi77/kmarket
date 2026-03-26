@@ -14,13 +14,12 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <Image
-                src="/logo.svg"
+                src="/1.jpg"
                 alt="KMarket"
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-xl"
+                className="w-10 h-10"
               />
-              <span className="text-xl font-bold text-white">KMarket</span>
             </div>
             <p className="text-sm text-gray-400 mb-4">
               Монголын хамгийн том онлайн худалдааны платформ. 

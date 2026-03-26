@@ -87,16 +87,13 @@ export default function Header() {
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 flex items-center group">
                 <Image
-                  src="/logo.svg"
+                  src="/1.jpg"
                   alt="KMarket"
                   width={40}
                   height={40}
-                  className="w-9 h-9 md:w-10 md:h-10 rounded-xl"
+                  className="w-9 h-9 md:w-10 md:h-10"
                   priority
                 />
-                <span className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight ml-1.5 group-hover:text-gray-900 transition-colors">
-                  market
-                </span>
               </Link>
             </div>
 
