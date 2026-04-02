@@ -46,18 +46,130 @@ export const PAYMENT_STATUS_LABELS: Record<string, string> = {
   Refunded: 'Буцаагдсан'
 };
 
-// Categories
+// ============ CATEGORY SYSTEM ============
+
+// Filter Definition Type
+export interface FilterDef {
+  key: string;
+  label: string;
+  type: 'select' | 'multi-select' | 'range';
+  options: string[];
+}
+
+// Main 6 Categories
 export const CATEGORIES = [
-  { id: 'beauty', name: 'Beauty', slug: 'beauty', icon: '💄' },
-  { id: 'fashion', name: 'Fashion', slug: 'fashion', icon: '👗' },
-  { id: 'shoes', name: 'Shoes', slug: 'shoes', icon: '👟' },
-  { id: 'dyson', name: 'Dyson', slug: 'dyson', icon: '💨' },
-  { id: 'trendy', name: 'Trendy', slug: 'trendy', icon: '✨' },
-  { id: 'best', name: 'Best Sellers', slug: 'best', icon: '🏆' },
+  { id: 'beauty', name: 'Beauty', slug: 'beauty', icon: '💄', description: 'Гоо сайхан, арьс арчилгаа' },
+  { id: 'fashion', name: 'Fashion', slug: 'fashion', icon: '👗', description: 'Хувцас, загвар' },
+  { id: 'shoes', name: 'Shoes', slug: 'shoes', icon: '👟', description: 'Гутал, пүүз' },
+  { id: 'dyson', name: 'Dyson', slug: 'dyson', icon: '💨', description: 'Dyson бүтээгдэхүүн' },
+  { id: 'trendy', name: 'Trendy', slug: 'trendy', icon: '✨', description: 'Трэнд бараа' },
+  { id: 'best', name: 'Best Sellers', slug: 'best', icon: '🏆', description: 'Шилдэг борлуулалт' },
 ] as const;
 
-// Sizes
-export const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'] as const;
+// Default Sub-categories for each main category
+export const DEFAULT_SUBCATEGORIES: Record<string, { name: string; slug: string }[]> = {
+  beauty: [
+    { name: 'Уруулын будаг', slug: 'lipstick' },
+    { name: 'Нүүрний тос', slug: 'foundation' },
+    { name: 'Mascara', slug: 'mascara' },
+    { name: 'Нүдний тень', slug: 'eyeshadow' },
+    { name: 'Усан үнэр', slug: 'perfume' },
+    { name: 'Арьс арчилгаа', slug: 'skincare' },
+    { name: 'Нүүрний ус', slug: 'toner' },
+    { name: 'Сыворотка', slug: 'serum' },
+    { name: 'Маск', slug: 'mask' },
+    { name: 'Хумсны лак', slug: 'nail-polish' },
+  ],
+  fashion: [
+    { name: 'Цамц', slug: 'shirt' },
+    { name: 'Өмд', slug: 'pants' },
+    { name: 'Куртка', slug: 'jacket' },
+    { name: 'Даашинз', slug: 'dress' },
+    { name: 'Пальто', slug: 'coat' },
+    { name: 'Хүрэм', slug: 'hoodie' },
+    { name: 'Жинс', slug: 'jeans' },
+    { name: 'Юбка', slug: 'skirt' },
+    { name: 'Костюм', slug: 'suit' },
+    { name: 'Спорт хувцас', slug: 'sportswear' },
+  ],
+  shoes: [
+    { name: 'Пүүз', slug: 'sneakers' },
+    { name: 'Сандаал', slug: 'sandals' },
+    { name: 'Өвлийн гутал', slug: 'winter-boots' },
+    { name: 'Даашинзны гутал', slug: 'formal-shoes' },
+    { name: 'Спорт гутал', slug: 'sport-shoes' },
+    { name: 'Loafer', slug: 'loafer' },
+    { name: 'Өсгийтэй гутал', slug: 'heels' },
+    { name: 'Гүйлтийн гутал', slug: 'running-shoes' },
+  ],
+  dyson: [
+    { name: 'Airwrap', slug: 'airwrap' },
+    { name: 'Supersonic', slug: 'supersonic' },
+    { name: 'Corrale', slug: 'corrale' },
+    { name: 'Тоос сорогч', slug: 'vacuum' },
+    { name: 'Агаар цэвэршүүлэгч', slug: 'purifier' },
+    { name: 'Чийгшүүлэгч', slug: 'humidifier' },
+    { name: 'Сэлгүүр', slug: 'fan' },
+    { name: 'Airstrait', slug: 'airstrait' },
+  ],
+  trendy: [
+    { name: 'Аксессуар', slug: 'accessories' },
+    { name: 'Цүнх', slug: 'bags' },
+    { name: 'Малгай', slug: 'hats' },
+    { name: 'Нарны шил', slug: 'sunglasses' },
+    { name: 'Цагны зүүлт', slug: 'watches' },
+    { name: 'Зүүлт', slug: 'jewelry' },
+    { name: 'Оронд алчуур', slug: 'scarves' },
+    { name: 'Бүс', slug: 'belts' },
+  ],
+  best: [
+    { name: 'Beauty шилдэг', slug: 'best-beauty' },
+    { name: 'Fashion шилдэг', slug: 'best-fashion' },
+    { name: 'Shoes шилдэг', slug: 'best-shoes' },
+    { name: 'Dyson шилдэг', slug: 'best-dyson' },
+    { name: 'Хамгийн эрэлттэй', slug: 'most-popular' },
+  ],
+};
+
+// Category-specific filter configurations
+export const CATEGORY_FILTERS: Record<string, FilterDef[]> = {
+  beauty: [
+    { key: 'product_type', label: 'Төрөл', type: 'select', options: ['Уруулын будаг', 'Нүүрний тос', 'Mascara', 'Нүдний тень', 'Усан үнэр', 'Арьс арчилгаа', 'Нүүрний ус', 'Сыворотка', 'Маск', 'Хумсны лак', 'Бусад'] },
+    { key: 'volume', label: 'Эзлэхүүн', type: 'select', options: ['5ml', '10ml', '15ml', '30ml', '50ml', '75ml', '100ml', '150ml', '200ml', '250ml', '500ml'] },
+    { key: 'skin_type', label: 'Арьсны төрөл', type: 'multi-select', options: ['Хуурай', 'Тослог', 'Хэвийн', 'Холимог', 'Мэдрэг'] },
+    { key: 'finish', label: 'Төрх', type: 'select', options: ['Matte', 'Glossy', 'Satin', 'Dewy', 'Natural'] },
+  ],
+  fashion: [
+    { key: 'size', label: 'Хэмжээ', type: 'multi-select', options: ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'] },
+    { key: 'gender', label: 'Хүйс', type: 'select', options: ['Эрэгтэй', 'Эмэгтэй', 'Unisex'] },
+    { key: 'material', label: 'Материал', type: 'select', options: ['Хөвөн', 'Полиэстер', 'Торго', 'Арьс', 'Даавуу', 'Ноос', 'Нейлон', 'Бусад'] },
+    { key: 'season', label: 'Улирал', type: 'select', options: ['Хавар', 'Зун', 'Намар', 'Өвөл', 'Бүх улирал'] },
+  ],
+  shoes: [
+    { key: 'size', label: 'Хэмжээ', type: 'multi-select', options: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'] },
+    { key: 'gender', label: 'Хүйс', type: 'select', options: ['Эрэгтэй', 'Эмэгтэй', 'Unisex'] },
+    { key: 'material', label: 'Материал', type: 'select', options: ['Арьс', 'Торго', 'Mesh', 'Canvas', 'Резин', 'Бусад'] },
+    { key: 'sole_type', label: 'Улны төрөл', type: 'select', options: ['Хавтгай', 'Өсгийтэй', 'Platform', 'Wedge', 'Спорт'] },
+  ],
+  dyson: [
+    { key: 'product_type', label: 'Төрөл', type: 'select', options: ['Үс хатаагч', 'Үс загварлагч', 'Үс гүйрүүлэгч', 'Тоос сорогч', 'Агаар цэвэршүүлэгч', 'Чийгшүүлэгч', 'Сэлгүүр', 'Бусад'] },
+    { key: 'power', label: 'Чадал (Ватт)', type: 'select', options: ['200W', '500W', '1000W', '1200W', '1400W', '1600W', '1800W', '2000W'] },
+    { key: 'weight_class', label: 'Жин', type: 'select', options: ['0.5кг хүртэл', '0.5-1кг', '1-2кг', '2-3кг', '3-5кг', '5кг+'] },
+    { key: 'warranty', label: 'Баталгаа', type: 'select', options: ['6 сар', '1 жил', '2 жил', '3 жил', '5 жил'] },
+    { key: 'color_variant', label: 'Өнгөний хувилбар', type: 'select', options: ['Fuchsia/Nickel', 'Prussian Blue/Copper', 'Nickel/Copper', 'Iron/Fuchsia', 'Vinca Blue/Rosé', 'Бусад'] },
+  ],
+  trendy: [
+    { key: 'size', label: 'Хэмжээ', type: 'multi-select', options: ['One Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL'] },
+    { key: 'gender', label: 'Хүйс', type: 'select', options: ['Эрэгтэй', 'Эмэгтэй', 'Unisex'] },
+    { key: 'material', label: 'Материал', type: 'select', options: ['Арьс', 'Нийлэг', 'Металл', 'Мод', 'Шил', 'Бусад'] },
+  ],
+  best: [
+    { key: 'original_category', label: 'Анхны ангилал', type: 'select', options: ['Beauty', 'Fashion', 'Shoes', 'Dyson', 'Trendy'] },
+  ],
+};
+
+// Sizes (combined)
+export const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'] as const;
 
 // Size Presets by Type
 export const SIZE_PRESETS: Record<string, string[]> = {

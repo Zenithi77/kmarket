@@ -5,15 +5,34 @@ import connectDB from '@/lib/mongodb';
 import { Category, User } from '@/lib/models';
 
 // GET /api/categories
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await connectDB();
+
+    const { searchParams } = new URL(request.url);
+    const parentSlug = searchParams.get('parent');
+    const flat = searchParams.get('flat') === 'true';
 
     const categories = await Category.find({ is_active: true })
       .sort({ order: 1, name: 1 })
       .lean();
 
-    // Organize into parent/child structure
+    // If requesting flat list (for dropdowns)
+    if (flat) {
+      return NextResponse.json(categories);
+    }
+
+    // If requesting subcategories of a specific parent
+    if (parentSlug) {
+      const parent = categories.find(c => c.slug === parentSlug && !c.parent_id);
+      if (!parent) {
+        return NextResponse.json([]);
+      }
+      const subs = categories.filter(c => c.parent_id?.toString() === parent._id.toString());
+      return NextResponse.json(subs);
+    }
+
+    // Default: organize into parent/child structure
     const parents = categories.filter(c => !c.parent_id);
     const result = parents.map(parent => ({
       ...parent,
@@ -52,12 +71,19 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
+    // Check if slug already exists
+    const existing = await Category.findOne({ slug });
+    if (existing) {
+      return NextResponse.json({ error: 'Энэ slug аль хэдийн байна' }, { status: 400 });
+    }
+
     const category = await Category.create({ 
       name: body.name,
       slug,
       icon: body.icon,
       image: body.image,
-      parent_id: body.parent_id,
+      parent_id: body.parent_id || undefined,
+      filters: body.filters || [],
       order: body.order || 0,
       is_active: true,
     });

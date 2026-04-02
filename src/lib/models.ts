@@ -37,6 +37,13 @@ const UserSchema = new Schema<IUser>({
 export const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 
 // ============ CATEGORY MODEL ============
+export interface ICategoryFilter {
+  key: string;
+  label: string;
+  type: 'select' | 'multi-select' | 'range';
+  options: string[];
+}
+
 export interface ICategory extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -44,6 +51,7 @@ export interface ICategory extends Document {
   icon?: string;
   image?: string;
   parent_id?: mongoose.Types.ObjectId;
+  filters?: ICategoryFilter[];
   is_active: boolean;
   order: number;
   created_at: Date;
@@ -55,6 +63,12 @@ const CategorySchema = new Schema<ICategory>({
   icon: { type: String },
   image: { type: String },
   parent_id: { type: Schema.Types.ObjectId, ref: 'Category' },
+  filters: [{
+    key: { type: String },
+    label: { type: String },
+    type: { type: String, enum: ['select', 'multi-select', 'range'] },
+    options: [{ type: String }],
+  }],
   is_active: { type: Boolean, default: true },
   order: { type: Number, default: 0 },
 }, { timestamps: { createdAt: 'created_at', updatedAt: false } });
@@ -84,6 +98,8 @@ export interface IProduct extends Document {
   brand?: string;
   stock: number;
   category_id: mongoose.Types.ObjectId;
+  subcategory_id?: mongoose.Types.ObjectId;
+  attributes?: Record<string, any>;
   is_featured: boolean;
   is_new: boolean;
   is_active: boolean;
@@ -112,6 +128,8 @@ const ProductSchema = new Schema<IProduct>({
   brand: { type: String },
   stock: { type: Number, default: 0 },
   category_id: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  subcategory_id: { type: Schema.Types.ObjectId, ref: 'Category' },
+  attributes: { type: Schema.Types.Mixed, default: {} },
   is_featured: { type: Boolean, default: false },
   is_new: { type: Boolean, default: true },
   is_active: { type: Boolean, default: true },

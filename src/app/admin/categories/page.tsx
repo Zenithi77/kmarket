@@ -7,14 +7,26 @@ import {
   Edit,
   Trash2,
   ChevronRight,
+  ChevronDown,
   FolderTree,
-  GripVertical,
   Upload,
   X,
-  Save
+  Save,
+  Filter,
+  Settings,
+  Layers,
+  Tag,
 } from 'lucide-react';
 import { Button, Modal, Input } from '@/components/ui';
+import { CATEGORY_FILTERS, DEFAULT_SUBCATEGORIES } from '@/lib/constants';
 import toast from 'react-hot-toast';
+
+interface CategoryFilter {
+  key: string;
+  label: string;
+  type: 'select' | 'multi-select' | 'range';
+  options: string[];
+}
 
 interface Category {
   _id: string;
@@ -24,25 +36,28 @@ interface Category {
   image?: string;
   order: number;
   is_active: boolean;
+  filters?: CategoryFilter[];
   subcategories?: Category[];
 }
 
-const defaultCategory = {
+const defaultSubCategory = {
   name: '',
   slug: '',
   icon: '',
-  image: '',
+  parent_id: '',
   order: 0,
 };
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editModal, setEditModal] = useState<{ data: Category | null } | null>(null);
-  const [deleteModal, setDeleteModal] = useState<{ id: string, name: string } | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-  const [formData, setFormData] = useState(defaultCategory);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [subModal, setSubModal] = useState<{ parentId: string; parentSlug: string; data: Category | null } | null>(null);
+  const [filterModal, setFilterModal] = useState<{ category: Category } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ id: string; name: string; isParent: boolean } | null>(null);
+  const [subFormData, setSubFormData] = useState(defaultSubCategory);
   const [uploading, setUploading] = useState(false);
+  const [initializingSubcats, setInitializingSubcats] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -53,88 +68,81 @@ export default function CategoriesPage() {
       const res = await fetch('/api/categories');
       const data = await res.json();
       setCategories(data);
-    } catch (error) {
-      toast.error('Категори ачаалахад алдаа гарлаа');
+    } catch {
+      toast.error('???????? ????????? ????? ??????');
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleExpand = (id: string) => {
-    setExpandedCategories(prev => 
-      prev.includes(id) 
-        ? prev.filter(x => x !== id) 
-        : [...prev, id]
-    );
+  const handleExpand = (id: string) => {
+    setExpandedCategory(prev => prev === id ? null : id);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'icon' | 'image') => {
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-
+    const formData = new FormData();
+    formData.append('file', file);
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.url) {
-        setFormData(prev => ({ ...prev, [type]: data.url }));
-        toast.success('Зураг оруулагдлаа');
+        setSubFormData(prev => ({ ...prev, icon: data.url }));
+        toast.success('????? ???????????');
       }
-    } catch (error) {
-      toast.error('Зураг оруулахад алдаа гарлаа');
+    } catch {
+      toast.error('????? ????????? ????? ??????');
     } finally {
       setUploading(false);
     }
   };
 
-  const handleEdit = (category: Category) => {
-    setFormData({
-      name: category.name,
-      slug: category.slug,
-      icon: category.icon || '',
-      image: category.image || '',
-      order: category.order,
-    });
-    setEditModal({ data: category });
+  const handleAddSubcategory = (parentId: string, parentSlug: string) => {
+    setSubFormData({ ...defaultSubCategory, parent_id: parentId });
+    setSubModal({ parentId, parentSlug, data: null });
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleEditSubcategory = (parentId: string, parentSlug: string, sub: Category) => {
+    setSubFormData({
+      name: sub.name,
+      slug: sub.slug,
+      icon: sub.icon || '',
+      parent_id: parentId,
+      order: sub.order,
+    });
+    setSubModal({ parentId, parentSlug, data: sub });
+  };
+
+  const handleSaveSubcategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name) {
-      toast.error('Нэр шаардлагатай');
+    if (!subFormData.name) {
+      toast.error('??? ??????? ??');
       return;
     }
-
     try {
-      const categoryId = editModal?.data?._id;
-      const isEdit = !!categoryId;
-      const url = '/api/categories';
-      const method = isEdit ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
+      const isEdit = !!subModal?.data;
+      const res = await fetch('/api/categories', {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isEdit ? { ...formData, _id: categoryId } : formData),
+        body: JSON.stringify(
+          isEdit
+            ? { ...subFormData, _id: subModal!.data!._id }
+            : { ...subFormData, parent_id: subModal!.parentId }
+        ),
       });
-
       if (res.ok) {
-        toast.success(isEdit ? 'Категори шинэчлэгдлээ' : 'Категори нэмэгдлээ');
-        setEditModal(null);
-        setFormData(defaultCategory);
+        toast.success(isEdit ? '??? ??????? ????????????' : '??? ??????? ?????????');
+        setSubModal(null);
+        setSubFormData(defaultSubCategory);
         fetchCategories();
       } else {
         const data = await res.json();
-        toast.error(data.error || 'Алдаа гарлаа');
+        toast.error(data.error || '????? ??????');
       }
-    } catch (error) {
-      toast.error('Алдаа гарлаа');
+    } catch {
+      toast.error('????? ??????');
     }
   };
 
@@ -142,13 +150,78 @@ export default function CategoriesPage() {
     try {
       const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        toast.success('Категори устгагдлаа');
+        toast.success('??????????');
         fetchCategories();
       }
-    } catch (error) {
-      toast.error('Алдаа гарлаа');
+    } catch {
+      toast.error('????? ??????');
     }
     setDeleteModal(null);
+  };
+
+  const handleInitializeSubcategories = async (parentId: string, parentSlug: string) => {
+    const defaults = DEFAULT_SUBCATEGORIES[parentSlug];
+    if (!defaults || defaults.length === 0) {
+      toast.error('??? ????????? ??? ??????? ?????????????????');
+      return;
+    }
+    setInitializingSubcats(parentId);
+    let successCount = 0;
+    for (const sub of defaults) {
+      try {
+        const res = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: sub.name,
+            slug: sub.slug,
+            parent_id: parentId,
+            order: successCount,
+          }),
+        });
+        if (res.ok) successCount++;
+      } catch { /* skip duplicates */ }
+    }
+    toast.success(`${successCount} ??? ??????? ?????????`);
+    setInitializingSubcats(null);
+    fetchCategories();
+  };
+
+  const handleSaveFilters = async (categoryId: string, filters: CategoryFilter[]) => {
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _id: categoryId, filters }),
+      });
+      if (res.ok) {
+        toast.success('???????? ????????????');
+        fetchCategories();
+      }
+    } catch {
+      toast.error('????? ??????');
+    }
+    setFilterModal(null);
+  };
+
+  const getCategoryEmoji = (slug: string) => {
+    const icons: Record<string, string> = {
+      beauty: '??', fashion: '??', shoes: '??',
+      dyson: '??', trendy: '?', best: '??',
+    };
+    return icons[slug] || '??';
+  };
+
+  const getCategoryColor = (slug: string) => {
+    const colors: Record<string, string> = {
+      beauty: 'from-pink-500 to-rose-500',
+      fashion: 'from-purple-500 to-indigo-500',
+      shoes: 'from-blue-500 to-cyan-500',
+      dyson: 'from-gray-600 to-gray-800',
+      trendy: 'from-amber-500 to-orange-500',
+      best: 'from-yellow-500 to-amber-500',
+    };
+    return colors[slug] || 'from-gray-500 to-gray-600';
   };
 
   if (loading) {
@@ -161,165 +234,229 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Категори</h1>
-          <p className="text-gray-500 mt-1">Нийт {categories.length} категори</p>
+          <h1 className="text-2xl font-bold text-gray-900">??????? ?????????</h1>
+          <p className="text-gray-500 mt-1">
+            {categories.length} ?????? ??????? | ??? ???????, ???????? ??????????
+          </p>
         </div>
-        <Button onClick={() => {
-          setFormData(defaultCategory);
-          setEditModal({ data: null });
-        }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Категори нэмэх
-        </Button>
       </div>
 
-      {/* Categories List */}
-      <div className="bg-white rounded-xl card-shadow overflow-hidden">
-        <div className="divide-y">
-          {categories.map((category) => (
-            <div key={category._id}>
-              {/* Main Category */}
-              <div className="flex items-center gap-4 p-4 hover:bg-gray-50">
-                <button className="p-1 hover:bg-gray-100 rounded cursor-move">
-                  <GripVertical className="w-5 h-5 text-gray-400" />
-                </button>
+      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <Layers className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm text-orange-800 font-medium">??????? ?????</p>
+            <p className="text-sm text-orange-600 mt-1">
+              6 ?????? ??????? ? ??? ??????? ? ?????. ??????? ???? ??????? ???????? (??????, ????????, ???????? ?.?) ??????????.
+            </p>
+          </div>
+        </div>
+      </div>
 
-                {/* Icon/Image Preview */}
-                <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden">
+      <div className="space-y-4">
+        {categories.map((category) => {
+          const isExpanded = expandedCategory === category._id;
+          const subCount = category.subcategories?.length || 0;
+          const filterCount = category.filters?.length || 0;
+          const defaultFilters = CATEGORY_FILTERS[category.slug] || [];
+
+          return (
+            <div key={category._id} className="bg-white rounded-xl card-shadow overflow-hidden">
+              <div
+                className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => handleExpand(category._id)}
+              >
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getCategoryColor(category.slug)} flex items-center justify-center text-2xl shadow-sm`}>
                   {category.icon ? (
-                    <Image
-                      src={category.icon}
-                      alt={category.name}
-                      width={56}
-                      height={56}
-                      className="object-cover"
-                    />
+                    <Image src={category.icon} alt={category.name} width={40} height={40} className="object-cover rounded-lg" />
                   ) : (
-                    <FolderTree className="w-6 h-6 text-gray-400" />
+                    getCategoryEmoji(category.slug)
                   )}
                 </div>
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900">{category.name}</h3>
-                    <span className="text-sm text-gray-500">/{category.slug}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
+                    <span className="text-xs text-gray-400 font-mono">/{category.slug}</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Дараалал: {category.order}
-                  </p>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                      <Tag className="w-3 h-3" />
+                      {subCount} ??? ???????
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                      <Filter className="w-3 h-3" />
+                      {filterCount > 0 ? `${filterCount} ????????` : `${defaultFilters.length} ???????? (default)`}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <button
-                    onClick={() => handleEdit(category)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    onClick={() => setFilterModal({ category })}
+                    className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="???????? ????????"
                   >
-                    <Edit className="w-4 h-4 text-gray-500" />
+                    <Settings className="w-4 h-4 text-blue-500" />
                   </button>
                   <button
-                    onClick={() => setDeleteModal({ id: category._id, name: category.name })}
-                    className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                    onClick={() => handleAddSubcategory(category._id, category.slug)}
+                    className="p-2 hover:bg-green-50 rounded-lg transition-colors"
+                    title="??? ??????? ?????"
                   >
-                    <Trash2 className="w-4 h-4 text-red-500" />
+                    <Plus className="w-4 h-4 text-green-500" />
                   </button>
-                  {category.subcategories && category.subcategories.length > 0 && (
-                    <button
-                      onClick={() => toggleExpand(category._id)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ChevronRight className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedCategories.includes(category._id) ? 'rotate-90' : ''
-                      }`} />
-                    </button>
+                </div>
+
+                <div className="p-1">
+                  {isExpanded ? (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
                 </div>
               </div>
 
-              {/* Subcategories */}
-              {expandedCategories.includes(category._id) && category.subcategories && category.subcategories.length > 0 && (
-                <div className="bg-gray-50 pl-20">
-                  {category.subcategories.map((sub) => (
-                    <div
-                      key={sub._id}
-                      className="flex items-center gap-4 p-3 border-t border-gray-100 hover:bg-gray-100"
-                    >
-                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                        {sub.icon ? (
-                          <Image
-                            src={sub.icon}
-                            alt={sub.name}
-                            width={40}
-                            height={40}
-                            className="object-cover"
-                          />
-                        ) : (
-                          <FolderTree className="w-4 h-4 text-gray-400" />
+              {isExpanded && (
+                <div className="border-t bg-gray-50">
+                  {subCount > 0 ? (
+                    <div className="divide-y divide-gray-100">
+                      {category.subcategories!.map((sub, idx) => (
+                        <div
+                          key={sub._id}
+                          className="flex items-center gap-4 px-6 py-3 hover:bg-gray-100 transition-colors"
+                        >
+                          <span className="w-6 text-center text-xs text-gray-400 font-mono">{idx + 1}</span>
+                          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                            {sub.icon ? (
+                              <Image src={sub.icon} alt={sub.name} width={24} height={24} className="object-cover rounded" />
+                            ) : (
+                              <FolderTree className="w-4 h-4 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-medium text-gray-800">{sub.name}</span>
+                            <span className="text-xs text-gray-400 ml-2 font-mono">/{sub.slug}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleEditSubcategory(category._id, category.slug, sub)}
+                              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5 text-gray-500" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteModal({ id: sub._id, name: sub.name, isParent: false })}
+                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-6 py-8 text-center">
+                      <FolderTree className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                      <p className="text-sm text-gray-500 mb-4">??? ??????? ???????? ???????</p>
+                      <div className="flex items-center justify-center gap-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAddSubcategory(category._id, category.slug)}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          ??? ?????? ?????
+                        </Button>
+                        {DEFAULT_SUBCATEGORIES[category.slug] && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleInitializeSubcategories(category._id, category.slug)}
+                            disabled={initializingSubcats === category._id}
+                          >
+                            {initializingSubcats === category._id ? (
+                              <>
+                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                                ????? ?????...
+                              </>
+                            ) : (
+                              <>
+                                <Layers className="w-3 h-3 mr-1" />
+                                ????? ???????? ????? ({DEFAULT_SUBCATEGORIES[category.slug].length})
+                              </>
+                            )}
+                          </Button>
                         )}
                       </div>
-                      <div className="flex-1">
-                        <span className="font-medium text-gray-700">{sub.name}</span>
-                        <span className="text-sm text-gray-400 ml-2">/{sub.slug}</span>
+                    </div>
+                  )}
+
+                  {subCount > 0 && (
+                    <div className="px-6 py-3 border-t border-gray-200">
+                      <button
+                        onClick={() => handleAddSubcategory(category._id, category.slug)}
+                        className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                      >
+                        <Plus className="w-4 h-4" />
+                        ??? ??????? ?????
+                      </button>
+                    </div>
+                  )}
+
+                  {(category.filters?.length || 0) > 0 && (
+                    <div className="px-6 py-3 border-t border-gray-200 bg-blue-50/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Filter className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="text-xs font-medium text-blue-700">???????? ???????????:</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleEdit(sub)}
-                          className="p-1.5 hover:bg-gray-200 rounded transition-colors"
-                        >
-                          <Edit className="w-4 h-4 text-gray-500" />
-                        </button>
-                        <button
-                          onClick={() => setDeleteModal({ id: sub._id, name: sub.name })}
-                          className="p-1.5 hover:bg-red-100 rounded transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
+                      <div className="flex flex-wrap gap-2">
+                        {category.filters!.map((f) => (
+                          <span
+                            key={f.key}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-md border border-blue-200 text-xs text-blue-700"
+                          >
+                            {f.label}
+                            <span className="text-blue-400">({f.options.length})</span>
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
-          ))}
-        </div>
-
-        {categories.length === 0 && (
-          <div className="text-center py-12">
-            <FolderTree className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900">Категори байхгүй</h3>
-            <p className="text-gray-500 mt-1">Эхний категорио нэмээрэй</p>
-          </div>
-        )}
+          );
+        })}
       </div>
 
-      {/* Edit/Add Modal */}
+      {categories.length === 0 && (
+        <div className="text-center py-16 bg-white rounded-xl card-shadow">
+          <FolderTree className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">??????? ???????</h3>
+          <p className="text-gray-500 mb-6">?????? 6 ?????? ????????? ????? ??</p>
+          <p className="text-sm text-gray-400">Beauty, Fashion, Shoes, Dyson, Trendy, Best Sellers</p>
+        </div>
+      )}
+
       <Modal
-        isOpen={!!editModal}
-        onClose={() => setEditModal(null)}
-        title={editModal?.data ? 'Категори засах' : 'Шинэ категори'}
+        isOpen={!!subModal}
+        onClose={() => setSubModal(null)}
+        title={subModal?.data ? '??? ??????? ?????' : '???? ??? ???????'}
       >
-        {editModal && (
-          <form onSubmit={handleSave} className="space-y-4">
-            {/* Icon Upload */}
+        {subModal && (
+          <form onSubmit={handleSaveSubcategory} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Icon зураг (Утсанд харагдана)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Icon ?????</label>
               <div className="flex items-center gap-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
-                  {formData.icon ? (
+                <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
+                  {subFormData.icon ? (
                     <div className="relative w-full h-full">
-                      <Image
-                        src={formData.icon}
-                        alt="Icon"
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={subFormData.icon} alt="Icon" fill className="object-cover" />
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, icon: '' }))}
+                        onClick={() => setSubFormData(prev => ({ ...prev, icon: '' }))}
                         className="absolute -top-1 -right-1 p-0.5 bg-red-500 text-white rounded-full"
                       >
                         <X className="w-3 h-3" />
@@ -328,103 +465,280 @@ export default function CategoriesPage() {
                   ) : (
                     <label className="cursor-pointer flex flex-col items-center">
                       {uploading ? (
-                        <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>
-                          <Upload className="w-6 h-6 text-gray-400" />
-                          <span className="text-xs text-gray-500 mt-1">Icon</span>
-                        </>
+                        <Upload className="w-5 h-5 text-gray-400" />
                       )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, 'icon')}
-                        className="hidden"
-                      />
+                      <input type="file" accept="image/*" onChange={handleIconUpload} className="hidden" />
                     </label>
                   )}
-                </div>
-                <div className="text-sm text-gray-500">
-                  <p>• Дөрвөлжин зураг (1:1)</p>
-                  <p>• PNG эсвэл SVG</p>
-                  <p>• Утсанд харагдана</p>
                 </div>
               </div>
             </div>
 
-            {/* Name */}
             <Input
-              label="Нэр"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ 
-                ...prev, 
+              label="???"
+              value={subFormData.name}
+              onChange={(e) => setSubFormData(prev => ({
+                ...prev,
                 name: e.target.value,
-                slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+                slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
               }))}
-              placeholder="Гоо сайхан"
+              placeholder="???: ??????? ?????"
               required
             />
 
-            {/* Slug */}
             <Input
               label="Slug"
-              value={formData.slug}
-              onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-              placeholder="goo-saikhan"
+              value={subFormData.slug}
+              onChange={(e) => setSubFormData(prev => ({ ...prev, slug: e.target.value }))}
+              placeholder="lipstick"
               required
             />
 
-            {/* Order */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Дараалал
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">????????</label>
               <input
                 type="number"
-                value={formData.order}
-                onChange={(e) => setFormData(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
+                value={subFormData.order}
+                onChange={(e) => setSubFormData(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-orange-500 outline-none"
               />
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setEditModal(null)}>
-                Болих
-              </Button>
+              <Button type="button" variant="outline" onClick={() => setSubModal(null)}>?????</Button>
               <Button type="submit">
                 <Save className="w-4 h-4 mr-2" />
-                Хадгалах
+                ????????
               </Button>
             </div>
           </form>
         )}
       </Modal>
 
-      {/* Delete Modal */}
+      <Modal
+        isOpen={!!filterModal}
+        onClose={() => setFilterModal(null)}
+        title={`${filterModal?.category?.name || ''} - ???????? ????????`}
+      >
+        {filterModal && (
+          <FilterConfigForm
+            category={filterModal.category}
+            onSave={(filters) => handleSaveFilters(filterModal.category._id, filters)}
+            onClose={() => setFilterModal(null)}
+          />
+        )}
+      </Modal>
+
       <Modal
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
-        title="Устгах"
+        title="??????"
       >
         {deleteModal && (
           <div className="space-y-4">
             <p className="text-gray-600">
-              <strong>{deleteModal.name}</strong> категорийг устгахдаа итгэлтэй байна у|?
+              <strong>{deleteModal.name}</strong>-? ????????? ???????? ????? ???
+              {deleteModal.isParent && ' ??? ??? ??????? ??? ??????????.'}
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setDeleteModal(null)}>
-                Болих
-              </Button>
-              <Button 
-                onClick={() => handleDelete(deleteModal.id)}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                Устгах
+              <Button variant="outline" onClick={() => setDeleteModal(null)}>?????</Button>
+              <Button onClick={() => handleDelete(deleteModal.id)} className="bg-red-500 hover:bg-red-600">
+                ??????
               </Button>
             </div>
           </div>
         )}
       </Modal>
+    </div>
+  );
+}
+
+function FilterConfigForm({
+  category,
+  onSave,
+  onClose,
+}: {
+  category: Category;
+  onSave: (filters: CategoryFilter[]) => void;
+  onClose: () => void;
+}) {
+  const defaultFilters = CATEGORY_FILTERS[category.slug] || [];
+  const [filters, setFilters] = useState<CategoryFilter[]>(
+    category.filters && category.filters.length > 0 ? category.filters : defaultFilters
+  );
+  const [newOption, setNewOption] = useState('');
+  const [editingFilterIdx, setEditingFilterIdx] = useState<number | null>(null);
+
+  const addFilter = () => {
+    setFilters(prev => [
+      ...prev,
+      { key: `custom_${Date.now()}`, label: '', type: 'select' as const, options: [] },
+    ]);
+    setEditingFilterIdx(filters.length);
+  };
+
+  const removeFilter = (idx: number) => {
+    setFilters(prev => prev.filter((_, i) => i !== idx));
+    if (editingFilterIdx === idx) setEditingFilterIdx(null);
+  };
+
+  const updateFilter = (idx: number, updates: Partial<CategoryFilter>) => {
+    setFilters(prev => prev.map((f, i) => i === idx ? { ...f, ...updates } : f));
+  };
+
+  const addOption = (idx: number) => {
+    if (!newOption.trim()) return;
+    setFilters(prev => prev.map((f, i) =>
+      i === idx ? { ...f, options: [...f.options, newOption.trim()] } : f
+    ));
+    setNewOption('');
+  };
+
+  const removeOption = (filterIdx: number, optIdx: number) => {
+    setFilters(prev => prev.map((f, i) =>
+      i === filterIdx ? { ...f, options: f.options.filter((_, oi) => oi !== optIdx) } : f
+    ));
+  };
+
+  const resetToDefaults = () => {
+    setFilters(defaultFilters);
+    toast.success('??????? ?????? ???????????');
+  };
+
+  return (
+    <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+      <div className="bg-blue-50 rounded-lg p-3">
+        <p className="text-sm text-blue-700">
+          ??? ???????? ???????? ?????????????? ??????????. ????? ???????? ?????? ???????? ???????.
+          ????????? ??????? ?????????? ??????????? ???? ?????.
+        </p>
+      </div>
+
+      {filters.map((filter, idx) => (
+        <div
+          key={filter.key + idx}
+          className={`border rounded-lg p-4 transition-colors ${
+            editingFilterIdx === idx ? 'border-orange-300 bg-orange-50/30' : 'border-gray-200'
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-400" />
+              {editingFilterIdx === idx ? (
+                <input
+                  type="text"
+                  value={filter.label}
+                  onChange={(e) => updateFilter(idx, { label: e.target.value })}
+                  placeholder="??????????? ???"
+                  className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
+                />
+              ) : (
+                <span className="font-medium text-gray-800">{filter.label || '??????'}</span>
+              )}
+              <span className="text-xs text-gray-400 font-mono">{filter.key}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setEditingFilterIdx(editingFilterIdx === idx ? null : idx)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <Edit className="w-3.5 h-3.5 text-gray-500" />
+              </button>
+              <button
+                type="button"
+                onClick={() => removeFilter(idx)}
+                className="p-1 hover:bg-red-50 rounded"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-red-500" />
+              </button>
+            </div>
+          </div>
+
+          {editingFilterIdx === idx && (
+            <div className="mb-3">
+              <label className="text-xs text-gray-500 mb-1 block">?????:</label>
+              <select
+                value={filter.type}
+                onChange={(e) => updateFilter(idx, { type: e.target.value as CategoryFilter['type'] })}
+                className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
+              >
+                <option value="select">??? ???????</option>
+                <option value="multi-select">???? ???????</option>
+                <option value="range">?????</option>
+              </select>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-1.5">
+            {filter.options.map((opt, optIdx) => (
+              <span
+                key={optIdx}
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-700"
+              >
+                {opt}
+                {editingFilterIdx === idx && (
+                  <button type="button" onClick={() => removeOption(idx, optIdx)} className="text-red-400 hover:text-red-600">
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </span>
+            ))}
+          </div>
+
+          {editingFilterIdx === idx && (
+            <div className="flex gap-2 mt-2">
+              <input
+                type="text"
+                value={newOption}
+                onChange={(e) => setNewOption(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(idx); } }}
+                placeholder="???? ????..."
+                className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => addOption(idx)}
+                className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
+              >
+                ?????
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={addFilter}
+            className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700 font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            ???????? ?????
+          </button>
+          {defaultFilters.length > 0 && (
+            <button
+              type="button"
+              onClick={resetToDefaults}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              ??????? ??????
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <Button variant="outline" onClick={onClose}>?????</Button>
+        <Button onClick={() => onSave(filters)}>
+          <Save className="w-4 h-4 mr-2" />
+          ???????? ????????
+        </Button>
+      </div>
     </div>
   );
 }

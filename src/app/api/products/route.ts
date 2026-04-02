@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const subcategory = searchParams.get('subcategory');
     const search = searchParams.get('search');
     const featured = searchParams.get('featured');
     const isNew = searchParams.get('new');
@@ -20,10 +21,22 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || 'desc';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
+    
+    // Attribute-based filters (passed as attr_KEY=VALUE)
+    const attrFilters: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      if (key.startsWith('attr_')) {
+        attrFilters[key.replace('attr_', '')] = value;
+      }
+    });
+
+    // Size filter
+    const sizeFilter = searchParams.get('size');
 
     const query: any = { is_active: true };
 
     if (category) query.category_id = category;
+    if (subcategory) query.subcategory_id = subcategory;
     if (brand) query.brand = brand;
     if (featured === 'true') query.is_featured = true;
     if (isNew === 'true') query.is_new = true;
@@ -43,13 +56,24 @@ export async function GET(request: NextRequest) {
       if (maxPrice) query.price.$lte = parseInt(maxPrice);
     }
 
+    // Size filter
+    if (sizeFilter) {
+      query.sizes = sizeFilter;
+    }
+
+    // Attribute filters
+    for (const [key, value] of Object.entries(attrFilters)) {
+      query[`attributes.${key}`] = value;
+    }
+
     const sortOptions: any = {};
     sortOptions[sort] = order === 'asc' ? 1 : -1;
 
     const skip = (page - 1) * limit;
     const [products, total] = await Promise.all([
       Product.find(query)
-        .populate('category_id', 'name slug')
+        .populate('category_id', 'name slug filters')
+        .populate('subcategory_id', 'name slug')
         .sort(sortOptions)
         .skip(skip)
         .limit(limit)
@@ -73,10 +97,10 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const body = await request.json();
     
-    const slug = body.name
+    const slug = body.slug || (body.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') + '-' + Date.now();
+      .replace(/(^-|-$)/g, '') + '-' + Date.now());
 
     const product = await Product.create({ ...body, slug });
     return NextResponse.json(product, { status: 201 });

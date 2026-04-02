@@ -15,9 +15,10 @@ import {
   Palette,
   Pipette,
   Ruler,
+  Filter,
 } from 'lucide-react';
 import { Button, Input, Textarea } from '@/components/ui';
-import { SIZE_PRESETS, SIZE_TYPE_LABELS, COMMON_COLORS } from '@/lib/constants';
+import { SIZE_PRESETS, SIZE_TYPE_LABELS, COMMON_COLORS, CATEGORY_FILTERS } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
 interface MediaItem {
@@ -38,6 +39,8 @@ interface CategoryOption {
   _id: string;
   name: string;
   slug: string;
+  filters?: { key: string; label: string; type: string; options: string[] }[];
+  subcategories?: CategoryOption[];
 }
 
 type SizeType = 'none' | 'clothing' | 'shoes' | 'bags' | 'ring' | 'custom';
@@ -54,6 +57,9 @@ export default function NewProductPage() {
   const [customColorHex, setCustomColorHex] = useState('#FF0000');
   const [customColorName, setCustomColorName] = useState('');
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [subcategories, setSubcategories] = useState<CategoryOption[]>([]);
+  const [selectedMainCat, setSelectedMainCat] = useState<CategoryOption | null>(null);
+  const [attributes, setAttributes] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -62,6 +68,7 @@ export default function NewProductPage() {
     price: '',
     originalPrice: '',
     category: '',
+    subcategory: '',
     brand: '',
     weight: '',
     stock: '',
@@ -72,24 +79,14 @@ export default function NewProductPage() {
     isOnSale: false
   });
 
-  // Fetch categories from API
+  // Fetch main categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await fetch('/api/categories');
         if (res.ok) {
           const data = await res.json();
-          // Flatten parent + subcategories
-          const flat: CategoryOption[] = [];
-          data.forEach((cat: any) => {
-            flat.push({ _id: cat._id, name: cat.name, slug: cat.slug });
-            if (cat.subcategories) {
-              cat.subcategories.forEach((sub: any) => {
-                flat.push({ _id: sub._id, name: `  └ ${sub.name}`, slug: sub.slug });
-              });
-            }
-          });
-          setCategories(flat);
+          setCategories(data);
         }
       } catch (error) {
         console.error('Failed to fetch categories:', error);
@@ -97,6 +94,18 @@ export default function NewProductPage() {
     };
     fetchCategories();
   }, []);
+
+  const handleMainCategoryChange = (catId: string) => {
+    const cat = categories.find(c => c._id === catId) || null;
+    setSelectedMainCat(cat);
+    setSubcategories(cat?.subcategories || []);
+    setFormData(prev => ({ ...prev, category: '', subcategory: '' }));
+    setAttributes({});
+  };
+
+  const handleAttributeChange = (key: string, value: string) => {
+    setAttributes(prev => ({ ...prev, [key]: value }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -301,7 +310,9 @@ export default function NewProductPage() {
         colors: selectedColors.length > 0 ? selectedColors : undefined,
         size_type: sizeType,
         sizes: selectedSizes,
-        category_id: formData.category,
+        category_id: formData.category || (selectedMainCat?._id),
+        subcategory_id: formData.subcategory || undefined,
+        attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
         brand: formData.brand,
         weight: formData.weight ? Number(formData.weight) : undefined,
         stock: Number(formData.stock) || 0,
@@ -794,23 +805,103 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* Category */}
+          {/* Category - Two Step */}
           <div className="bg-white rounded-xl card-shadow p-6 space-y-4">
             <h2 className="text-lg font-semibold">Категори</h2>
 
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
-              required
-            >
-              <option value="">Сонгоно уу</option>
-              {categories.map(cat => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Үндсэн ангилал</label>
+              <select
+                value={selectedMainCat?._id || ''}
+                onChange={(e) => handleMainCategoryChange(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                required
+              >
+                <option value="">Сонгоно уу</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {subcategories.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Дэд ангилал</label>
+                <select
+                  name="subcategory"
+                  value={formData.subcategory}
+                  onChange={(e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      subcategory: e.target.value,
+                      category: e.target.value || selectedMainCat?._id || '',
+                    }));
+                  }}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                >
+                  <option value="">Бүгд (үндсэн)</option>
+                  {subcategories.map(sub => (
+                    <option key={sub._id} value={sub._id}>{sub.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {selectedMainCat && (
+              <p className="text-xs text-gray-400">
+                Сонгосон: {selectedMainCat.name}
+                {formData.subcategory && subcategories.find(s => s._id === formData.subcategory) &&
+                  ` → ${subcategories.find(s => s._id === formData.subcategory)?.name}`
+                }
+              </p>
+            )}
           </div>
+
+          {/* Dynamic Attributes based on category filters */}
+          {selectedMainCat && (() => {
+            const catFilters = selectedMainCat.filters && selectedMainCat.filters.length > 0
+              ? selectedMainCat.filters
+              : CATEGORY_FILTERS[selectedMainCat.slug] || [];
+            if (catFilters.length === 0) return null;
+            return (
+              <div className="bg-white rounded-xl card-shadow p-6 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-blue-500" />
+                  <h2 className="text-lg font-semibold">Шинж чанар</h2>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {selectedMainCat.name} ангилалд хамаарах шүүлтүүрүүд
+                </p>
+                {catFilters.map((filter: { key: string; label: string; type: string; options: string[] }) => (
+                  <div key={filter.key}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      {filter.label}
+                    </label>
+                    {filter.type === 'select' || filter.type === 'multi-select' ? (
+                      <select
+                        value={attributes[filter.key] || ''}
+                        onChange={(e) => handleAttributeChange(filter.key, e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                      >
+                        <option value="">Сонгоно уу</option>
+                        {filter.options.map((opt: string) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={attributes[filter.key] || ''}
+                        onChange={(e) => handleAttributeChange(filter.key, e.target.value)}
+                        placeholder={`${filter.label} оруулах`}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Brand & SKU */}
           <div className="bg-white rounded-xl card-shadow p-6 space-y-4">

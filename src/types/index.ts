@@ -12,14 +12,24 @@ export interface User {
   updated_at: string;
 }
 
+// Category Filter Definition
+export interface CategoryFilter {
+  key: string;
+  label: string;
+  type: 'select' | 'multi-select' | 'range';
+  options: string[];
+}
+
 // Category Types
 export interface Category {
   id: string;
   name: string;
   slug: string;
   description?: string;
+  icon?: string;
   image_url?: string;
   parent_id?: string;
+  filters?: CategoryFilter[];
   is_active: boolean;
   created_at: string;
   subcategories?: Category[];
@@ -45,11 +55,14 @@ export interface Product {
   brand?: string;
   weight?: number;
   category_id: string;
+  subcategory_id?: string;
   category?: Category;
+  subcategory?: Category;
   images: string[];
   colors?: ProductColor[];
   size_type?: SizeType;
   sizes: string[];
+  attributes?: Record<string, any>;
   stock: number;
   is_active: boolean;
   is_featured: boolean;
