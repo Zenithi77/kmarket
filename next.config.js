@@ -1,11 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Allow larger request bodies for video uploads
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '100mb',
-    },
-  },
   images: {
     remotePatterns: [
       {
@@ -35,8 +29,6 @@ const nextConfig = {
       },
     ],
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 }
 

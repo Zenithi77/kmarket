@@ -5,14 +5,15 @@ import { Product } from '@/lib/models';
 // GET /api/products/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
 
     // Check if id is slug or ObjectId
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
-    const query = isObjectId ? { _id: params.id } : { slug: params.id };
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    const query = isObjectId ? { _id: id } : { slug: id };
 
     const product = await Product.findOne(query)
       .populate('category_id', 'name slug')
@@ -32,14 +33,15 @@ export async function GET(
 // PUT /api/products/[id] (Admin)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
     const body = await request.json();
 
     const product = await Product.findByIdAndUpdate(
-      params.id,
+      id,
       { ...body, updated_at: new Date() },
       { new: true }
     );
@@ -58,12 +60,13 @@ export async function PUT(
 // DELETE /api/products/[id] (Admin)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
 
-    const product = await Product.findByIdAndDelete(params.id);
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
       return NextResponse.json({ error: 'Бараа олдсонгүй' }, { status: 404 });

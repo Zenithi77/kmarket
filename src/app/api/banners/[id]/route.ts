@@ -7,12 +7,13 @@ import { Banner, User } from '@/lib/models';
 // GET - Нэг banner авах
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    
-    const banner = await Banner.findById(params.id);
+    const { id } = await params;
+
+    const banner = await Banner.findById(id);
     
     if (!banner) {
       return NextResponse.json({ error: 'Banner олдсонгүй' }, { status: 404 });
@@ -31,9 +32,10 @@ export async function GET(
 // PUT - Banner засах (admin only)
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
@@ -51,7 +53,7 @@ export async function PUT(
     const { title, subtitle, description, image, link, bg_color, text_color, order, is_active } = body;
 
     const banner = await Banner.findByIdAndUpdate(
-      params.id,
+      id,
       {
         title,
         subtitle,
@@ -83,9 +85,10 @@ export async function PUT(
 // DELETE - Banner устгах (admin only)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
@@ -99,7 +102,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
 
-    const banner = await Banner.findByIdAndDelete(params.id);
+    const banner = await Banner.findByIdAndDelete(id);
 
     if (!banner) {
       return NextResponse.json({ error: 'Banner олдсонгүй' }, { status: 404 });

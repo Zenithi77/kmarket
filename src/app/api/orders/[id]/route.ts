@@ -5,14 +5,15 @@ import { Order } from '@/lib/models';
 // GET /api/orders/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
 
     // Find by id or order_number
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
-    const query = isObjectId ? { _id: params.id } : { order_number: params.id };
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    const query = isObjectId ? { _id: id } : { order_number: id };
 
     const order = await Order.findOne(query)
       .populate('user_id', 'email full_name phone')
@@ -32,14 +33,15 @@ export async function GET(
 // PUT /api/orders/[id] - Update order status
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    const { id } = await params;
     const body = await request.json();
 
     const order = await Order.findByIdAndUpdate(
-      params.id,
+      id,
       { 
         status: body.status,
         payment_status: body.payment_status,

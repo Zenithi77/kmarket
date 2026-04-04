@@ -43,11 +43,11 @@ interface ApiCategory {
 }
 
 const sortOptions = [
-  { value: 'newest', label: '???? ?? ?????' },
-  { value: 'price_asc', label: '???: ?????? ??' },
-  { value: 'price_desc', label: '???: ????? ????' },
-  { value: 'popular', label: '????????' },
-  { value: 'rating', label: '???????' },
+  { value: 'newest', label: 'Шинэ нь эхэнд' },
+  { value: 'price_asc', label: 'Үнэ: Багаас их' },
+  { value: 'price_desc', label: 'Үнэ: Ихээс бага' },
+  { value: 'popular', label: 'Эрэлттэй' },
+  { value: 'rating', label: 'Үнэлгээ' },
 ];
 
 function ProductsContent() {
@@ -167,17 +167,17 @@ function ProductsContent() {
   const FilterSidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <div className={`space-y-6 ${mobile ? '' : 'sticky top-24'}`}>
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-gray-900">????????</h2>
+        <h2 className="font-semibold text-gray-900">Шүүлтүүр</h2>
         {activeFilterCount > 0 && (
           <button onClick={clearFilters} className="text-sm text-orange-500 hover:text-orange-600">
-            ????????
+            Цэвэрлэх
           </button>
         )}
       </div>
 
       {/* Categories */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-3">????????</h3>
+        <h3 className="font-medium text-gray-900 mb-3">Ангилал</h3>
         <div className="space-y-1">
           {categories.map((cat) => (
             <div key={cat._id}>
@@ -206,7 +206,7 @@ function ProductsContent() {
                       !selectedSubcategory ? 'text-orange-600 font-medium bg-orange-50' : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    ????
+                    Бүгд
                   </button>
                   {cat.subcategories.map((sub) => (
                     <button
@@ -233,7 +233,7 @@ function ProductsContent() {
         <div className="border-t pt-4">
           <div className="flex items-center gap-1.5 mb-3">
             <Filter className="w-4 h-4 text-orange-500" />
-            <h3 className="font-medium text-gray-900 text-sm">{selectedCategoryObj?.name} ????????</h3>
+            <h3 className="font-medium text-gray-900 text-sm">{selectedCategoryObj?.name} шүүлтүүр</h3>
           </div>
           {activeCategoryFilters.map((filter: { key: string; label: string; type: string; options: string[] }) => (
             <div key={filter.key} className="mb-4">
@@ -260,7 +260,7 @@ function ProductsContent() {
 
       {/* Brands */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-3">?????</h3>
+        <h3 className="font-medium text-gray-900 mb-3">Бренд</h3>
         <div className="space-y-2 max-h-40 overflow-y-auto">
           {BRANDS.map((brand) => (
             <label key={brand} className="flex items-center cursor-pointer">
@@ -279,7 +279,7 @@ function ProductsContent() {
 
       {/* Price Range */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-3">????? ???????</h3>
+        <h3 className="font-medium text-gray-900 mb-3">Үнийн хязгаар</h3>
         <div className="space-y-3">
           <input
             type="range"
@@ -291,8 +291,8 @@ function ProductsContent() {
             className="w-full accent-orange-500"
           />
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>?0</span>
-            <span>?{priceRange[1].toLocaleString()}</span>
+            <span>₮0</span>
+            <span>₮{priceRange[1].toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -303,9 +303,9 @@ function ProductsContent() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">????????????</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Бүх бараанууд</h1>
           <p className="text-gray-500 mt-2">
-            {products.length} ???????????? ??????
+            {products.length} бүтээгдэхүүн олдлоо
             {selectedCategory && selectedCategoryObj && (
               <span className="ml-2 px-2 py-0.5 bg-orange-100 text-orange-700 text-sm rounded-full">
                 {selectedCategoryObj.name}
@@ -334,7 +334,7 @@ function ProductsContent() {
                 className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white rounded-lg border card-shadow"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                ????????
+                Шүүлтүүр
                 {activeFilterCount > 0 && (
                   <span className="w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center">
                     {activeFilterCount}
@@ -401,7 +401,7 @@ function ProductsContent() {
         <div className="fixed inset-0 bg-black/50 z-50 lg:hidden">
           <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white overflow-y-auto animate-slide-left">
             <div className="sticky top-0 bg-white border-b px-4 py-4 flex items-center justify-between z-10">
-              <h2 className="font-semibold">????????</h2>
+              <h2 className="font-semibold">Шүүлтүүр</h2>
               <button onClick={() => setShowFilters(false)}>
                 <X className="w-6 h-6" />
               </button>
@@ -413,7 +413,7 @@ function ProductsContent() {
                   onClick={() => setShowFilters(false)}
                   className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
                 >
-                  ???????? ({products.length} ?????)
+                  Харуулах ({products.length} бараа)
                 </button>
               </div>
             </div>
