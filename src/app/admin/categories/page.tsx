@@ -69,7 +69,7 @@ export default function CategoriesPage() {
       const data = await res.json();
       setCategories(data);
     } catch {
-      toast.error('???????? ????????? ????? ??????');
+      toast.error('Категори ачаалахад алдаа гарлаа');
     } finally {
       setLoading(false);
     }
@@ -90,10 +90,10 @@ export default function CategoriesPage() {
       const data = await res.json();
       if (data.url) {
         setSubFormData(prev => ({ ...prev, icon: data.url }));
-        toast.success('????? ???????????');
+        toast.success('Зураг оруулагдлаа');
       }
     } catch {
-      toast.error('????? ????????? ????? ??????');
+      toast.error('Зураг оруулахад алдаа гарлаа');
     } finally {
       setUploading(false);
     }
@@ -118,7 +118,7 @@ export default function CategoriesPage() {
   const handleSaveSubcategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subFormData.name) {
-      toast.error('??? ??????? ??');
+      toast.error('Нэр оруулна уу');
       return;
     }
     try {
@@ -133,16 +133,16 @@ export default function CategoriesPage() {
         ),
       });
       if (res.ok) {
-        toast.success(isEdit ? '??? ??????? ????????????' : '??? ??????? ?????????');
+        toast.success(isEdit ? 'Дэд ангилал шинэчлэгдлээ' : 'Дэд ангилал нэмэгдлээ');
         setSubModal(null);
         setSubFormData(defaultSubCategory);
         fetchCategories();
       } else {
         const data = await res.json();
-        toast.error(data.error || '????? ??????');
+        toast.error(data.error || 'Алдаа гарлаа');
       }
     } catch {
-      toast.error('????? ??????');
+      toast.error('Алдаа гарлаа');
     }
   };
 
@@ -150,11 +150,11 @@ export default function CategoriesPage() {
     try {
       const res = await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        toast.success('??????????');
+        toast.success('Устгагдлаа');
         fetchCategories();
       }
     } catch {
-      toast.error('????? ??????');
+      toast.error('Алдаа гарлаа');
     }
     setDeleteModal(null);
   };
@@ -162,7 +162,7 @@ export default function CategoriesPage() {
   const handleInitializeSubcategories = async (parentId: string, parentSlug: string) => {
     const defaults = DEFAULT_SUBCATEGORIES[parentSlug];
     if (!defaults || defaults.length === 0) {
-      toast.error('??? ????????? ??? ??????? ?????????????????');
+      toast.error('Энэ категорид дэд ангилал тодорхойлогдоогүй');
       return;
     }
     setInitializingSubcats(parentId);
@@ -182,7 +182,7 @@ export default function CategoriesPage() {
         if (res.ok) successCount++;
       } catch { /* skip duplicates */ }
     }
-    toast.success(`${successCount} ??? ??????? ?????????`);
+    toast.success(`${successCount} дэд ангилал нэмэгдлээ`);
     setInitializingSubcats(null);
     fetchCategories();
   };
@@ -195,21 +195,21 @@ export default function CategoriesPage() {
         body: JSON.stringify({ _id: categoryId, filters }),
       });
       if (res.ok) {
-        toast.success('???????? ????????????');
+        toast.success('Тохиргоо хадгалагдлаа');
         fetchCategories();
       }
     } catch {
-      toast.error('????? ??????');
+      toast.error('Алдаа гарлаа');
     }
     setFilterModal(null);
   };
 
   const getCategoryEmoji = (slug: string) => {
     const icons: Record<string, string> = {
-      beauty: '??', fashion: '??', shoes: '??',
-      dyson: '??', trendy: '?', best: '??',
+      beauty: '💄', fashion: '👗', shoes: '👟',
+      dyson: '🔧', trendy: '🔥', best: '⭐',
     };
-    return icons[slug] || '??';
+    return icons[slug] || '📦';
   };
 
   const getCategoryColor = (slug: string) => {
@@ -236,9 +236,9 @@ export default function CategoriesPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">??????? ?????????</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Ангилал удирдлага</h1>
           <p className="text-gray-500 mt-1">
-            {categories.length} ?????? ??????? | ??? ???????, ???????? ??????????
+            {categories.length} үндсэн ангилал | Дэд ангилал, тохиргоо засварлана
           </p>
         </div>
       </div>
@@ -247,9 +247,9 @@ export default function CategoriesPage() {
         <div className="flex items-start gap-3">
           <Layers className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm text-orange-800 font-medium">??????? ?????</p>
+            <p className="text-sm text-orange-800 font-medium">Ангилал бүтэц</p>
             <p className="text-sm text-orange-600 mt-1">
-              6 ?????? ??????? ? ??? ??????? ? ?????. ??????? ???? ??????? ???????? (??????, ????????, ???????? ?.?) ??????????.
+              6 үндсэн ангилал + дэд ангилал + шүүлт. Ангилал тусбүрд фильтерүүд (брэнд, материал, хэмжээс г.м) тохируулна.
             </p>
           </div>
         </div>
@@ -284,11 +284,11 @@ export default function CategoriesPage() {
                   <div className="flex items-center gap-4 mt-1">
                     <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                       <Tag className="w-3 h-3" />
-                      {subCount} ??? ???????
+                      {subCount} дэд ангилал
                     </span>
                     <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                       <Filter className="w-3 h-3" />
-                      {filterCount > 0 ? `${filterCount} ????????` : `${defaultFilters.length} ???????? (default)`}
+                      {filterCount > 0 ? `${filterCount} фильтер` : `${defaultFilters.length} фильтер (default)`}
                     </span>
                   </div>
                 </div>
@@ -297,14 +297,14 @@ export default function CategoriesPage() {
                   <button
                     onClick={() => setFilterModal({ category })}
                     className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="???????? ????????"
+                    title="Фильтер тохируулах"
                   >
                     <Settings className="w-4 h-4 text-blue-500" />
                   </button>
                   <button
                     onClick={() => handleAddSubcategory(category._id, category.slug)}
                     className="p-2 hover:bg-green-50 rounded-lg transition-colors"
-                    title="??? ??????? ?????"
+                    title="Дэд ангилал нэмэх"
                   >
                     <Plus className="w-4 h-4 text-green-500" />
                   </button>
@@ -360,7 +360,7 @@ export default function CategoriesPage() {
                   ) : (
                     <div className="px-6 py-8 text-center">
                       <FolderTree className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                      <p className="text-sm text-gray-500 mb-4">??? ??????? ???????? ???????</p>
+                      <p className="text-sm text-gray-500 mb-4">Дэд ангилал одоогоор байхгүй</p>
                       <div className="flex items-center justify-center gap-3">
                         <Button
                           size="sm"
@@ -368,7 +368,7 @@ export default function CategoriesPage() {
                           onClick={() => handleAddSubcategory(category._id, category.slug)}
                         >
                           <Plus className="w-3 h-3 mr-1" />
-                          ??? ?????? ?????
+                          Дэд ангилал нэмэх
                         </Button>
                         {DEFAULT_SUBCATEGORIES[category.slug] && (
                           <Button
@@ -379,12 +379,12 @@ export default function CategoriesPage() {
                             {initializingSubcats === category._id ? (
                               <>
                                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                                ????? ?????...
+                                Нэмэж байна...
                               </>
                             ) : (
                               <>
                                 <Layers className="w-3 h-3 mr-1" />
-                                ????? ???????? ????? ({DEFAULT_SUBCATEGORIES[category.slug].length})
+                                Бэлэн загвараас нэмэх ({DEFAULT_SUBCATEGORIES[category.slug].length})
                               </>
                             )}
                           </Button>
@@ -400,7 +400,7 @@ export default function CategoriesPage() {
                         className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium"
                       >
                         <Plus className="w-4 h-4" />
-                        ??? ??????? ?????
+                        Дэд ангилал нэмэх
                       </button>
                     </div>
                   )}
@@ -409,7 +409,7 @@ export default function CategoriesPage() {
                     <div className="px-6 py-3 border-t border-gray-200 bg-blue-50/50">
                       <div className="flex items-center gap-2 mb-2">
                         <Filter className="w-3.5 h-3.5 text-blue-500" />
-                        <span className="text-xs font-medium text-blue-700">???????? ???????????:</span>
+                        <span className="text-xs font-medium text-blue-700">Тохируулсан фильтерүүд:</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {category.filters!.map((f) => (
@@ -434,8 +434,8 @@ export default function CategoriesPage() {
       {categories.length === 0 && (
         <div className="text-center py-16 bg-white rounded-xl card-shadow">
           <FolderTree className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">??????? ???????</h3>
-          <p className="text-gray-500 mb-6">?????? 6 ?????? ????????? ????? ??</p>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Ангилал байхгүй</h3>
+          <p className="text-gray-500 mb-6">Үндсэн 6 ангилал үүсгэгдэнэ</p>
           <p className="text-sm text-gray-400">Beauty, Fashion, Shoes, Dyson, Trendy, Best Sellers</p>
         </div>
       )}
@@ -443,12 +443,12 @@ export default function CategoriesPage() {
       <Modal
         isOpen={!!subModal}
         onClose={() => setSubModal(null)}
-        title={subModal?.data ? '??? ??????? ?????' : '???? ??? ???????'}
+        title={subModal?.data ? 'Дэд ангилал засах' : 'Шинэ дэд ангилал'}
       >
         {subModal && (
           <form onSubmit={handleSaveSubcategory} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Icon ?????</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Icon зураг</label>
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300">
                   {subFormData.icon ? (
@@ -477,14 +477,14 @@ export default function CategoriesPage() {
             </div>
 
             <Input
-              label="???"
+              label="Нэр"
               value={subFormData.name}
               onChange={(e) => setSubFormData(prev => ({
                 ...prev,
                 name: e.target.value,
                 slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
               }))}
-              placeholder="???: ??????? ?????"
+              placeholder="Жнь: Уруулын будаг"
               required
             />
 
@@ -497,7 +497,7 @@ export default function CategoriesPage() {
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">????????</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Дараалал</label>
               <input
                 type="number"
                 value={subFormData.order}
@@ -507,10 +507,10 @@ export default function CategoriesPage() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={() => setSubModal(null)}>?????</Button>
+              <Button type="button" variant="outline" onClick={() => setSubModal(null)}>Болих</Button>
               <Button type="submit">
                 <Save className="w-4 h-4 mr-2" />
-                ????????
+                Хадгалах
               </Button>
             </div>
           </form>
@@ -520,7 +520,7 @@ export default function CategoriesPage() {
       <Modal
         isOpen={!!filterModal}
         onClose={() => setFilterModal(null)}
-        title={`${filterModal?.category?.name || ''} - ???????? ????????`}
+        title={`${filterModal?.category?.name || ''} - Фильтер тохиргоо`}
       >
         {filterModal && (
           <FilterConfigForm
@@ -534,18 +534,18 @@ export default function CategoriesPage() {
       <Modal
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
-        title="??????"
+        title="Устгах"
       >
         {deleteModal && (
           <div className="space-y-4">
             <p className="text-gray-600">
-              <strong>{deleteModal.name}</strong>-? ????????? ???????? ????? ???
-              {deleteModal.isParent && ' ??? ??? ??????? ??? ??????????.'}
+              <strong>{deleteModal.name}</strong>-г устгахдаа итгэлтэй байна уу?
+              {deleteModal.isParent && ' Бүх дэд ангилал мөн устгагдана.'}
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setDeleteModal(null)}>?????</Button>
+              <Button variant="outline" onClick={() => setDeleteModal(null)}>Болих</Button>
               <Button onClick={() => handleDelete(deleteModal.id)} className="bg-red-500 hover:bg-red-600">
-                ??????
+                Устгах
               </Button>
             </div>
           </div>
@@ -604,15 +604,15 @@ function FilterConfigForm({
 
   const resetToDefaults = () => {
     setFilters(defaultFilters);
-    toast.success('??????? ?????? ???????????');
+    toast.success('Анхдагч утгаар сэргээгдлээ');
   };
 
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto">
       <div className="bg-blue-50 rounded-lg p-3">
         <p className="text-sm text-blue-700">
-          ??? ???????? ???????? ?????????????? ??????????. ????? ???????? ?????? ???????? ???????.
-          ????????? ??????? ?????????? ??????????? ???? ?????.
+          Энэ хэсэгтээ фильтерүүдийг тохируулна. Шинэ фильтер нэмэх буюу одоо байгаа фильтер засварлах.
+          Хэрэглэгч бүтээгдэхүүн шүүхэд ашиглана.
         </p>
       </div>
 
@@ -631,11 +631,11 @@ function FilterConfigForm({
                   type="text"
                   value={filter.label}
                   onChange={(e) => updateFilter(idx, { label: e.target.value })}
-                  placeholder="??????????? ???"
+                  placeholder="Фильтерийн нэр"
                   className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
                 />
               ) : (
-                <span className="font-medium text-gray-800">{filter.label || '??????'}</span>
+                <span className="font-medium text-gray-800">{filter.label || 'Нэргүй'}</span>
               )}
               <span className="text-xs text-gray-400 font-mono">{filter.key}</span>
             </div>
@@ -659,15 +659,15 @@ function FilterConfigForm({
 
           {editingFilterIdx === idx && (
             <div className="mb-3">
-              <label className="text-xs text-gray-500 mb-1 block">?????:</label>
+              <label className="text-xs text-gray-500 mb-1 block">Төрөл:</label>
               <select
                 value={filter.type}
                 onChange={(e) => updateFilter(idx, { type: e.target.value as CategoryFilter['type'] })}
                 className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
               >
-                <option value="select">??? ???????</option>
-                <option value="multi-select">???? ???????</option>
-                <option value="range">?????</option>
+                <option value="select">Нэг сонголт</option>
+                <option value="multi-select">Олон сонголт</option>
+                <option value="range">Хүрээ</option>
               </select>
             </div>
           )}
@@ -695,7 +695,7 @@ function FilterConfigForm({
                 value={newOption}
                 onChange={(e) => setNewOption(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(idx); } }}
-                placeholder="???? ????..."
+                placeholder="Утга оруулах..."
                 className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
               />
               <button
@@ -703,7 +703,7 @@ function FilterConfigForm({
                 onClick={() => addOption(idx)}
                 className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
               >
-                ?????
+                Нэмэх
               </button>
             </div>
           )}
@@ -718,7 +718,7 @@ function FilterConfigForm({
             className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700 font-medium"
           >
             <Plus className="w-4 h-4" />
-            ???????? ?????
+            Фильтер нэмэх
           </button>
           {defaultFilters.length > 0 && (
             <button
@@ -726,17 +726,17 @@ function FilterConfigForm({
               onClick={resetToDefaults}
               className="text-sm text-blue-600 hover:text-blue-700"
             >
-              ??????? ??????
+              Анхдагч утгаар
             </button>
           )}
         </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button variant="outline" onClick={onClose}>?????</Button>
+        <Button variant="outline" onClick={onClose}>Болих</Button>
         <Button onClick={() => onSave(filters)}>
           <Save className="w-4 h-4 mr-2" />
-          ???????? ????????
+          Тохиргоо хадгалах
         </Button>
       </div>
     </div>

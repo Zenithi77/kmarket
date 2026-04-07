@@ -44,8 +44,8 @@ interface ApiCategory {
 
 const sortOptions = [
   { value: 'newest', label: 'Шинэ нь эхэнд' },
-  { value: 'price_asc', label: 'Үнэ: Багаас их' },
-  { value: 'price_desc', label: 'Үнэ: Ихээс бага' },
+  { value: 'price_asc', label: 'Үнэ: Бага нь эхэнд' },
+  { value: 'price_desc', label: 'Үнэ: Их нь эхэнд' },
   { value: 'popular', label: 'Эрэлттэй' },
   { value: 'rating', label: 'Үнэлгээ' },
 ];
@@ -233,7 +233,7 @@ function ProductsContent() {
         <div className="border-t pt-4">
           <div className="flex items-center gap-1.5 mb-3">
             <Filter className="w-4 h-4 text-orange-500" />
-            <h3 className="font-medium text-gray-900 text-sm">{selectedCategoryObj?.name} шүүлтүүр</h3>
+            <h3 className="font-medium text-gray-900 text-sm">{selectedCategoryObj?.name} фильтер</h3>
           </div>
           {activeCategoryFilters.map((filter: { key: string; label: string; type: string; options: string[] }) => (
             <div key={filter.key} className="mb-4">
@@ -260,7 +260,7 @@ function ProductsContent() {
 
       {/* Brands */}
       <div>
-        <h3 className="font-medium text-gray-900 mb-3">Бренд</h3>
+        <h3 className="font-medium text-gray-900 mb-3">Брэнд</h3>
         <div className="space-y-2 max-h-40 overflow-y-auto">
           {BRANDS.map((brand) => (
             <label key={brand} className="flex items-center cursor-pointer">
@@ -303,7 +303,7 @@ function ProductsContent() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">Бүх бараанууд</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Бүтээгдэхүүн</h1>
           <p className="text-gray-500 mt-2">
             {products.length} бүтээгдэхүүн олдлоо
             {selectedCategory && selectedCategoryObj && (
@@ -413,7 +413,7 @@ function ProductsContent() {
                   onClick={() => setShowFilters(false)}
                   className="w-full py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
                 >
-                  Харуулах ({products.length} бараа)
+                  Хэрэглэх ({products.length} бараа)
                 </button>
               </div>
             </div>

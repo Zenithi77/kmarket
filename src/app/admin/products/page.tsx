@@ -67,7 +67,7 @@ export default function ProductsPage() {
         setTotalCount(data.total || 0);
       }
     } catch {
-      toast.error('????? ????????? ?????');
+      toast.error('Бараа ачаалахад алдаа гарлаа');
     } finally {
       setLoading(false);
     }
@@ -95,13 +95,13 @@ export default function ProductsPage() {
     try {
       const res = await fetch(`/api/products/${deleteModal._id}`, { method: 'DELETE' });
       if (res.ok) {
-        toast.success('????? ??????????');
+        toast.success('Бараа устгагдлаа');
         fetchProducts();
       } else {
-        toast.error('???????? ????? ??????');
+        toast.error('Устгахад алдаа гарлаа');
       }
     } catch {
-      toast.error('????? ??????');
+      toast.error('Алдаа гарлаа');
     }
     setDeleteModal(null);
   };
@@ -114,25 +114,25 @@ export default function ProductsPage() {
 
   const getStatusBadge = (product: Product) => {
     if (product.stock === 0) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">???????</span>;
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Дууссан</span>;
     }
     if (!product.is_active) {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">????????</span>;
+      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Идэвхгүй</span>;
     }
-    return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">????????</span>;
+    return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Идэвхтэй</span>;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">????????????</h1>
-          <p className="text-gray-500 mt-1">???? {totalCount} ????????????</p>
+          <h1 className="text-2xl font-bold text-gray-900">Бүтээгдэхүүн</h1>
+          <p className="text-gray-500 mt-1">Нийт {totalCount} бүтээгдэхүүн</p>
         </div>
         <Link href="/admin/products/new">
           <Button>
             <Plus className="w-4 h-4 mr-2" />
-            ????? ?????
+            Бараа нэмэх
           </Button>
         </Link>
       </div>
@@ -142,7 +142,7 @@ export default function ProductsPage() {
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="????? ????..."
+              placeholder="Бараа хайх..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
@@ -155,7 +155,7 @@ export default function ProductsPage() {
             onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
             className="px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
           >
-            <option value="">??? ????????</option>
+            <option value="">Бүх категори</option>
             {categories.map(cat => (
               <option key={cat._id} value={cat.slug}>{cat.name}</option>
             ))}
@@ -163,7 +163,7 @@ export default function ProductsPage() {
 
           <Button type="submit">
             <Search className="w-4 h-4 mr-1" />
-            ????
+            Хайх
           </Button>
         </form>
       </div>
@@ -176,12 +176,12 @@ export default function ProductsPage() {
         ) : products.length === 0 ? (
           <div className="text-center py-20">
             <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">????? ?????????</h3>
-            <p className="text-gray-500 mb-4">??????? ???? ??????? ????? ???? ????? ????? ??.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Бараа олдсонгүй</h3>
+            <p className="text-gray-500 mb-4">Одоогоор бараа бүртгэгдээгүй байна. Шинэ бараа нэмнэ үү.</p>
             <Link href="/admin/products/new">
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                ????? ?????
+                Бараа нэмэх
               </Button>
             </Link>
           </div>
@@ -190,12 +190,12 @@ export default function ProductsPage() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">????????????</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">????????</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">???</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">????</th>
-                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">??????</th>
-                  <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase">??????</th>
+                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">Бүтээгдэхүүн</th>
+                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">Ангилал</th>
+                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">Үнэ</th>
+                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">Нөөц</th>
+                  <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase">Статус</th>
+                  <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase">Үйлдэл</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -300,15 +300,15 @@ export default function ProductsPage() {
         )}
       </div>
 
-      <Modal isOpen={!!deleteModal} onClose={() => setDeleteModal(null)} title="????? ??????">
+      <Modal isOpen={!!deleteModal} onClose={() => setDeleteModal(null)} title="Бараа устгах">
         {deleteModal && (
           <div className="space-y-4">
             <p className="text-gray-600">
-              <strong>{deleteModal.name}</strong> ?????? ????????? ???????? ????? ???
+              <strong>{deleteModal.name}</strong> барааг устгахдаа итгэлтэй байна уу?
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setDeleteModal(null)}>?????</Button>
-              <Button onClick={handleDelete} className="bg-red-500 hover:bg-red-600">??????</Button>
+              <Button variant="outline" onClick={() => setDeleteModal(null)}>Болих</Button>
+              <Button onClick={handleDelete} className="bg-red-500 hover:bg-red-600">Устгах</Button>
             </div>
           </div>
         )}
