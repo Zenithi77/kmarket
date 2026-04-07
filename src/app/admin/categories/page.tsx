@@ -16,9 +16,13 @@ import {
   Settings,
   Layers,
   Tag,
+  Check,
+  AlertCircle,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { Button, Modal, Input } from '@/components/ui';
-import { CATEGORY_FILTERS, DEFAULT_SUBCATEGORIES } from '@/lib/constants';
+import { CATEGORIES, CATEGORY_FILTERS, DEFAULT_SUBCATEGORIES } from '@/lib/constants';
 import toast from 'react-hot-toast';
 
 interface CategoryFilter {
@@ -57,6 +61,7 @@ export default function CategoriesPage() {
   const [deleteModal, setDeleteModal] = useState<{ id: string; name: string; isParent: boolean } | null>(null);
   const [subFormData, setSubFormData] = useState(defaultSubCategory);
   const [uploading, setUploading] = useState(false);
+  const [initializingAll, setInitializingAll] = useState(false);
   const [initializingSubcats, setInitializingSubcats] = useState<string | null>(null);
 
   useEffect(() => {
@@ -73,6 +78,117 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ========== Үндсэн 6 ангилалыг автомат үүсгэх ==========
+  const initializeMainCategories = async () => {
+    setInitializingAll(true);
+    let created = 0;
+    for (const cat of CATEGORIES) {
+      try {
+        const res = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: cat.name,
+            slug: cat.slug,
+            icon: cat.icon,
+            order: CATEGORIES.indexOf(cat),
+          }),
+        });
+        if (res.ok) created++;
+      } catch { /* skip duplicates */ }
+    }
+    if (created > 0) {
+      toast.success(`${created} үндсэн ангилал үүсгэгдлээ`);
+    } else {
+      toast.error('Ангилалууд аль хэдийн үүссэн байна');
+    }
+    setInitializingAll(false);
+    fetchCategories();
+  };
+
+  // ========== Бүх дэд ангилалыг нэг дор автомат үүсгэх ==========
+  const initializeAllSubcategories = async (parentId: string, parentSlug: string) => {
+    const defaults = DEFAULT_SUBCATEGORIES[parentSlug];
+    if (!defaults || defaults.length === 0) {
+      toast.error('Энэ ангилалд бэлэн дэд ангилал байхгүй');
+      return;
+    }
+    setInitializingSubcats(parentId);
+    let successCount = 0;
+    for (const sub of defaults) {
+      try {
+        const res = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: sub.name,
+            slug: sub.slug,
+            parent_id: parentId,
+            order: successCount,
+          }),
+        });
+        if (res.ok) successCount++;
+      } catch { /* skip duplicates */ }
+    }
+    toast.success(`${successCount} дэд ангилал нэмэгдлээ`);
+    setInitializingSubcats(null);
+    fetchCategories();
+  };
+
+  // ========== Бүх ангилал + бүх дэд ангилалыг нэг товчоор ==========
+  const initializeEverything = async () => {
+    setInitializingAll(true);
+    
+    // 1. Үндсэн ангилалуудыг үүсгэх
+    for (const cat of CATEGORIES) {
+      try {
+        await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: cat.name,
+            slug: cat.slug,
+            icon: cat.icon,
+            order: CATEGORIES.indexOf(cat),
+          }),
+        });
+      } catch {}
+    }
+
+    // 2. Шинэчилсэн categories авах
+    const res = await fetch('/api/categories');
+    const freshCategories = await res.json();
+
+    // 3. Дэд ангилалуудыг үүсгэх
+    let totalSubs = 0;
+    for (const parent of freshCategories) {
+      const defaults = DEFAULT_SUBCATEGORIES[parent.slug];
+      if (!defaults) continue;
+      const existingSlugs = (parent.subcategories || []).map((s: Category) => s.slug);
+      
+      for (const sub of defaults) {
+        if (existingSlugs.includes(sub.slug)) continue;
+        try {
+          const r = await fetch('/api/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: sub.name,
+              slug: sub.slug,
+              parent_id: parent._id,
+              order: totalSubs,
+            }),
+          });
+          if (r.ok) totalSubs++;
+        } catch {}
+      }
+    }
+
+    toast.success(`Бүх ангилал амжилттай бүрдүүллээ! (${totalSubs} дэд ангилал нэмэгдлээ)`);
+    setInitializingAll(false);
+    fetchCategories();
   };
 
   const handleExpand = (id: string) => {
@@ -159,34 +275,6 @@ export default function CategoriesPage() {
     setDeleteModal(null);
   };
 
-  const handleInitializeSubcategories = async (parentId: string, parentSlug: string) => {
-    const defaults = DEFAULT_SUBCATEGORIES[parentSlug];
-    if (!defaults || defaults.length === 0) {
-      toast.error('Энэ категорид дэд ангилал тодорхойлогдоогүй');
-      return;
-    }
-    setInitializingSubcats(parentId);
-    let successCount = 0;
-    for (const sub of defaults) {
-      try {
-        const res = await fetch('/api/categories', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: sub.name,
-            slug: sub.slug,
-            parent_id: parentId,
-            order: successCount,
-          }),
-        });
-        if (res.ok) successCount++;
-      } catch { /* skip duplicates */ }
-    }
-    toast.success(`${successCount} дэд ангилал нэмэгдлээ`);
-    setInitializingSubcats(null);
-    fetchCategories();
-  };
-
   const handleSaveFilters = async (categoryId: string, filters: CategoryFilter[]) => {
     try {
       const res = await fetch('/api/categories', {
@@ -205,11 +293,8 @@ export default function CategoriesPage() {
   };
 
   const getCategoryEmoji = (slug: string) => {
-    const icons: Record<string, string> = {
-      beauty: '💄', fashion: '👗', shoes: '👟',
-      dyson: '🔧', trendy: '🔥', best: '⭐',
-    };
-    return icons[slug] || '📦';
+    const cat = CATEGORIES.find(c => c.slug === slug);
+    return cat?.icon || '📦';
   };
 
   const getCategoryColor = (slug: string) => {
@@ -224,6 +309,16 @@ export default function CategoriesPage() {
     return colors[slug] || 'from-gray-500 to-gray-600';
   };
 
+  // ========== Ангилал бүр дэх дэд ангилалуудын тоо + бэлэн загвар тоо ==========
+  const getSubcategoryStats = (category: Category) => {
+    const existing = category.subcategories?.length || 0;
+    const defaults = DEFAULT_SUBCATEGORIES[category.slug] || [];
+    const total = defaults.length;
+    const existingSlugs = (category.subcategories || []).map(s => s.slug);
+    const missing = defaults.filter(d => !existingSlugs.includes(d.slug));
+    return { existing, total, missing };
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -232,44 +327,122 @@ export default function CategoriesPage() {
     );
   }
 
+  // ========== Бүх ангилал бүрэн эсэхийг шалгах ==========
+  const existingMainSlugs = categories.map(c => c.slug);
+  const missingMainCategories = CATEGORIES.filter(c => !existingMainSlugs.includes(c.slug));
+  const allMainExist = missingMainCategories.length === 0;
+
+  // Бүх дэд ангилал бүрдсэн эсэх
+  const totalMissingSubs = categories.reduce((acc, cat) => {
+    const { missing } = getSubcategoryStats(cat);
+    return acc + missing.length;
+  }, 0);
+
   return (
     <div className="space-y-6">
+      {/* ========== Header ========== */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ангилал удирдлага</h1>
           <p className="text-gray-500 mt-1">
-            {categories.length} үндсэн ангилал | Дэд ангилал, тохиргоо засварлана
+            {categories.length} үндсэн ангилал · {categories.reduce((a, c) => a + (c.subcategories?.length || 0), 0)} дэд ангилал
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchCategories}>
+            <RefreshCw className="w-4 h-4 mr-1" />
+            Шинэчлэх
+          </Button>
         </div>
       </div>
 
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <Layers className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm text-orange-800 font-medium">Ангилал бүтэц</p>
-            <p className="text-sm text-orange-600 mt-1">
-              6 үндсэн ангилал + дэд ангилал + шүүлт. Ангилал тусбүрд фильтерүүд (брэнд, материал, хэмжээс г.м) тохируулна.
+      {/* ========== Анхааруулга: Үндсэн ангилал дутуу бол ========== */}
+      {!allMainExist && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-red-800 font-medium">Үндсэн ангилалууд дутуу байна!</p>
+              <p className="text-sm text-red-600 mt-1">
+                Дараах ангилалууд үүсээгүй: {missingMainCategories.map(c => c.name).join(', ')}
+              </p>
+              <Button
+                size="sm"
+                className="mt-3"
+                onClick={initializeMainCategories}
+                disabled={initializingAll}
+              >
+                {initializingAll ? (
+                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Үүсгэж байна...</>
+                ) : (
+                  <><Plus className="w-4 h-4 mr-1" /> Үндсэн 6 ангилал үүсгэх</>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== Нэг товчоор бүгдийг бүрдүүлэх ========== */}
+      {(totalMissingSubs > 0 || !allMainExist) && (
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <Layers className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm text-orange-800 font-medium">Бүх ангилал + дэд ангилалуудыг нэг дор бүрдүүлэх</p>
+              <p className="text-sm text-orange-600 mt-1">
+                6 үндсэн ангилал + бүх дэд ангилалуудыг автоматаар үүсгэнэ. 
+                {totalMissingSubs > 0 && ` (${totalMissingSubs} дэд ангилал нэмэгдэх боломжтой)`}
+              </p>
+              <Button
+                size="sm"
+                className="mt-3"
+                onClick={initializeEverything}
+                disabled={initializingAll}
+              >
+                {initializingAll ? (
+                  <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Бүрдүүлж байна...</>
+                ) : (
+                  <><Layers className="w-4 h-4 mr-1" /> Бүгдийг бүрдүүлэх</>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== Бүх бүрдсэн бол ========== */}
+      {allMainExist && totalMissingSubs === 0 && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <Check className="w-5 h-5 text-green-500" />
+            <p className="text-sm text-green-800 font-medium">
+              Бүх ангилал бүрэн бүрдсэн байна! ({categories.length} ангилал, {categories.reduce((a, c) => a + (c.subcategories?.length || 0), 0)} дэд ангилал)
             </p>
           </div>
         </div>
-      </div>
+      )}
 
+      {/* ========== Ангилалуудын жагсаалт ========== */}
       <div className="space-y-4">
         {categories.map((category) => {
           const isExpanded = expandedCategory === category._id;
-          const subCount = category.subcategories?.length || 0;
+          const stats = getSubcategoryStats(category);
           const filterCount = category.filters?.length || 0;
           const defaultFilters = CATEGORY_FILTERS[category.slug] || [];
+          const catInfo = CATEGORIES.find(c => c.slug === category.slug);
 
           return (
             <div key={category._id} className="bg-white rounded-xl card-shadow overflow-hidden">
+              {/* ===== Ангилал Header ===== */}
               <div
                 className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => handleExpand(category._id)}
               >
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getCategoryColor(category.slug)} flex items-center justify-center text-2xl shadow-sm`}>
-                  {category.icon ? (
+                  {category.icon && !category.icon.startsWith('http') ? (
+                    <span>{category.icon}</span>
+                  ) : category.icon ? (
                     <Image src={category.icon} alt={category.name} width={40} height={40} className="object-cover rounded-lg" />
                   ) : (
                     getCategoryEmoji(category.slug)
@@ -280,12 +453,25 @@ export default function CategoriesPage() {
                   <div className="flex items-center gap-3">
                     <h3 className="text-lg font-bold text-gray-900">{category.name}</h3>
                     <span className="text-xs text-gray-400 font-mono">/{category.slug}</span>
+                    {catInfo && <span className="text-xs text-gray-400">{catInfo.description}</span>}
                   </div>
                   <div className="flex items-center gap-4 mt-1">
                     <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                       <Tag className="w-3 h-3" />
-                      {subCount} дэд ангилал
+                      {stats.existing} / {stats.total} дэд ангилал
                     </span>
+                    {stats.missing.length > 0 && (
+                      <span className="inline-flex items-center gap-1 text-xs text-orange-500 font-medium">
+                        <AlertCircle className="w-3 h-3" />
+                        {stats.missing.length} нэмэх боломжтой
+                      </span>
+                    )}
+                    {stats.missing.length === 0 && stats.total > 0 && (
+                      <span className="inline-flex items-center gap-1 text-xs text-green-500">
+                        <Check className="w-3 h-3" />
+                        Бүрэн
+                      </span>
+                    )}
                     <span className="inline-flex items-center gap-1 text-xs text-gray-500">
                       <Filter className="w-3 h-3" />
                       {filterCount > 0 ? `${filterCount} фильтер` : `${defaultFilters.length} фильтер (default)`}
@@ -319,81 +505,100 @@ export default function CategoriesPage() {
                 </div>
               </div>
 
+              {/* ===== Ангилал дэлгэрэнгүй (дэд ангилалууд) ===== */}
               {isExpanded && (
                 <div className="border-t bg-gray-50">
-                  {subCount > 0 ? (
-                    <div className="divide-y divide-gray-100">
-                      {category.subcategories!.map((sub, idx) => (
-                        <div
-                          key={sub._id}
-                          className="flex items-center gap-4 px-6 py-3 hover:bg-gray-100 transition-colors"
-                        >
-                          <span className="w-6 text-center text-xs text-gray-400 font-mono">{idx + 1}</span>
-                          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
-                            {sub.icon ? (
-                              <Image src={sub.icon} alt={sub.name} width={24} height={24} className="object-cover rounded" />
-                            ) : (
-                              <FolderTree className="w-4 h-4 text-gray-400" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="font-medium text-gray-800">{sub.name}</span>
-                            <span className="text-xs text-gray-400 ml-2 font-mono">/{sub.slug}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleEditSubcategory(category._id, category.slug, sub)}
-                              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
-                            >
-                              <Edit className="w-3.5 h-3.5 text-gray-500" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteModal({ id: sub._id, name: sub.name, isParent: false })}
-                              className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                            </button>
-                          </div>
+                  {/* Дутуу дэд ангилалууд байвал автомат нэмэх товч */}
+                  {stats.missing.length > 0 && (
+                    <div className="px-6 py-3 bg-amber-50 border-b border-amber-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-amber-800 font-medium">
+                            {stats.missing.length} дэд ангилал нэмэгдээгүй байна
+                          </p>
+                          <p className="text-xs text-amber-600 mt-0.5">
+                            Дутуу: {stats.missing.map(m => m.name).join(', ')}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="px-6 py-8 text-center">
-                      <FolderTree className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                      <p className="text-sm text-gray-500 mb-4">Дэд ангилал одоогоор байхгүй</p>
-                      <div className="flex items-center justify-center gap-3">
                         <Button
                           size="sm"
-                          variant="outline"
-                          onClick={() => handleAddSubcategory(category._id, category.slug)}
+                          onClick={() => initializeAllSubcategories(category._id, category.slug)}
+                          disabled={initializingSubcats === category._id}
                         >
-                          <Plus className="w-3 h-3 mr-1" />
-                          Дэд ангилал нэмэх
+                          {initializingSubcats === category._id ? (
+                            <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Нэмэж байна...</>
+                          ) : (
+                            <><Layers className="w-3 h-3 mr-1" /> Бүгдийг нэмэх</>
+                          )}
                         </Button>
-                        {DEFAULT_SUBCATEGORIES[category.slug] && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleInitializeSubcategories(category._id, category.slug)}
-                            disabled={initializingSubcats === category._id}
-                          >
-                            {initializingSubcats === category._id ? (
-                              <>
-                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                                Нэмэж байна...
-                              </>
-                            ) : (
-                              <>
-                                <Layers className="w-3 h-3 mr-1" />
-                                Бэлэн загвараас нэмэх ({DEFAULT_SUBCATEGORIES[category.slug].length})
-                              </>
-                            )}
-                          </Button>
-                        )}
                       </div>
                     </div>
                   )}
 
-                  {subCount > 0 && (
+                  {/* Одоо байгаа дэд ангилалуудын жагсаалт */}
+                  {(category.subcategories?.length || 0) > 0 ? (
+                    <div className="divide-y divide-gray-100">
+                      {category.subcategories!.map((sub, idx) => {
+                        const isDefault = DEFAULT_SUBCATEGORIES[category.slug]?.some(d => d.slug === sub.slug);
+                        return (
+                          <div
+                            key={sub._id}
+                            className="flex items-center gap-4 px-6 py-3 hover:bg-gray-100 transition-colors"
+                          >
+                            <span className="w-6 text-center text-xs text-gray-400 font-mono">{idx + 1}</span>
+                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                              {sub.icon && sub.icon.startsWith('http') ? (
+                                <Image src={sub.icon} alt={sub.name} width={24} height={24} className="object-cover rounded" />
+                              ) : (
+                                <FolderTree className="w-4 h-4 text-gray-400" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-800">{sub.name}</span>
+                                <span className="text-xs text-gray-400 font-mono">/{sub.slug}</span>
+                                {isDefault && (
+                                  <span className="text-[10px] px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">бэлэн</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleEditSubcategory(category._id, category.slug, sub)}
+                                className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                                title="Засах"
+                              >
+                                <Edit className="w-3.5 h-3.5 text-gray-500" />
+                              </button>
+                              <button
+                                onClick={() => setDeleteModal({ id: sub._id, name: sub.name, isParent: false })}
+                                className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Устгах"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : stats.missing.length === 0 ? (
+                    <div className="px-6 py-8 text-center">
+                      <FolderTree className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                      <p className="text-sm text-gray-500 mb-4">Дэд ангилал байхгүй</p>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAddSubcategory(category._id, category.slug)}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Дэд ангилал нэмэх
+                      </Button>
+                    </div>
+                  ) : null}
+
+                  {/* Дэд ангилал нэмэх товч */}
+                  {(category.subcategories?.length || 0) > 0 && (
                     <div className="px-6 py-3 border-t border-gray-200">
                       <button
                         onClick={() => handleAddSubcategory(category._id, category.slug)}
@@ -405,6 +610,7 @@ export default function CategoriesPage() {
                     </div>
                   )}
 
+                  {/* Тохируулсан фильтерүүд */}
                   {(category.filters?.length || 0) > 0 && (
                     <div className="px-6 py-3 border-t border-gray-200 bg-blue-50/50">
                       <div className="flex items-center gap-2 mb-2">
@@ -431,15 +637,62 @@ export default function CategoriesPage() {
         })}
       </div>
 
-      {categories.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-xl card-shadow">
-          <FolderTree className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Ангилал байхгүй</h3>
-          <p className="text-gray-500 mb-6">Үндсэн 6 ангилал үүсгэгдэнэ</p>
-          <p className="text-sm text-gray-400">Beauty, Fashion, Shoes, Dyson, Trendy, Best Sellers</p>
+      {/* ========== Бэлэн ангилалуудын бүтэц preview ========== */}
+      <div className="bg-white rounded-xl card-shadow p-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <Layers className="w-5 h-5 text-orange-500" />
+          Бэлэн ангилалын бүтэц (загвар)
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Дараах ангилалууд homepage-д гарахаар тохируулагдсан. Бүрэн бүтцийг харна уу.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {CATEGORIES.map(cat => {
+            const subs = DEFAULT_SUBCATEGORIES[cat.slug] || [];
+            const dbCategory = categories.find(c => c.slug === cat.slug);
+            const dbSubSlugs = dbCategory?.subcategories?.map(s => s.slug) || [];
+            
+            return (
+              <div key={cat.slug} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">{cat.icon}</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{cat.name}</h3>
+                    <p className="text-xs text-gray-400">{cat.description}</p>
+                  </div>
+                  {dbCategory ? (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">DB-д байгаа</span>
+                  ) : (
+                    <span className="ml-auto text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">Үүсээгүй</span>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {subs.map(sub => (
+                    <div key={sub.slug} className="flex items-center gap-2 text-sm">
+                      {dbSubSlugs.includes(sub.slug) ? (
+                        <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
+                      ) : (
+                        <X className="w-3 h-3 text-gray-300 flex-shrink-0" />
+                      )}
+                      <span className={dbSubSlugs.includes(sub.slug) ? 'text-gray-700' : 'text-gray-400'}>
+                        {sub.name}
+                      </span>
+                      <span className="text-xs text-gray-300 font-mono">/{sub.slug}</span>
+                    </div>
+                  ))}
+                  {subs.length === 0 && (
+                    <p className="text-xs text-gray-400">Дэд ангилал тодорхойлогдоогүй</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
+      {/* ========== Modals ========== */}
+      
+      {/* Дэд ангилал нэмэх/засах modal */}
       <Modal
         isOpen={!!subModal}
         onClose={() => setSubModal(null)}
@@ -517,6 +770,7 @@ export default function CategoriesPage() {
         )}
       </Modal>
 
+      {/* Фильтер тохиргоо modal */}
       <Modal
         isOpen={!!filterModal}
         onClose={() => setFilterModal(null)}
@@ -531,6 +785,7 @@ export default function CategoriesPage() {
         )}
       </Modal>
 
+      {/* Устгах modal */}
       <Modal
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
@@ -555,6 +810,7 @@ export default function CategoriesPage() {
   );
 }
 
+// ========== Фильтер тохируулах form ========== 
 function FilterConfigForm({
   category,
   onSave,
