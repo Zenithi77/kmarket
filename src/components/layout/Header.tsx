@@ -313,91 +313,105 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[108px] z-40">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-            onClick={() => setIsMenuOpen(false)}
-          />
-          
-          {/* Menu Panel */}
-          <div className="absolute left-0 top-0 bottom-0 bg-white w-[80%] max-w-[320px] shadow-2xl overflow-y-auto animate-slide-from-left">
-            {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-amber-500 p-5 text-white">
-              <h2 className="text-lg font-bold">Ангилал</h2>
-              <p className="text-sm text-orange-100 mt-0.5">Бүх бүтээгдэхүүнүүдийг үзэх</p>
-            </div>
-            
-            {/* Categories with Icons */}
-            <div className="py-2">
-              {CATEGORIES.map((category) => {
-                const IconComponent = category.icon;
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/category/${category.slug}`}
-                    className="flex items-center gap-4 px-5 py-4 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 group"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <div className={`p-2.5 rounded-xl bg-gray-100 group-hover:bg-gray-200 transition-colors`}>
-                      <IconComponent className={`w-5 h-5 ${category.iconColor}`} />
-                    </div>
-                    <span className="flex-1">{category.name}</span>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
-                  </Link>
-                );
-              })}
-            </div>
+      {/* Mobile Menu Overlay – always mounted, driven by translate */}
+      <div className="md:hidden" aria-hidden={!isMenuOpen}>
+        {/* Backdrop */}
+        <div
+          className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+            isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+          onClick={() => setIsMenuOpen(false)}
+        />
 
-            {/* Divider */}
-            <div className="mx-5 border-t border-gray-100" />
+        {/* Slide-in Panel */}
+        <div
+          className={`fixed left-0 top-0 bottom-0 z-50 w-[82%] max-w-xs bg-white shadow-2xl overflow-y-auto transition-transform duration-300 ease-in-out ${
+            isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {/* Panel Header */}
+          <div className="sticky top-0 z-10 flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-4 text-white">
+            <div>
+              <h2 className="text-base font-bold tracking-wide">Ангилал</h2>
+              <p className="text-xs text-orange-100 mt-0.5">Бүх бүтээгдэхүүнүүд</p>
+            </div>
+            <button
+              onClick={() => setIsMenuOpen(false)}
+              className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            {/* Quick Links with Icons */}
-            <div className="py-2">
-              <Link
-                href="/products"
-                className="flex items-center gap-4 px-5 py-4 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="p-2.5 rounded-xl bg-blue-100 group-hover:bg-blue-200 transition-colors">
-                  <Package className="w-5 h-5 text-blue-500" />
-                </div>
-                <span className="flex-1">Бүх бараа</span>
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
-              </Link>
-              <Link
-                href="/products?sale=true"
-                className="flex items-center gap-4 px-5 py-4 text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200 group"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="p-2.5 rounded-xl bg-red-100 group-hover:bg-red-200 transition-colors">
-                  <Percent className="w-5 h-5 text-red-500" />
-                </div>
-                <span className="flex-1">Хямдрал</span>
-                <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">HOT</span>
-              </Link>
-              {mounted && isAuthenticated && user?.role === 'admin' && (
+          {/* Categories */}
+          <div className="py-2">
+            {CATEGORIES.map((category) => {
+              const IconComponent = category.icon;
+              return (
                 <Link
-                  href="/admin"
-                  className="flex items-center gap-4 px-5 py-4 text-sm text-orange-600 font-medium hover:bg-orange-50 transition-all duration-200 group"
+                  key={category.id}
+                  href={`/category/${category.slug}`}
+                  className="flex items-center gap-4 px-5 py-3.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100 group transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 transition-colors">
-                    <Shield className="w-5 h-5 text-white" />
+                  <div className="p-2.5 rounded-xl bg-gray-100 group-hover:bg-gray-200 transition-colors flex-shrink-0">
+                    <IconComponent className={`w-5 h-5 ${category.iconColor}`} />
                   </div>
-                  <span className="flex-1">Админ хэсэг</span>
-                  <ChevronRight className="w-4 h-4 text-orange-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" />
+                  <span className="flex-1">{category.name}</span>
+                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all" />
                 </Link>
-              )}
-            </div>
-            
-            {/* Bottom spacing */}
-            <div className="h-10" />
+              );
+            })}
           </div>
+
+          {/* Divider */}
+          <div className="mx-5 border-t border-gray-100" />
+
+          {/* Quick Links */}
+          <div className="py-2">
+            <Link
+              href="/products"
+              className="flex items-center gap-4 px-5 py-3.5 text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors group"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div className="p-2.5 rounded-xl bg-blue-100 group-hover:bg-blue-200 transition-colors flex-shrink-0">
+                <Package className="w-5 h-5 text-blue-500" />
+              </div>
+              <span className="flex-1">Бүх бараа</span>
+              <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all" />
+            </Link>
+
+            <Link
+              href="/products?sale=true"
+              className="flex items-center gap-4 px-5 py-3.5 text-sm font-medium text-red-600 hover:bg-red-50 active:bg-red-100 transition-colors group"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div className="p-2.5 rounded-xl bg-red-100 group-hover:bg-red-200 transition-colors flex-shrink-0">
+                <Percent className="w-5 h-5 text-red-500" />
+              </div>
+              <span className="flex-1">Хямдрал</span>
+              <span className="ml-auto px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">HOT</span>
+            </Link>
+
+            {mounted && isAuthenticated && user?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-4 px-5 py-3.5 text-sm text-orange-600 font-medium hover:bg-orange-50 active:bg-orange-100 transition-colors group"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex-shrink-0">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <span className="flex-1">Админ хэсэг</span>
+                <ChevronRight className="w-4 h-4 text-orange-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            )}
+          </div>
+
+          {/* Bottom spacer */}
+          <div className="h-8" />
         </div>
-      )}
+      </div>
     </header>
   );
 }

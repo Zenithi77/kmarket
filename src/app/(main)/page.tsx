@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Tag, LucideIcon } from 'lucide-react';
 import { ProductCard } from '@/components/product';
 import { CategorySlider, ProductSlider } from '@/components/home';
 import { Product } from '@/types';
@@ -33,6 +33,24 @@ function mapProduct(p: any): Product {
     updated_at: p.updated_at || '',
   };
 }
+
+// Slug-to-icon/style config for category cards
+const CAT_CONFIG: Record<string, { icon: LucideIcon; gradient: string; light: string; iconColor: string }> = {
+  beauty:  { icon: Sparkles,   gradient: 'from-pink-400 to-rose-500',     light: 'bg-pink-50',   iconColor: 'text-pink-500' },
+  fashion: { icon: Shirt,      gradient: 'from-purple-400 to-violet-500',  light: 'bg-purple-50', iconColor: 'text-purple-500' },
+  shoes:   { icon: Footprints, gradient: 'from-blue-400 to-cyan-500',      light: 'bg-blue-50',   iconColor: 'text-blue-500' },
+  dyson:   { icon: Wind,       gradient: 'from-cyan-400 to-teal-500',      light: 'bg-cyan-50',   iconColor: 'text-cyan-500' },
+  trendy:  { icon: TrendingUp, gradient: 'from-rose-400 to-orange-500',    light: 'bg-rose-50',   iconColor: 'text-rose-500' },
+  best:    { icon: Award,      gradient: 'from-amber-400 to-yellow-500',   light: 'bg-amber-50',  iconColor: 'text-amber-500' },
+  sale:    { icon: Tag,        gradient: 'from-red-400 to-rose-500',       light: 'bg-red-50',    iconColor: 'text-red-500' },
+};
+
+const FALLBACK_GRADIENTS = [
+  { gradient: 'from-orange-400 to-amber-500', light: 'bg-orange-50', iconColor: 'text-orange-500' },
+  { gradient: 'from-teal-400 to-green-500',   light: 'bg-teal-50',   iconColor: 'text-teal-500' },
+  { gradient: 'from-violet-400 to-purple-500',light: 'bg-violet-50', iconColor: 'text-violet-500' },
+  { gradient: 'from-sky-400 to-blue-500',     light: 'bg-sky-50',    iconColor: 'text-sky-500' },
+];
 
 // Banner type
 interface Banner {
@@ -175,139 +193,142 @@ export default function HomePage() {
   }, [isPaused, banners.length, nextSlide]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Banner Slider - Coupang Style */}
-      <section 
-        className="relative overflow-hidden"
+    <div className="min-h-screen bg-gray-50">
+      {/* ── HERO BANNER SLIDER ── */}
+      <section
+        className="relative overflow-hidden bg-white"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Slides Container */}
-        <div 
+        <div
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {banners.map((banner, index) => (
-            <div 
-              key={banner._id} 
+            <div
+              key={banner._id}
               className="w-full flex-shrink-0 relative"
               style={{ backgroundColor: banner.bg_color }}
             >
               <Link href={banner.link || '/products'} className="block">
-                <div className="max-w-7xl mx-auto px-4 py-2 lg:py-4">
+                <div className="max-w-7xl mx-auto px-4 py-4 lg:py-6">
                   <div className="flex items-center justify-between">
-                    {/* Text Content */}
                     <div className="w-full lg:w-1/2 text-center lg:text-left z-10">
                       {banner.subtitle && (
-                        <p 
-                          className="text-lg lg:text-xl font-medium mb-2 opacity-80"
-                          style={{ color: banner.text_color }}
-                        >
+                        <p className="text-lg lg:text-xl font-medium mb-2 opacity-80" style={{ color: banner.text_color }}>
                           {banner.subtitle}
                         </p>
                       )}
-                      <h1 
-                        className="text-4xl lg:text-6xl xl:text-7xl font-bold mb-4 tracking-wide"
-                        style={{ color: banner.text_color }}
-                      >
+                      <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold mb-4 tracking-wide" style={{ color: banner.text_color }}>
                         {banner.title}
                       </h1>
                       {banner.description && (
                         <p className="text-gray-600 text-lg mb-6">{banner.description}</p>
                       )}
-                      <span 
-                        className="inline-flex items-center font-medium hover:opacity-80 transition-opacity"
-                        style={{ color: banner.text_color }}
-                      >
+                      <span className="inline-flex items-center font-medium hover:opacity-80 transition-opacity" style={{ color: banner.text_color }}>
                         SHOP NOW <ArrowRight className="ml-2 w-5 h-5" />
                       </span>
                     </div>
-                    
-                    {/* Image */}
-                    <div className="hidden lg:block w-1/2 relative h-[200px]">
-                      <Image
-                        src={banner.image}
-                        alt={banner.title}
-                        fill
-                        className="object-contain"
-                        priority={index === 0}
-                      />
+                    <div className="hidden lg:block w-1/2 relative h-[220px]">
+                      <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
                     </div>
                   </div>
                 </div>
-                
-                {/* Mobile Image */}
-                <div className="lg:hidden relative h-[100px] mt-2">
-                  <Image
-                    src={banner.image}
-                    alt={banner.title}
-                    fill
-                    className="object-contain"
-                    priority={index === 0}
-                  />
+                <div className="lg:hidden relative h-[110px] mt-2">
+                  <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
                 </div>
               </Link>
             </div>
           ))}
         </div>
 
-        {/* Navigation Arrows */}
         {banners.length > 1 && (
           <>
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center transition-all hover:scale-110 z-20"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
+            <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
             </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center transition-all hover:scale-110 z-20"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-700" />
+            <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
+              <ChevronRight className="w-5 h-5 text-gray-700" />
             </button>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`transition-all duration-300 rounded-full ${index === currentSlide ? 'w-6 h-2 bg-orange-500' : 'w-2 h-2 bg-gray-300 hover:bg-gray-500'}`}
+                />
+              ))}
+            </div>
           </>
-        )}
-
-        {/* Dots Indicator */}
-        {banners.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`transition-all duration-300 rounded-full ${
-                  index === currentSlide 
-                    ? 'w-8 h-2 bg-orange-500' 
-                    : 'w-2 h-2 bg-gray-400 hover:bg-gray-600'
-                }`}
-              />
-            ))}
-          </div>
         )}
       </section>
 
-      {/* Category Icons Slider - Coupang Style */}
-      <CategorySlider categories={categories.length > 0 ? categories.map(c => ({
-        id: c._id,
-        name: c.name,
-        slug: c.slug,
-        icon: c.icon,
-        image: c.image
-      })) : undefined} />
+      {/* ── CATEGORY QUICK-NAV ICONS ── */}
+      <CategorySlider categories={categories.length > 0 ? categories.map(c => ({ id: c._id, name: c.name, slug: c.slug, icon: c.icon, image: c.image })) : undefined} />
 
-      {/* Today's Deal - Product Slider */}
+      {/* ── CATEGORY SHOWCASE CARDS ── */}
+      {categories.length > 0 && (
+        <section className="bg-white py-8 border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-gray-900">Ангилалаар үзэх</h2>
+              <Link href="/products" className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1">
+                Бүгд <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {categories.slice(0, 6).map((cat, i) => {
+                const slugKey = cat.slug?.split('-')[0]?.toLowerCase() || '';
+                const cfg = CAT_CONFIG[slugKey] || { ...FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length], icon: Package };
+                const Icon = cfg.icon;
+                return (
+                  <Link
+                    key={cat._id}
+                    href={`/category/${cat.slug}`}
+                    className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 hover:border-transparent hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* Top colored strip */}
+                    <div className={`h-1.5 w-full bg-gradient-to-r ${cfg.gradient}`} />
+
+                    <div className="p-4 flex flex-col items-center text-center gap-3">
+                      {/* Icon circle */}
+                      <div className={`w-12 h-12 rounded-xl ${cfg.light} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                        {cat.image ? (
+                          <img src={cat.image} alt={cat.name} className="w-10 h-10 object-cover rounded-lg" />
+                        ) : (
+                          <Icon className={`w-6 h-6 ${cfg.iconColor}`} />
+                        )}
+                      </div>
+
+                      <span className="text-sm font-semibold text-gray-800 group-hover:text-orange-500 transition-colors leading-tight">
+                        {cat.name}
+                      </span>
+
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r ${cfg.gradient} text-white opacity-0 group-hover:opacity-100 transition-opacity`}>
+                        Үзэх →
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── SALE PRODUCTS ── */}
       {saleProducts.length > 0 && (
         <ProductSlider
           title="Today's Deal"
-          badge="On Sale"
+          badge="Sale"
           badgeColor="bg-red-500"
           products={saleProducts}
           viewAllLink="/products?sale=true"
         />
       )}
 
-      {/* Trending Products - Slider Style */}
+      {/* ── FEATURED / TRENDING ── */}
       {featuredProducts.length > 0 && (
         <ProductSlider
           title="Trending Now"
@@ -317,7 +338,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* New Arrivals - Slider Style */}
+      {/* ── NEW ARRIVALS ── */}
       {newProducts.length > 0 && (
         <ProductSlider
           title="New Arrivals"
@@ -327,7 +348,7 @@ export default function HomePage() {
         />
       )}
 
-      {/* All Products fallback - shows when other sections are empty */}
+      {/* ── ALL PRODUCTS FALLBACK ── */}
       {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length > 0 && (
         <ProductSlider
           title="Бүтээгдэхүүн"
@@ -337,7 +358,27 @@ export default function HomePage() {
         />
       )}
 
-
+      {/* ── EMPTY STATE (no products at all) ── */}
+      {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length === 0 && categories.length === 0 && (
+        <section className="py-24 bg-white">
+          <div className="max-w-md mx-auto text-center px-4">
+            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Package className="w-10 h-10 text-orange-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">Бараа байхгүй байна</h2>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              Дэлгүүр одоохондоо хоосон байна.<br />Админ хэсгээс ангилал болон бараа нэмнэ үү.
+            </p>
+            <Link
+              href="/admin/products/new"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-200"
+            >
+              <Package className="w-5 h-5" />
+              Бараа нэмэх
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
