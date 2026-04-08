@@ -16,6 +16,9 @@ import {
   Pipette,
   Ruler,
   Filter,
+  FolderPlus,
+  ChevronRight,
+  CheckCircle2,
 } from 'lucide-react';
 import { Button, Input, Textarea } from '@/components/ui';
 import { SIZE_PRESETS, SIZE_TYPE_LABELS, COMMON_COLORS, CATEGORY_FILTERS } from '@/lib/constants';
@@ -60,6 +63,13 @@ export default function NewProductPage() {
   const [subcategories, setSubcategories] = useState<CategoryOption[]>([]);
   const [selectedMainCat, setSelectedMainCat] = useState<CategoryOption | null>(null);
   const [attributes, setAttributes] = useState<Record<string, string>>({});
+
+  // Inline category creation state
+  const [showAddMainCat, setShowAddMainCat] = useState(false);
+  const [showAddSubCat, setShowAddSubCat] = useState(false);
+  const [newMainCatName, setNewMainCatName] = useState('');
+  const [newSubCatName, setNewSubCatName] = useState('');
+  const [addingCat, setAddingCat] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -99,8 +109,77 @@ export default function NewProductPage() {
     const cat = categories.find(c => c._id === catId) || null;
     setSelectedMainCat(cat);
     setSubcategories(cat?.subcategories || []);
-    setFormData(prev => ({ ...prev, category: '', subcategory: '' }));
+    setFormData(prev => ({ ...prev, category: catId, subcategory: '' }));
     setAttributes({});
+    setShowAddSubCat(false);
+  };
+
+  // Create new main category inline
+  const handleCreateMainCategory = async () => {
+    const name = newMainCatName.trim();
+    if (!name) { toast.error('Ангилалын нэр оруулна уу'); return; }
+    setAddingCat(true);
+    try {
+      const slug = name.toLowerCase().replace(/[^a-z0-9а-яёөүa-z\s-]/gi, '').replace(/\s+/g, '-');
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Алдаа гарлаа');
+      }
+      const created = await res.json();
+      const newCat: CategoryOption = { _id: created._id, name: created.name, slug: created.slug, subcategories: [] };
+      setCategories(prev => [...prev, newCat]);
+      setSelectedMainCat(newCat);
+      setSubcategories([]);
+      setFormData(prev => ({ ...prev, category: created._id, subcategory: '' }));
+      setNewMainCatName('');
+      setShowAddMainCat(false);
+      toast.success(`"${name}" ангилал нэмэгдлээ`);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setAddingCat(false);
+    }
+  };
+
+  // Create new subcategory inline under selected main category
+  const handleCreateSubCategory = async () => {
+    if (!selectedMainCat) { toast.error('Эхлэж үндсэн ангилал сонгоно уу'); return; }
+    const name = newSubCatName.trim();
+    if (!name) { toast.error('Дэд ангилалын нэр оруулна уу'); return; }
+    setAddingCat(true);
+    try {
+      const slug = `${selectedMainCat.slug}-${name.toLowerCase().replace(/\s+/g, '-')}`;
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug, parent_id: selectedMainCat._id }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Алдаа гарлаа');
+      }
+      const created = await res.json();
+      const newSub: CategoryOption = { _id: created._id, name: created.name, slug: created.slug };
+      setSubcategories(prev => [...prev, newSub]);
+      setCategories(prev => prev.map(c =>
+        c._id === selectedMainCat._id
+          ? { ...c, subcategories: [...(c.subcategories || []), newSub] }
+          : c
+      ));
+      setFormData(prev => ({ ...prev, subcategory: created._id }));
+      setNewSubCatName('');
+      setShowAddSubCat(false);
+      toast.success(`"${name}" дэд ангилал нэмэгдлээ`);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setAddingCat(false);
+    }
   };
 
   const handleAttributeChange = (key: string, value: string) => {
@@ -310,7 +389,7 @@ export default function NewProductPage() {
         colors: selectedColors.length > 0 ? selectedColors : undefined,
         size_type: sizeType,
         sizes: selectedSizes,
-        category_id: formData.category || (selectedMainCat?._id),
+        category_id: formData.subcategory || formData.category || selectedMainCat?._id,
         subcategory_id: formData.subcategory || undefined,
         attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
         brand: formData.brand,
@@ -806,54 +885,179 @@ export default function NewProductPage() {
           </div>
 
           {/* Category - Two Step */}
-          <div className="bg-white rounded-xl card-shadow p-6 space-y-4">
-            <h2 className="text-lg font-semibold">Категори</h2>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Үндсэн ангилал</label>
-              <select
-                value={selectedMainCat?._id || ''}
-                onChange={(e) => handleMainCategoryChange(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
-                required
-              >
-                <option value="">Сонгоно уу</option>
-                {categories.map(cat => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
-                ))}
-              </select>
+          <div className="bg-white rounded-xl card-shadow p-6 space-y-5">
+            <div className="flex items-center gap-2">
+              <FolderPlus className="w-5 h-5 text-orange-500" />
+              <h2 className="text-lg font-semibold">Категори</h2>
             </div>
 
-            {subcategories.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Дэд ангилал</label>
-                <select
-                  name="subcategory"
-                  value={formData.subcategory}
-                  onChange={(e) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      subcategory: e.target.value,
-                      category: e.target.value || selectedMainCat?._id || '',
-                    }));
-                  }}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
-                >
-                  <option value="">Бүгд (үндсэн)</option>
-                  {subcategories.map(sub => (
-                    <option key={sub._id} value={sub._id}>{sub.name}</option>
-                  ))}
-                </select>
+            {/* ── MAIN CATEGORY ── */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Үндсэн ангилал <span className="text-red-500">*</span>
+              </label>
+
+              {categories.length === 0 ? (
+                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700">
+                  <span>Ангилал олдсонгүй.</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddMainCat(true)}
+                    className="font-semibold underline underline-offset-2 hover:text-amber-900"
+                  >
+                    Нэмэх →
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <select
+                    value={selectedMainCat?._id || ''}
+                    onChange={(e) => handleMainCategoryChange(e.target.value)}
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm bg-white"
+                  >
+                    <option value="">— Сонгоно уу —</option>
+                    {categories.map(cat => (
+                      <option key={cat._id} value={cat._id}>{cat.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { setShowAddMainCat(v => !v); setShowAddSubCat(false); }}
+                    title="Шинэ үндсэн ангилал нэмэх"
+                    className="p-2.5 rounded-lg border border-dashed border-orange-300 text-orange-500 hover:bg-orange-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* ── inline new main cat form ── */}
+              {showAddMainCat && (
+                <div className="mt-2 p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
+                  <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">Шинэ үндсэн ангилал</p>
+                  <input
+                    type="text"
+                    value={newMainCatName}
+                    onChange={(e) => setNewMainCatName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateMainCategory())}
+                    placeholder="Ангилалын нэр (жнь: Гутал)"
+                    className="w-full px-3 py-2 rounded-lg border border-orange-200 bg-white text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                    autoFocus
+                  />
+                  {newMainCatName.trim() && (
+                    <p className="text-xs text-gray-400">
+                      Slug: <span className="font-mono text-gray-600">{newMainCatName.trim().toLowerCase().replace(/\s+/g, '-')}</span>
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCreateMainCategory}
+                      disabled={addingCat || !newMainCatName.trim()}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                    >
+                      {addingCat ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                      Нэмэх
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowAddMainCat(false); setNewMainCatName(''); }}
+                      className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-orange-100 transition-colors"
+                    >
+                      Болих
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── SUB CATEGORY ── */}
+            {selectedMainCat && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+                  <ChevronRight className="w-4 h-4 text-orange-400" />
+                  Дэд ангилал
+                  <span className="text-xs font-normal text-gray-400 ml-1">(заавал биш)</span>
+                </div>
+
+                <div className="flex gap-2">
+                  <select
+                    name="subcategory"
+                    value={formData.subcategory}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subcategory: e.target.value }))}
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm bg-white"
+                  >
+                    <option value="">— Бүгд (үндсэн) —</option>
+                    {subcategories.map(sub => (
+                      <option key={sub._id} value={sub._id}>{sub.name}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { setShowAddSubCat(v => !v); setShowAddMainCat(false); }}
+                    title="Шинэ дэд ангилал нэмэх"
+                    className="p-2.5 rounded-lg border border-dashed border-orange-300 text-orange-500 hover:bg-orange-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* ── inline new sub cat form ── */}
+                {showAddSubCat && (
+                  <div className="mt-2 p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-3">
+                    <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
+                      Шинэ дэд ангилал — <span className="normal-case font-normal text-blue-600">{selectedMainCat.name}</span>
+                    </p>
+                    <input
+                      type="text"
+                      value={newSubCatName}
+                      onChange={(e) => setNewSubCatName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateSubCategory())}
+                      placeholder="Дэд ангилалын нэр (жнь: Спорт гутал)"
+                      className="w-full px-3 py-2 rounded-lg border border-blue-200 bg-white text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
+                      autoFocus
+                    />
+                    {newSubCatName.trim() && (
+                      <p className="text-xs text-gray-400">
+                        Slug: <span className="font-mono text-gray-600">{selectedMainCat.slug}-{newSubCatName.trim().toLowerCase().replace(/\s+/g, '-')}</span>
+                      </p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCreateSubCategory}
+                        disabled={addingCat || !newSubCatName.trim()}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors font-medium"
+                      >
+                        {addingCat ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                        Нэмэх
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setShowAddSubCat(false); setNewSubCatName(''); }}
+                        className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        Болих
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
+            {/* ── breadcrumb summary ── */}
             {selectedMainCat && (
-              <p className="text-xs text-gray-400">
-                Сонгосон: {selectedMainCat.name}
-                {formData.subcategory && subcategories.find(s => s._id === formData.subcategory) &&
-                  ` → ${subcategories.find(s => s._id === formData.subcategory)?.name}`
-                }
-              </p>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+                <span className="font-medium text-gray-700">{selectedMainCat.name}</span>
+                {formData.subcategory && (
+                  <>
+                    <ChevronRight className="w-3 h-3" />
+                    <span className="font-medium text-orange-600">
+                      {subcategories.find(s => s._id === formData.subcategory)?.name}
+                    </span>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
