@@ -1,12 +1,12 @@
 ﻿'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Tag, LucideIcon } from 'lucide-react';
-import { ProductCard } from '@/components/product';
+import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Truck, ShieldCheck, RotateCcw, Headphones } from 'lucide-react';
 import { CategorySlider, ProductSlider } from '@/components/home';
 import { Product } from '@/types';
+import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
 
 // Helper to map API response (_id) to frontend Product type (id)
 function mapProduct(p: any): Product {
@@ -33,24 +33,6 @@ function mapProduct(p: any): Product {
     updated_at: p.updated_at || '',
   };
 }
-
-// Slug-to-icon/style config for category cards
-const CAT_CONFIG: Record<string, { icon: LucideIcon; gradient: string; light: string; iconColor: string }> = {
-  beauty:  { icon: Sparkles,   gradient: 'from-pink-400 to-rose-500',     light: 'bg-pink-50',   iconColor: 'text-pink-500' },
-  fashion: { icon: Shirt,      gradient: 'from-purple-400 to-violet-500',  light: 'bg-purple-50', iconColor: 'text-purple-500' },
-  shoes:   { icon: Footprints, gradient: 'from-blue-400 to-cyan-500',      light: 'bg-blue-50',   iconColor: 'text-blue-500' },
-  dyson:   { icon: Wind,       gradient: 'from-cyan-400 to-teal-500',      light: 'bg-cyan-50',   iconColor: 'text-cyan-500' },
-  trendy:  { icon: TrendingUp, gradient: 'from-rose-400 to-orange-500',    light: 'bg-rose-50',   iconColor: 'text-rose-500' },
-  best:    { icon: Award,      gradient: 'from-amber-400 to-yellow-500',   light: 'bg-amber-50',  iconColor: 'text-amber-500' },
-  sale:    { icon: Tag,        gradient: 'from-red-400 to-rose-500',       light: 'bg-red-50',    iconColor: 'text-red-500' },
-};
-
-const FALLBACK_GRADIENTS = [
-  { gradient: 'from-orange-400 to-amber-500', light: 'bg-orange-50', iconColor: 'text-orange-500' },
-  { gradient: 'from-teal-400 to-green-500',   light: 'bg-teal-50',   iconColor: 'text-teal-500' },
-  { gradient: 'from-violet-400 to-purple-500',light: 'bg-violet-50', iconColor: 'text-violet-500' },
-  { gradient: 'from-sky-400 to-blue-500',     light: 'bg-sky-50',    iconColor: 'text-sky-500' },
-];
 
 // Banner type
 interface Banner {
@@ -192,121 +174,164 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [isPaused, banners.length, nextSlide]);
 
+  // ── Time-deal countdown (resets every 6h) ──
+  const [timeLeft, setTimeLeft] = useState({ h: 0, m: 0, s: 0 });
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const next = new Date(now);
+      const slot = Math.ceil((now.getHours() + 1) / 6) * 6;
+      next.setHours(slot, 0, 0, 0);
+      const diff = Math.max(0, next.getTime() - now.getTime());
+      setTimeLeft({
+        h: Math.floor(diff / 3_600_000),
+        m: Math.floor((diff % 3_600_000) / 60_000),
+        s: Math.floor((diff % 60_000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // ── Top ranking list (sale > featured > all, top 5) ──
+  const rankingProducts = useMemo(() => {
+    const pool = [...saleProducts, ...featuredProducts, ...allProducts];
+    const seen = new Set<string>();
+    const unique: Product[] = [];
+    for (const p of pool) {
+      if (!seen.has(p.id)) { seen.add(p.id); unique.push(p); }
+      if (unique.length >= 8) break;
+    }
+    return unique;
+  }, [saleProducts, featuredProducts, allProducts]);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ── HERO BANNER SLIDER ── */}
-      <section
-        className="relative overflow-hidden bg-white"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {banners.map((banner, index) => (
+    <div className="min-h-screen bg-gray-100">
+      {/* ── HERO BANNER SLIDER (rounded card style) ── */}
+      <section className="bg-white pb-2">
+        <div className="max-w-7xl mx-auto px-3 pt-3">
+          <div
+            className="relative overflow-hidden rounded-2xl shadow-sm"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             <div
-              key={banner._id}
-              className="w-full flex-shrink-0 relative"
-              style={{ backgroundColor: banner.bg_color }}
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
-              <Link href={banner.link || '/products'} className="block">
-                <div className="max-w-7xl mx-auto px-4 py-4 lg:py-6">
-                  <div className="flex items-center justify-between">
-                    <div className="w-full lg:w-1/2 text-center lg:text-left z-10">
-                      {banner.subtitle && (
-                        <p className="text-lg lg:text-xl font-medium mb-2 opacity-80" style={{ color: banner.text_color }}>
-                          {banner.subtitle}
-                        </p>
-                      )}
-                      <h1 className="text-4xl lg:text-6xl xl:text-7xl font-bold mb-4 tracking-wide" style={{ color: banner.text_color }}>
-                        {banner.title}
-                      </h1>
-                      {banner.description && (
-                        <p className="text-gray-600 text-lg mb-6">{banner.description}</p>
-                      )}
-                      <span className="inline-flex items-center font-medium hover:opacity-80 transition-opacity" style={{ color: banner.text_color }}>
-                        SHOP NOW <ArrowRight className="ml-2 w-5 h-5" />
-                      </span>
+              {banners.map((banner, index) => (
+                <div
+                  key={banner._id}
+                  className="w-full flex-shrink-0 relative"
+                  style={{ backgroundColor: banner.bg_color }}
+                >
+                  <Link href={banner.link || '/products'} className="block">
+                    <div className="px-6 lg:px-12 py-6 lg:py-10">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="w-full lg:w-1/2 z-10">
+                          {banner.subtitle && (
+                            <p className="text-sm lg:text-base font-medium mb-2 opacity-80" style={{ color: banner.text_color }}>
+                              {banner.subtitle}
+                            </p>
+                          )}
+                          <h1 className="text-3xl lg:text-5xl xl:text-6xl font-extrabold mb-3 tracking-tight leading-tight" style={{ color: banner.text_color }}>
+                            {banner.title}
+                          </h1>
+                          {banner.description && (
+                            <p className="text-gray-700/80 text-sm lg:text-base mb-5 line-clamp-2">{banner.description}</p>
+                          )}
+                          <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/90 backdrop-blur text-gray-900 text-sm font-semibold hover:bg-white transition-all">
+                            SHOP NOW <ArrowRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                        <div className="hidden lg:block w-1/2 relative h-[220px]">
+                          <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="hidden lg:block w-1/2 relative h-[220px]">
+                    <div className="lg:hidden relative h-[120px]">
                       <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
                     </div>
-                  </div>
+                  </Link>
                 </div>
-                <div className="lg:hidden relative h-[110px] mt-2">
-                  <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-
-        {banners.length > 1 && (
-          <>
-            <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
-            </button>
-            <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-lg hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
-              <ChevronRight className="w-5 h-5 text-gray-700" />
-            </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
-              {banners.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`transition-all duration-300 rounded-full ${index === currentSlide ? 'w-6 h-2 bg-orange-500' : 'w-2 h-2 bg-gray-300 hover:bg-gray-500'}`}
-                />
               ))}
             </div>
-          </>
-        )}
+
+            {banners.length > 1 && (
+              <>
+                <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-md hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+                <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-md hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
+                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                </button>
+                <div className="absolute bottom-3 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur text-white text-[11px] font-medium z-20">
+                  {currentSlide + 1} / {banners.length}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </section>
 
-      {/* ── CATEGORY QUICK-NAV ICONS ── */}
+      {/* ── CATEGORY QUICK-NAV (single horizontal row) ── */}
       <CategorySlider categories={categories.length > 0 ? categories.map(c => ({ id: c._id, name: c.name, slug: c.slug, icon: c.icon, image: c.image })) : undefined} />
 
-      {/* ── CATEGORY SHOWCASE CARDS ── */}
-      {categories.length > 0 && (
-        <section className="bg-white py-8 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold text-gray-900">Ангилалаар үзэх</h2>
-              <Link href="/products" className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1">
-                Бүгд <ChevronRight className="w-4 h-4" />
-              </Link>
+      {/* ── TIME DEAL (Korean-style flash deal w/ countdown) ── */}
+      {saleProducts.length > 0 && (
+        <section className="mt-2 bg-white">
+          <div className="max-w-7xl mx-auto px-4 py-5">
+            <div className="flex items-end justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold">
+                  <Flame className="w-3.5 h-3.5" /> TIME DEAL
+                </div>
+                <h2 className="text-lg md:text-xl font-extrabold text-gray-900">Цагийн онцгой хямдрал</h2>
+              </div>
+              <div className="flex items-center gap-1 font-mono text-sm">
+                {(['h','m','s'] as const).map((k, i) => (
+                  <span key={k} className="contents">
+                    <span className="px-2 py-1 rounded-md bg-gray-900 text-white font-bold tabular-nums min-w-[34px] text-center">
+                      {String((timeLeft as any)[k]).padStart(2, '0')}
+                    </span>
+                    {i < 2 && <span className="text-gray-400 font-bold">:</span>}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {categories.slice(0, 6).map((cat, i) => {
-                const slugKey = cat.slug?.split('-')[0]?.toLowerCase() || '';
-                const cfg = CAT_CONFIG[slugKey] || { ...FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length], icon: Package };
-                const Icon = cfg.icon;
+            <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-1">
+              {saleProducts.slice(0, 10).map((product) => {
+                const discount = calculateDiscountPercent(product.price, product.sale_price || 0);
                 return (
                   <Link
-                    key={cat._id}
-                    href={`/category/${cat.slug}`}
-                    className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100 hover:border-transparent hover:shadow-lg transition-all duration-300"
+                    key={product.id}
+                    href={`/product/${product.slug}`}
+                    className="flex-shrink-0 w-40 md:w-44 group"
                   >
-                    {/* Top colored strip */}
-                    <div className={`h-1.5 w-full bg-gradient-to-r ${cfg.gradient}`} />
-
-                    <div className="p-4 flex flex-col items-center text-center gap-3">
-                      {/* Icon circle */}
-                      <div className={`w-12 h-12 rounded-xl ${cfg.light} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
-                        {cat.image ? (
-                          <img src={cat.image} alt={cat.name} className="w-10 h-10 object-cover rounded-lg" />
-                        ) : (
-                          <Icon className={`w-6 h-6 ${cfg.iconColor}`} />
-                        )}
-                      </div>
-
-                      <span className="text-sm font-semibold text-gray-800 group-hover:text-orange-500 transition-colors leading-tight">
-                        {cat.name}
-                      </span>
-
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r ${cfg.gradient} text-white opacity-0 group-hover:opacity-100 transition-opacity`}>
-                        Үзэх →
+                    <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                      <Image
+                        src={product.images[0] || '/placeholder.svg'}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {discount > 0 && (
+                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-red-500 text-white text-[11px] font-bold">
+                          -{discount}%
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-xs md:text-sm text-gray-800 mt-2 line-clamp-2 leading-snug min-h-[34px]">
+                      {product.name}
+                    </h3>
+                    <div className="mt-1 flex items-baseline gap-1.5">
+                      {discount > 0 && (
+                        <span className="text-red-500 font-extrabold text-sm">{discount}%</span>
+                      )}
+                      <span className="text-base font-extrabold text-gray-900">
+                        {formatPrice(product.sale_price || product.price)}
                       </span>
                     </div>
                   </Link>
@@ -317,46 +342,143 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── SALE PRODUCTS ── */}
-      {saleProducts.length > 0 && (
-        <ProductSlider
-          title="Today's Deal"
-          badge="Sale"
-          badgeColor="bg-red-500"
-          products={saleProducts}
-          viewAllLink="/products?sale=true"
-        />
+      {/* ── TOP RANKING (Korean weekly best style) ── */}
+      {rankingProducts.length > 0 && (
+        <section className="mt-2 bg-white">
+          <div className="max-w-7xl mx-auto px-4 py-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg md:text-xl font-extrabold text-gray-900">Шилдэг рэнкинг</h2>
+                <span className="text-xs text-gray-400">7 хоногийн шилдэг</span>
+              </div>
+              <Link href="/products?featured=true" className="text-xs text-gray-500 hover:text-orange-500 font-medium">
+                Бүгд &gt;
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {rankingProducts.slice(0, 8).map((product, idx) => {
+                const discount = calculateDiscountPercent(product.price, product.sale_price || 0);
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/product/${product.slug}`}
+                    className="flex gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                      <Image
+                        src={product.images[0] || '/placeholder.svg'}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className={`absolute top-1 left-1 w-6 h-6 rounded-md flex items-center justify-center text-xs font-extrabold text-white ${idx < 3 ? 'bg-red-500' : 'bg-gray-800/80'}`}>
+                        {idx + 1}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <h3 className="text-sm text-gray-800 line-clamp-2 leading-snug">{product.name}</h3>
+                      <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                        {discount > 0 && (
+                          <span className="text-red-500 font-extrabold text-sm">{discount}%</span>
+                        )}
+                        <span className="text-sm font-extrabold text-gray-900">
+                          {formatPrice(product.sale_price || product.price)}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* ── FEATURED / TRENDING ── */}
       {featuredProducts.length > 0 && (
-        <ProductSlider
-          title="Trending Now"
-          subtitle="Одоо эрэлттэй байгаа"
-          products={featuredProducts}
-          viewAllLink="/products?featured=true"
-        />
+        <div className="mt-2">
+          <ProductSlider
+            title="Trending Now"
+            subtitle="Одоо эрэлттэй байгаа"
+            products={featuredProducts}
+            viewAllLink="/products?featured=true"
+          />
+        </div>
       )}
+
+      {/* ── PROMO STRIP ── */}
+      <section className="mt-2 bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Link href="/products?new=true" className="relative h-32 md:h-36 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 via-rose-50 to-orange-50 p-5 flex items-center justify-between group">
+              <div>
+                <p className="text-xs font-bold text-rose-500 mb-1">NEW IN</p>
+                <h3 className="text-xl md:text-2xl font-extrabold text-gray-900">Шинэ ирсэн</h3>
+                <p className="text-xs text-gray-500 mt-1">Энэ долоо хоногийн шинэлэг</p>
+              </div>
+              <ArrowRight className="w-6 h-6 text-rose-500 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="/products?sale=true" className="relative h-32 md:h-36 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 p-5 flex items-center justify-between group">
+              <div>
+                <p className="text-xs font-bold text-orange-600 mb-1">UP TO 70% OFF</p>
+                <h3 className="text-xl md:text-2xl font-extrabold text-gray-900">Хямдралын зах</h3>
+                <p className="text-xs text-gray-500 mt-1">Хязгаарлагдмал тоо</p>
+              </div>
+              <ArrowRight className="w-6 h-6 text-orange-600 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── NEW ARRIVALS ── */}
       {newProducts.length > 0 && (
-        <ProductSlider
-          title="New Arrivals"
-          subtitle="Шинэ ирсэн"
-          products={newProducts}
-          viewAllLink="/products?new=true"
-        />
+        <div className="mt-2">
+          <ProductSlider
+            title="New Arrivals"
+            subtitle="Шинэ ирсэн"
+            products={newProducts}
+            viewAllLink="/products?new=true"
+          />
+        </div>
       )}
 
       {/* ── ALL PRODUCTS FALLBACK ── */}
       {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length > 0 && (
-        <ProductSlider
-          title="Бүтээгдэхүүн"
-          subtitle="Бүх бараанууд"
-          products={allProducts}
-          viewAllLink="/products"
-        />
+        <div className="mt-2">
+          <ProductSlider
+            title="Бүтээгдэхүүн"
+            subtitle="Бүх бараанууд"
+            products={allProducts}
+            viewAllLink="/products"
+          />
+        </div>
       )}
+
+      {/* ── TRUST / SERVICE BAR (Korean shop footer feature row) ── */}
+      <section className="mt-2 bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { Icon: Truck,        title: 'Хурдан хүргэлт', desc: 'УБ дотор 24 цагт' },
+              { Icon: ShieldCheck,  title: 'Баталгаат',       desc: '100% эх барааны' },
+              { Icon: RotateCcw,    title: 'Буцаалт',         desc: '7 хоногийн дотор' },
+              { Icon: Headphones,   title: '24/7 Тусламж',    desc: 'Хэзээ ч холбогдоорой' },
+            ].map(({ Icon, title, desc }) => (
+              <div key={title} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+                  <Icon className="w-5 h-5 text-orange-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-900 truncate">{title}</p>
+                  <p className="text-[11px] text-gray-500 truncate">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── EMPTY STATE (no products at all) ── */}
       {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length === 0 && categories.length === 0 && (
