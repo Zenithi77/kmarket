@@ -27,8 +27,20 @@ async function connectDB(): Promise<typeof mongoose> {
   }
 
   if (!cached.promise) {
-    const opts = {
+    const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
+      // ── Serverless-friendly tuning ──
+      // Small pool — each lambda only needs 1-2 connections
+      maxPoolSize: 5,
+      minPoolSize: 0,
+      // Drop idle sockets quickly so warm lambdas don't hold dead connections
+      maxIdleTimeMS: 10_000,
+      // Fail fast instead of hanging if Atlas is slow / unreachable
+      serverSelectionTimeoutMS: 5_000,
+      socketTimeoutMS: 20_000,
+      // Faster initial handshake
+      compressors: 'zlib',
+      retryWrites: true,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
