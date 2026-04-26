@@ -63,7 +63,7 @@ const mockProducts = [
     slug: 'dyson-airwrap-complete',
     price: 2200000,
     originalPrice: 2500000,
-    images: ['/products/dyson-airwrap.jpg'],
+    images: ['/placeholder.svg'],
     category: { id: '4', name: 'Dyson', slug: 'dyson' },
     isNew: true,
     isOnSale: true,
@@ -79,7 +79,7 @@ const mockProducts = [
     slug: 'nike-air-force-1-07',
     price: 450000,
     originalPrice: null,
-    images: ['/products/nike-af1.jpg'],
+    images: ['/placeholder.svg'],
     category: { id: '3', name: 'Гутал', slug: 'shoes' },
     isNew: false,
     isOnSale: false,
@@ -95,7 +95,7 @@ const mockProducts = [
     slug: 'mac-lipstick-ruby-woo',
     price: 95000,
     originalPrice: 120000,
-    images: ['/products/mac-lipstick.jpg'],
+    images: ['/placeholder.svg'],
     category: { id: '1', name: 'Гоо сайхан', slug: 'beauty' },
     isNew: false,
     isOnSale: true,
@@ -111,7 +111,7 @@ const mockProducts = [
     slug: 'adidas-ultraboost-22',
     price: 450000,
     originalPrice: 520000,
-    images: ['/products/adidas-ultraboost.jpg'],
+    images: ['/placeholder.svg'],
     category: { id: '3', name: 'Гутал', slug: 'shoes' },
     isNew: true,
     isOnSale: true,
@@ -182,7 +182,8 @@ export default function CategoryPage() {
           {category.subcategories.map((sub) => (
             <Link
               key={sub.slug}
-              href={`/category/${slug}/${sub.slug}`}
+              href={`/category/${slug}?sub=${sub.slug}`}
+              prefetch={false}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm font-medium text-gray-700 transition-colors"
             >
               {sub.name}

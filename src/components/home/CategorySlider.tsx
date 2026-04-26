@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Tag, Truck, Star, LucideIcon } from 'lucide-react';
 
 interface CategoryItem {
@@ -61,7 +62,15 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
                   className={`w-20 h-20 rounded-3xl ${config.bg} flex items-center justify-center group-active:scale-95 transition-transform duration-150 overflow-hidden shadow-sm`}
                 >
                   {category.image ? (
-                    <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      width={80}
+                      height={80}
+                      sizes="80px"
+                      priority={index < 6}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (config as any).icon ? (
                     <IconComponent className={`w-10 h-10 ${config.iconColor}`} />
                   ) : (
@@ -94,7 +103,14 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
                   className={`w-12 h-12 rounded-full ${config.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 overflow-hidden`}
                 >
                   {category.image ? (
-                    <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      width={48}
+                      height={48}
+                      sizes="48px"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (config as any).icon ? (
                     <IconComponent className={`w-5 h-5 ${config.iconColor}`} />
                   ) : (
