@@ -316,7 +316,7 @@ export default function Header() {
 
       {/* Mobile Menu Overlay – rendered via portal so it escapes header's backdrop-filter containing block */}
       {mounted && createPortal(
-      <div className="md:hidden" aria-hidden={!isMenuOpen}>
+      <div className="md:hidden" {...(!isMenuOpen ? { inert: '' as any } : {})}>
         {/* Backdrop */}
         <div
           className={`fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
