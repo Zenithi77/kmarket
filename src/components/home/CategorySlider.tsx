@@ -4,6 +4,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Tag, Truck, Star, LucideIcon } from 'lucide-react';
 
+// Cloudinary on-the-fly transform: tiny + auto format/quality, bypasses /_next/image
+function cdnIcon(url: string | undefined, size: number): string | undefined {
+  if (!url) return url;
+  if (url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+    return url.replace('/upload/', `/upload/f_auto,q_auto,c_fill,w_${size},h_${size}/`);
+  }
+  return url;
+}
+
+const isCloudinary = (url?: string) => !!url && url.includes('res.cloudinary.com');
+
 interface CategoryItem {
   id: string;
   name: string;
@@ -63,12 +74,13 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
                 >
                   {category.image ? (
                     <Image
-                      src={category.image}
+                      src={cdnIcon(category.image, 160)!}
                       alt={category.name}
                       width={80}
                       height={80}
                       sizes="80px"
                       priority={index < 6}
+                      unoptimized={isCloudinary(category.image)}
                       className="w-full h-full object-cover"
                     />
                   ) : (config as any).icon ? (
@@ -104,11 +116,12 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
                 >
                   {category.image ? (
                     <Image
-                      src={category.image}
+                      src={cdnIcon(category.image, 96)!}
                       alt={category.name}
                       width={48}
                       height={48}
                       sizes="48px"
+                      unoptimized={isCloudinary(category.image)}
                       className="w-full h-full object-cover"
                     />
                   ) : (config as any).icon ? (
