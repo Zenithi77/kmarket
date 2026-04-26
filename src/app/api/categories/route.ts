@@ -41,7 +41,13 @@ export async function GET(request: NextRequest) {
       ),
     }));
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: {
+        // Edge-cache for 1 hour, serve stale up to 1 day while revalidating
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, s-maxage=3600',
+      },
+    });
   } catch (error) {
     console.error('Categories GET error:', error);
     return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });

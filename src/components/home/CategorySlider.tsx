@@ -50,7 +50,31 @@ const FALLBACK_CONFIGS = [
 ];
 
 export default function CategorySlider({ categories }: CategorySliderProps) {
-  if (!categories || categories.length === 0) return null;
+  // Render a lightweight skeleton while categories are loading so layout doesn't shift
+  if (!categories || categories.length === 0) {
+    return (
+      <section className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="md:hidden grid grid-cols-3 gap-y-5 gap-x-2 px-3 py-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-2.5">
+                <div className="w-20 h-20 rounded-3xl bg-gray-100 animate-pulse" />
+                <div className="w-12 h-3 rounded bg-gray-100 animate-pulse" />
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:flex items-center justify-center gap-6 px-4 py-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <div className="w-12 h-12 rounded-full bg-gray-100 animate-pulse" />
+                <div className="w-10 h-2.5 rounded bg-gray-100 animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white border-b border-gray-100">

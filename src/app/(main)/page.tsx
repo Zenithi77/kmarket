@@ -95,6 +95,17 @@ export default function HomePage() {
 
   // Fetch banners, categories, and products from API
   useEffect(() => {
+    // ── Hydrate categories instantly from localStorage cache (instant icons on revisit) ──
+    try {
+      const cached = localStorage.getItem('km:categories');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed?.data) && Date.now() - parsed.t < 24 * 3600 * 1000) {
+          setCategories(parsed.data);
+        }
+      }
+    } catch {}
+
     const fetchBanners = async () => {
       try {
         const res = await fetch('/api/banners');
@@ -113,6 +124,9 @@ export default function HomePage() {
         const data = await res.json();
         if (Array.isArray(data)) {
           setCategories(data);
+          try {
+            localStorage.setItem('km:categories', JSON.stringify({ t: Date.now(), data }));
+          } catch {}
         }
       } catch (error) {
         console.log('Failed to fetch categories');

@@ -21,6 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="mn">
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      </head>
       <body className="antialiased">
         <Providers>
           {children}
