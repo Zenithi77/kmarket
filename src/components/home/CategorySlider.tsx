@@ -41,11 +41,11 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
   if (!categories || categories.length === 0) return null;
 
   return (
-    <section className="bg-white border-b border-gray-100 sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-white/90">
+    <section className="bg-white border-b border-gray-100">
       <div className="max-w-7xl mx-auto">
-        {/* Single horizontal row, scroll on overflow (Coupang / Musinsa style) */}
-        <div className="flex gap-1 overflow-x-auto hide-scrollbar px-3 py-3 snap-x">
-          {categories.map((category, index) => {
+        {/* ── MOBILE: Coupang-style 5-col grid (2 rows max = 10 items) ── */}
+        <div className="md:hidden grid grid-cols-5 gap-y-4 gap-x-1 px-2 py-4">
+          {categories.slice(0, 10).map((category, index) => {
             const slugKey = category.slug?.split('-')[0]?.toLowerCase() || '';
             const config = SLUG_MAP[slugKey] || FALLBACK_CONFIGS[index % FALLBACK_CONFIGS.length];
             const IconComponent = (config as any).icon || Package;
@@ -55,20 +55,53 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="flex-shrink-0 snap-start flex flex-col items-center gap-1.5 group w-[68px] md:w-[84px]"
+                className="flex flex-col items-center gap-2 group active:opacity-70"
               >
                 <div
-                  className={`w-14 h-14 md:w-16 md:h-16 rounded-full ${config.bg} flex items-center justify-center group-hover:scale-105 group-active:scale-95 transition-transform duration-200 overflow-hidden`}
+                  className={`w-16 h-16 rounded-2xl ${config.bg} flex items-center justify-center group-active:scale-95 transition-transform duration-150 overflow-hidden shadow-sm`}
                 >
                   {category.image ? (
                     <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
                   ) : (config as any).icon ? (
-                    <IconComponent className={`w-6 h-6 md:w-7 md:h-7 ${config.iconColor}`} />
+                    <IconComponent className={`w-8 h-8 ${config.iconColor}`} />
                   ) : (
-                    <span className={`text-xl font-bold ${config.iconColor}`}>{initial}</span>
+                    <span className={`text-2xl font-bold ${config.iconColor}`}>{initial}</span>
                   )}
                 </div>
-                <span className="text-[11px] md:text-xs font-medium text-gray-700 text-center leading-tight group-hover:text-orange-500 transition-colors line-clamp-1 w-full">
+                <span className="text-[11px] font-medium text-gray-700 text-center leading-tight line-clamp-2 px-0.5 min-h-[28px]">
+                  {category.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* ── DESKTOP: small horizontal row (search-bar adjunct, max 8) ── */}
+        <div className="hidden md:flex items-center justify-center gap-6 px-4 py-3">
+          {categories.slice(0, 8).map((category, index) => {
+            const slugKey = category.slug?.split('-')[0]?.toLowerCase() || '';
+            const config = SLUG_MAP[slugKey] || FALLBACK_CONFIGS[index % FALLBACK_CONFIGS.length];
+            const IconComponent = (config as any).icon || Package;
+            const initial = category.name.charAt(0).toUpperCase();
+
+            return (
+              <Link
+                key={category.id}
+                href={`/category/${category.slug}`}
+                className="flex flex-col items-center gap-1.5 group min-w-0"
+              >
+                <div
+                  className={`w-12 h-12 rounded-full ${config.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 overflow-hidden`}
+                >
+                  {category.image ? (
+                    <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+                  ) : (config as any).icon ? (
+                    <IconComponent className={`w-5 h-5 ${config.iconColor}`} />
+                  ) : (
+                    <span className={`text-base font-bold ${config.iconColor}`}>{initial}</span>
+                  )}
+                </div>
+                <span className="text-[11px] font-medium text-gray-600 group-hover:text-orange-500 transition-colors whitespace-nowrap">
                   {category.name}
                 </span>
               </Link>
