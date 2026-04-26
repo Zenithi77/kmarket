@@ -43,9 +43,9 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
   return (
     <section className="bg-white border-b border-gray-100">
       <div className="max-w-7xl mx-auto">
-        {/* ── MOBILE: Coupang-style 5-col grid (2 rows max = 10 items) ── */}
-        <div className="md:hidden grid grid-cols-5 gap-y-4 gap-x-1 px-2 py-4">
-          {categories.slice(0, 10).map((category, index) => {
+        {/* ── MOBILE: Coupang-style 3-col grid (2 rows max = 6 items) ── */}
+        <div className="md:hidden grid grid-cols-3 gap-y-5 gap-x-2 px-3 py-5">
+          {categories.slice(0, 6).map((category, index) => {
             const slugKey = category.slug?.split('-')[0]?.toLowerCase() || '';
             const config = SLUG_MAP[slugKey] || FALLBACK_CONFIGS[index % FALLBACK_CONFIGS.length];
             const IconComponent = (config as any).icon || Package;
@@ -55,20 +55,20 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className="flex flex-col items-center gap-2 group active:opacity-70"
+                className="flex flex-col items-center gap-2.5 group active:opacity-70"
               >
                 <div
-                  className={`w-16 h-16 rounded-2xl ${config.bg} flex items-center justify-center group-active:scale-95 transition-transform duration-150 overflow-hidden shadow-sm`}
+                  className={`w-20 h-20 rounded-3xl ${config.bg} flex items-center justify-center group-active:scale-95 transition-transform duration-150 overflow-hidden shadow-sm`}
                 >
                   {category.image ? (
                     <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
                   ) : (config as any).icon ? (
-                    <IconComponent className={`w-8 h-8 ${config.iconColor}`} />
+                    <IconComponent className={`w-10 h-10 ${config.iconColor}`} />
                   ) : (
-                    <span className={`text-2xl font-bold ${config.iconColor}`}>{initial}</span>
+                    <span className={`text-3xl font-bold ${config.iconColor}`}>{initial}</span>
                   )}
                 </div>
-                <span className="text-[11px] font-medium text-gray-700 text-center leading-tight line-clamp-2 px-0.5 min-h-[28px]">
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight line-clamp-1">
                   {category.name}
                 </span>
               </Link>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -313,11 +314,12 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay – always mounted, driven by translate */}
+      {/* Mobile Menu Overlay – rendered via portal so it escapes header's backdrop-filter containing block */}
+      {mounted && createPortal(
       <div className="md:hidden" aria-hidden={!isMenuOpen}>
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+          className={`fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
             isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
           onClick={() => setIsMenuOpen(false)}
@@ -325,7 +327,7 @@ export default function Header() {
 
         {/* Slide-in Panel */}
         <div
-          className={`fixed left-0 top-0 bottom-0 z-50 w-[82%] max-w-xs bg-white shadow-2xl overflow-y-auto transition-transform duration-300 ease-in-out ${
+          className={`fixed left-0 top-0 bottom-0 z-[101] w-[82%] max-w-xs bg-white shadow-2xl overflow-y-auto transition-transform duration-300 ease-in-out ${
             isMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
@@ -411,7 +413,9 @@ export default function Header() {
           {/* Bottom spacer */}
           <div className="h-8" />
         </div>
-      </div>
+      </div>,
+      document.body
+      )}
     </header>
   );
 }
