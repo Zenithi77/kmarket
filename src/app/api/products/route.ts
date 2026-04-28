@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
-import { Product } from '@/lib/models';
+import { Product, Category } from '@/lib/models';
+
+const isObjectId = (v: string) => mongoose.Types.ObjectId.isValid(v) && /^[a-f0-9]{24}$/i.test(v);
+
+async function resolveCategoryId(value: string | null): Promise<string | null> {
+  if (!value) return null;
+  if (isObjectId(value)) return value;
+  const cat = await Category.findOne({ slug: value }).select('_id').lean<{ _id: mongoose.Types.ObjectId }>();
+  return cat ? cat._id.toString() : '__NOMATCH__';
+}
 
 // GET /api/products
 export async function GET(request: NextRequest) {
@@ -17,11 +27,12 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get('min_price');
     const maxPrice = searchParams.get('max_price');
     const brand = searchParams.get('brand');
+    const color = searchParams.get('color');
     const sort = searchParams.get('sort') || 'created_at';
     const order = searchParams.get('order') || 'desc';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
-    
+
     // Attribute-based filters (passed as attr_KEY=VALUE)
     const attrFilters: Record<string, string> = {};
     searchParams.forEach((value, key) => {
@@ -35,8 +46,21 @@ export async function GET(request: NextRequest) {
 
     const query: any = { is_active: true };
 
-    if (category) query.category_id = category;
-    if (subcategory) query.subcategory_id = subcategory;
+    // Resolve category/subcategory by slug or id
+    const [categoryId, subcategoryId] = await Promise.all([
+      resolveCategoryId(category),
+      resolveCategoryId(subcategory),
+    ]);
+
+    if (categoryId === '__NOMATCH__' || subcategoryId === '__NOMATCH__') {
+      return NextResponse.json({
+        products: [],
+        pagination: { page, limit, total: 0, pages: 0 },
+      });
+    }
+
+    if (categoryId) query.category_id = categoryId;
+    if (subcategoryId) query.subcategory_id = subcategoryId;
     if (brand) query.brand = brand;
     if (featured === 'true') query.is_featured = true;
     if (isNew === 'true') query.is_new = true;
@@ -59,6 +83,11 @@ export async function GET(request: NextRequest) {
     // Size filter
     if (sizeFilter) {
       query.sizes = sizeFilter;
+    }
+
+    // Color filter (match by color name, case-insensitive)
+    if (color) {
+      query['colors.name'] = { $regex: `^${color}$`, $options: 'i' };
     }
 
     // Attribute filters
