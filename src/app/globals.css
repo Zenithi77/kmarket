@@ -1,13 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary: #f97316;
-  --primary-dark: #ea580c;
+  --primary:       #f97316;
+  --primary-dark:  #ea580c;
   --primary-light: #fed7aa;
+  --sale:          #ef4444;
+  --surface:       #ffffff;
+  --surface-subtle:#fafafa;
+  --surface-muted: #f4f4f5;
+  --border:        #e5e7eb;
+  --text:          #18181b;
+  --text-muted:    #71717a;
 }
 
 * {
@@ -18,14 +25,22 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #fafafa;
-  color: #1a1a1a;
+  font-family: 'Inter', 'Pretendard', system-ui, sans-serif;
+  background-color: var(--surface-subtle);
+  color: var(--text);
   min-height: 100vh;
+  font-feature-settings: 'ss01', 'cv11', 'tnum';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
+
+/* Tabular numbers for prices, counts, countdowns */
+.tabular { font-variant-numeric: tabular-nums; }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -354,3 +369,102 @@ body {
 .toast-info {
   @apply bg-blue-50 border-blue-200 text-blue-800;
 }
+
+/* ─────────────────────────────────────────────────────────
+   Korean shopping design system — additions (non-breaking)
+   ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* Surface containers */
+  .kcard {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-soft;
+  }
+  .kcard-flat {
+    @apply bg-white rounded-2xl border border-gray-100;
+  }
+  .kcard-hover {
+    @apply kcard transition-all duration-300 hover:shadow-cardHover hover:-translate-y-0.5;
+  }
+  .ksection {
+    @apply bg-white rounded-2xl border border-gray-100;
+  }
+  .ksection-title {
+    @apply text-lg md:text-xl font-extrabold text-gray-900 tracking-tight;
+  }
+  .ksection-sub {
+    @apply text-xs md:text-sm text-gray-500;
+  }
+
+  /* Soft dividers */
+  .kdivider {
+    @apply h-px w-full bg-gray-100;
+  }
+  .kdivider-strong {
+    @apply h-px w-full bg-gray-200;
+  }
+
+  /* Chips (filter, pill, tag) */
+  .kchip {
+    @apply inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 transition-colors;
+  }
+  .kchip-primary {
+    @apply inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold hover:bg-primary-100 transition-colors;
+  }
+  .kchip-sale {
+    @apply inline-flex items-center gap-1 h-7 px-2.5 rounded-full bg-sale-50 text-sale-600 text-xs font-semibold;
+  }
+
+  /* Price typography (Korean-style: bold black, sale red %, gray strike) */
+  .price {
+    @apply text-base md:text-lg font-extrabold text-gray-900 tabular;
+  }
+  .price-lg {
+    @apply text-xl md:text-2xl font-extrabold text-gray-900 tabular;
+  }
+  .price-sale {
+    @apply text-sale-500 font-extrabold tabular;
+  }
+  .price-strike {
+    @apply text-xs md:text-sm text-gray-400 line-through tabular;
+  }
+
+  /* Skeleton with shimmer */
+  .kskeleton {
+    background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-md;
+  }
+
+  /* Focus ring helper */
+  .kring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white;
+  }
+}
+
+@layer utilities {
+  /* Korean-style line-clamps with min-heights for grid alignment */
+  .clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* Smooth horizontal scroll on touch (carousels) */
+  .snap-px { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .snap-px > * { scroll-snap-align: start; }
+
+  /* Backdrop helpers */
+  .bg-glass { background-color: rgba(255,255,255,0.72); backdrop-filter: saturate(180%) blur(12px); -webkit-backdrop-filter: saturate(180%) blur(12px); }
+}
+
+/* Body scroll-lock when modals/drawers are open */
+body.no-scroll { overflow: hidden; }
+
+/* Scrollbar polish */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: #a1a1aa; background-clip: padding-box; border: 2px solid transparent; }
+
