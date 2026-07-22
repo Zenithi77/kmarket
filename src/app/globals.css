@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --primary:       #212121;
-  --primary-dark:  #000000;
-  --primary-light: #ece9e2;
+  --primary:       #a8441a;
+  --primary-dark:  #83350f;
+  --primary-light: #fbe1d0;
   --sale:          #ba1a1a;
-  --surface:       #f4f2ee;
-  --surface-subtle:#ece9e2;
-  --surface-muted: #e3e0d8;
-  --border:        #d8d4c9;
+  --surface:       #ffffff;
+  --surface-subtle:#faf9f7;
+  --surface-muted: #f2f0ec;
+  --border:        #e7e3da;
   --text:          #1b1c1c;
-  --text-muted:    #5c584f;
+  --text-muted:    #6b665c;
 }
 
 * {
@@ -108,8 +108,8 @@ body {
   height: 18px;
   border-radius: 9999px;
   background: #ffffff;
-  border: 2px solid #a04100;
-  box-shadow: 0 2px 6px rgba(160, 65, 0, 0.30);
+  border: 2px solid #a8441a;
+  box-shadow: 0 2px 6px rgba(168, 68, 26, 0.30);
   cursor: pointer;
   transition: transform 0.15s ease;
 }
@@ -122,8 +122,8 @@ body {
   height: 18px;
   border-radius: 9999px;
   background: #ffffff;
-  border: 2px solid #a04100;
-  box-shadow: 0 2px 6px rgba(160, 65, 0, 0.30);
+  border: 2px solid #a8441a;
+  box-shadow: 0 2px 6px rgba(168, 68, 26, 0.30);
   cursor: pointer;
 }
 .range-thumb::-webkit-slider-runnable-track {

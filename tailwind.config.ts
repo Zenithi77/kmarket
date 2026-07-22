@@ -9,19 +9,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand — Allbirds-style near-black CTA (no colored brand accent)
+        // Brand — warm ember/terracotta accent on white
         primary: {
-          50:  '#f6f5f3',
-          100: '#eeece8',
-          200: '#d9d6cf',
-          300: '#b3afa5',
-          400: '#7d7972',
-          500: '#4a4744',
-          600: '#212121',
-          700: '#171717',
-          800: '#0f0f0f',
-          900: '#080808',
-          950: '#000000',
+          50:  '#fdf1ea',
+          100: '#fbe1d0',
+          200: '#f5c3a1',
+          300: '#eda06e',
+          400: '#e07c40',
+          500: '#c85a25',
+          600: '#a8441a',
+          700: '#83350f',
+          800: '#5f260b',
+          900: '#3d1707',
+          950: '#200b03',
         },
         // Sale red — used for discount %, time-deal, ranking badges
         sale: {
@@ -31,13 +31,13 @@ const config: Config = {
           600: '#93000a',
           700: '#93000a',
         },
-        // Neutral surface tokens — warm putty/oatmeal, Allbirds-style
+        // Neutral surface tokens — clean white with warm-tinted neutrals
         surface: {
-          DEFAULT: '#f4f2ee',
-          subtle:  '#ece9e2',
-          muted:   '#e3e0d8',
-          border:  '#d8d4c9',
-          divider: '#e3e0d8',
+          DEFAULT: '#ffffff',
+          subtle:  '#faf9f7',
+          muted:   '#f2f0ec',
+          border:  '#e7e3da',
+          divider: '#efece5',
         },
         dark: {
           100: '#1A1A1A',
@@ -45,24 +45,24 @@ const config: Config = {
           300: '#3d3d3d',
         },
         // Named tokens
-        'earth-charcoal': '#212121',
-        'soft-bone': '#ECE9E2',
-        'clay-gray': '#D8D4C9',
+        'earth-charcoal': '#1A1A1A',
+        'soft-bone': '#FFFFFF',
+        'clay-gray': '#E7E3DA',
         'amber-highlight': '#FFB347',
         'on-surface': '#1b1c1c',
-        'on-surface-variant': '#5c584f',
-        'outline': '#8a867b',
-        'outline-variant': '#d8d4c9',
-        // Warm putty neutral scale replacing Tailwind's default cool gray
+        'on-surface-variant': '#6b665c',
+        'outline': '#9a9488',
+        'outline-variant': '#e7e3da',
+        // Warm neutral scale replacing Tailwind's default cool gray
         gray: {
-          50:  '#f6f5f3',
-          100: '#ece9e2',
-          200: '#e3e0d8',
-          300: '#d8d4c9',
-          400: '#b3afa5',
-          500: '#8a867b',
-          600: '#5c584f',
-          700: '#443f37',
+          50:  '#faf9f7',
+          100: '#f2f0ec',
+          200: '#e7e3da',
+          300: '#d8d3c7',
+          400: '#b3aea1',
+          500: '#9a9488',
+          600: '#6b665c',
+          700: '#4d493f',
           800: '#2d2a25',
           900: '#1b1a17',
           950: '#000000',
@@ -94,7 +94,7 @@ const config: Config = {
         'card':      '0 1px 3px rgba(15, 23, 42, 0.05), 0 2px 8px rgba(15, 23, 42, 0.04)',
         'cardHover': '0 10px 25px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(15, 23, 42, 0.04)',
         'popover':   '0 8px 24px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04)',
-        'brand':     '0 4px 14px rgba(0, 0, 0, 0.18)',
+        'brand':     '0 4px 14px rgba(168, 68, 26, 0.25)',
         'sale':      '0 4px 14px rgba(186, 26, 26, 0.20)',
       },
       keyframes: {

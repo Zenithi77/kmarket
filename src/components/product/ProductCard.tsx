@@ -119,7 +119,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="absolute bottom-3 right-3 w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="absolute bottom-3 right-3 w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <ShoppingCart className="w-4 h-4" />
           </button>

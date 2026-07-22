@@ -17,12 +17,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary:   'bg-primary-600 hover:bg-black active:bg-black text-white shadow-brand',
+  primary:   'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white shadow-brand',
   secondary: 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 hover:border-gray-400',
-  outline:   'bg-transparent hover:bg-gray-50 text-on-surface border-2 border-gray-900',
+  outline:   'bg-transparent hover:bg-primary-50 text-primary-600 border-2 border-primary-500',
   ghost:     'bg-transparent hover:bg-gray-100 text-gray-700',
   danger:    'bg-sale-500 hover:bg-sale-600 text-white shadow-sale',
-  soft:      'bg-gray-100 hover:bg-gray-200 text-on-surface',
+  soft:      'bg-primary-50 hover:bg-primary-100 text-primary-700',
   dark:      'bg-gray-900 hover:bg-black text-white',
   link:      'bg-transparent text-on-surface hover:text-black hover:underline underline-offset-4 px-0 py-0',
 };
