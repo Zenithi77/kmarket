@@ -58,13 +58,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/product/${product.slug}`}>
-      <div className="product-card group kcard-hover overflow-hidden h-full flex flex-col">
+      <div className="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-cardHover transition-shadow duration-300 h-full flex flex-col">
         {/* Image/Video Container */}
-        <div className="relative aspect-[4/5] bg-gray-50 flex-shrink-0 overflow-hidden">
+        <div className="relative aspect-square bg-white flex-shrink-0 overflow-hidden p-6">
           {isFirstMediaVideo ? (
             <video
               src={firstMedia}
-              className="w-full h-full object-cover product-image"
+              className="w-full h-full object-contain product-image"
               muted
               playsInline
               loop
@@ -80,25 +80,24 @@ export function ProductCard({ product }: ProductCardProps) {
               src={firstMedia}
               alt={product.name}
               fill
-              className="product-image object-cover"
+              className="product-image object-contain p-4"
             />
           )}
-          <div className="product-overlay" />
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
             {isOnSale && (
-              <span className="bg-sale-500 text-white font-mono text-[11px] font-bold px-2.5 py-1 uppercase tracking-wider">
+              <span className="bg-sale-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 -{discountPercent}%
               </span>
             )}
-            {product.is_featured && (
-              <span className="bg-primary-600 text-white font-mono text-[11px] font-bold px-2.5 py-1 uppercase tracking-wider">
-                HOT
+            {!isOnSale && product.is_featured && (
+              <span className="bg-gray-100 text-on-surface text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wide">
+                Bestseller
               </span>
             )}
             {isOutOfStock && (
-              <span className="bg-earth-charcoal text-white font-mono text-[11px] font-bold px-2.5 py-1 uppercase tracking-wider">
+              <span className="bg-gray-100 text-on-surface-variant text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wide">
                 Дууссан
               </span>
             )}
@@ -107,10 +106,10 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Wishlist Button */}
           <button
             onClick={handleToggleWishlist}
-            className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
               mounted && isWishlisted
                 ? 'bg-sale-500 text-white'
-                : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:text-sale-500'
+                : 'bg-white/90 text-gray-500 hover:text-sale-500'
             }`}
           >
             <Heart className={`w-4 h-4 ${mounted && isWishlisted ? 'fill-current' : ''}`} />
@@ -120,59 +119,57 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="absolute bottom-3 right-3 w-10 h-10 bg-primary-600 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="absolute bottom-3 right-3 w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-4 flex flex-col flex-grow">
-          {/* Brand */}
-          <div className="h-4 mb-1">
-            {product.brand && (
-              <p className="font-mono text-[11px] text-on-surface-variant uppercase tracking-wider truncate">
-                {product.brand}
+        <div className="px-4 pb-4 flex flex-col flex-grow">
+          {/* Name */}
+          <h3 className="text-xs font-bold uppercase tracking-wide text-on-surface line-clamp-1 group-hover:text-black transition-colors">
+            {product.name}
+          </h3>
+
+          {/* Color/variant name */}
+          <div className="h-5 mt-0.5">
+            {product.colors && product.colors.length > 0 && (
+              <p className="text-xs text-on-surface-variant truncate">
+                {product.colors[0].name}
               </p>
             )}
           </div>
 
-          {/* Name */}
-          <h3 className="font-display font-semibold text-on-surface line-clamp-2 mb-2 group-hover:text-primary-600 transition-colors h-12">
-            {product.name}
-          </h3>
-
-          {/* Price */}
-          <div className="flex items-center gap-2 h-7 mt-auto">
-            <span className="price">
-              {formatPrice(product.sale_price || product.price)}
-            </span>
-            {isOnSale && (
-              <span className="price-strike">
-                {formatPrice(product.price)}
+          {/* Bottom row: color swatches + price */}
+          <div className="flex items-center justify-between mt-auto pt-2">
+            <div className="flex items-center gap-1">
+              {product.colors && product.colors.length > 0 ? (
+                <>
+                  {product.colors.slice(0, 4).map((c, i) => (
+                    <span
+                      key={`${c.hex}-${i}`}
+                      className="w-4 h-4 rounded-full border border-gray-200"
+                      style={{ backgroundColor: c.hex }}
+                      title={c.name}
+                    />
+                  ))}
+                  {product.colors.length > 4 && (
+                    <span className="text-[11px] text-gray-400 ml-0.5">+{product.colors.length - 4}</span>
+                  )}
+                </>
+              ) : <span />}
+            </div>
+            <div className="flex items-center gap-1.5">
+              {isOnSale && (
+                <span className="price-strike text-xs">
+                  {formatPrice(product.price)}
+                </span>
+              )}
+              <span className="text-sm font-bold text-on-surface tabular">
+                {formatPrice(product.sale_price || product.price)}
               </span>
-            )}
-          </div>
-
-          {/* Sizes */}
-          <div className="h-7 mt-2">
-            {product.sizes && product.sizes.length > 0 && (
-              <div className="flex items-center gap-1 flex-wrap overflow-hidden">
-                {product.sizes.slice(0, 4).map((size) => (
-                  <span
-                    key={size}
-                    className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"
-                  >
-                    {size}
-                  </span>
-                ))}
-                {product.sizes.length > 4 && (
-                  <span className="text-xs text-gray-400">
-                    +{product.sizes.length - 4}
-                  </span>
-                )}
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

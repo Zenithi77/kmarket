@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Truck, ShieldCheck, RotateCcw, Headphones } from 'lucide-react';
-import { CategorySlider, ProductSlider } from '@/components/home';
+import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
 import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
 
@@ -288,9 +288,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── CATEGORY QUICK-NAV (single horizontal row) ── */}
-      <CategorySlider categories={categories.length > 0 ? categories.map(c => ({ id: c._id, name: c.name, slug: c.slug, icon: c.icon, image: c.image })) : undefined} />
 
       {/* ── TIME DEAL (Korean-style flash deal w/ countdown) ── */}
       {saleProducts.length > 0 && (
