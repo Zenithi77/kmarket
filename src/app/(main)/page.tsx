@@ -64,8 +64,8 @@ const defaultSlides: Banner[] = [
     subtitle: 'DEALS',
     description: 'Солонгос гоо сайхны бүтээгдэхүүн',
     link: '/products',
-    bg_color: '#E9D5FF',
-    text_color: '#7C3AED',
+    bg_color: '#E3E0D8',
+    text_color: '#212121',
     image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800',
   },
   {
@@ -74,8 +74,8 @@ const defaultSlides: Banner[] = [
     subtitle: 'ARRIVALS',
     description: 'Шинэ ирсэн бүтээгдэхүүнүүд',
     link: '/products?new=true',
-    bg_color: '#FEF3C7',
-    text_color: '#F97316',
+    bg_color: '#ECE9E2',
+    text_color: '#212121',
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800',
   },
 ];
@@ -298,10 +298,10 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 py-5">
             <div className="flex items-end justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs font-bold">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sale-500 text-white text-xs font-bold">
                   <Flame className="w-3.5 h-3.5" /> TIME DEAL
                 </div>
-                <h2 className="text-lg md:text-xl font-extrabold text-gray-900">Цагийн онцгой хямдрал</h2>
+                <h2 className="font-display text-lg md:text-xl font-extrabold text-gray-900">Цагийн онцгой хямдрал</h2>
               </div>
               <div className="flex items-center gap-1 font-mono text-sm">
                 {(['h','m','s'] as const).map((k, i) => (
@@ -332,7 +332,7 @@ export default function HomePage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       {discount > 0 && (
-                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-red-500 text-white text-[11px] font-bold">
+                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-sale-500 text-white text-[11px] font-bold">
                           -{discount}%
                         </div>
                       )}
@@ -342,7 +342,7 @@ export default function HomePage() {
                     </h3>
                     <div className="mt-1 flex items-baseline gap-1.5">
                       {discount > 0 && (
-                        <span className="text-red-500 font-extrabold text-sm">{discount}%</span>
+                        <span className="text-sale-500 font-extrabold text-sm">{discount}%</span>
                       )}
                       <span className="text-base font-extrabold text-gray-900">
                         {formatPrice(product.sale_price || product.price)}
@@ -362,11 +362,11 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 py-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-amber-500" />
-                <h2 className="text-lg md:text-xl font-extrabold text-gray-900">Шилдэг рэнкинг</h2>
+                <Crown className="w-5 h-5 text-amber-highlight" />
+                <h2 className="font-display text-lg md:text-xl font-extrabold text-gray-900">Шилдэг рэнкинг</h2>
                 <span className="text-xs text-gray-400">7 хоногийн шилдэг</span>
               </div>
-              <Link href="/products?featured=true" className="text-xs text-gray-500 hover:text-orange-500 font-medium">
+              <Link href="/products?featured=true" className="text-xs text-gray-500 hover:text-primary-500 font-medium">
                 Бүгд &gt;
               </Link>
             </div>
@@ -387,7 +387,7 @@ export default function HomePage() {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform"
                       />
-                      <div className={`absolute top-1 left-1 w-6 h-6 rounded-md flex items-center justify-center text-xs font-extrabold text-white ${idx < 3 ? 'bg-red-500' : 'bg-gray-800/80'}`}>
+                      <div className={`absolute top-1 left-1 w-6 h-6 rounded-md flex items-center justify-center text-xs font-extrabold text-white ${idx < 3 ? 'bg-sale-500' : 'bg-gray-800/80'}`}>
                         {idx + 1}
                       </div>
                     </div>
@@ -395,7 +395,7 @@ export default function HomePage() {
                       <h3 className="text-sm text-gray-800 line-clamp-2 leading-snug">{product.name}</h3>
                       <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
                         {discount > 0 && (
-                          <span className="text-red-500 font-extrabold text-sm">{discount}%</span>
+                          <span className="text-sale-500 font-extrabold text-sm">{discount}%</span>
                         )}
                         <span className="text-sm font-extrabold text-gray-900">
                           {formatPrice(product.sale_price || product.price)}
@@ -426,21 +426,21 @@ export default function HomePage() {
       <section className="mt-2 bg-white">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Link href="/products?new=true" className="relative h-32 md:h-36 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-100 via-rose-50 to-orange-50 p-5 flex items-center justify-between group">
+            <Link href="/products?new=true" className="relative h-32 md:h-36 rounded overflow-hidden bg-gray-50 border border-clay-gray p-5 flex items-center justify-between group">
               <div>
-                <p className="text-xs font-bold text-rose-500 mb-1">NEW IN</p>
-                <h3 className="text-xl md:text-2xl font-extrabold text-gray-900">Шинэ ирсэн</h3>
+                <p className="font-mono text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-wide">NEW IN</p>
+                <h3 className="font-display text-xl md:text-2xl font-extrabold text-gray-900">Шинэ ирсэн</h3>
                 <p className="text-xs text-gray-500 mt-1">Энэ долоо хоногийн шинэлэг</p>
               </div>
-              <ArrowRight className="w-6 h-6 text-rose-500 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-6 h-6 text-on-surface-variant group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="/products?sale=true" className="relative h-32 md:h-36 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 p-5 flex items-center justify-between group">
+            <Link href="/products?sale=true" className="relative h-32 md:h-36 rounded overflow-hidden bg-primary-50 border border-primary-100 p-5 flex items-center justify-between group">
               <div>
-                <p className="text-xs font-bold text-orange-600 mb-1">UP TO 70% OFF</p>
+                <p className="text-xs font-bold text-primary-600 mb-1">UP TO 70% OFF</p>
                 <h3 className="text-xl md:text-2xl font-extrabold text-gray-900">Хямдралын зах</h3>
                 <p className="text-xs text-gray-500 mt-1">Хязгаарлагдмал тоо</p>
               </div>
-              <ArrowRight className="w-6 h-6 text-orange-600 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-6 h-6 text-primary-600 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
@@ -482,7 +482,7 @@ export default function HomePage() {
             ].map(({ Icon, title, desc }) => (
               <div key={title} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  <Icon className="w-5 h-5 text-orange-500" />
+                  <Icon className="w-5 h-5 text-primary-500" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 truncate">{title}</p>
@@ -498,8 +498,8 @@ export default function HomePage() {
       {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length === 0 && categories.length === 0 && (
         <section className="py-24 bg-white">
           <div className="max-w-md mx-auto text-center px-4">
-            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Package className="w-10 h-10 text-orange-400" />
+            <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Package className="w-10 h-10 text-primary-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-3">Бараа байхгүй байна</h2>
             <p className="text-gray-500 mb-8 leading-relaxed">
@@ -507,7 +507,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-amber-600 transition-all shadow-lg shadow-orange-200"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-display font-bold uppercase tracking-wide rounded hover:bg-primary-700 transition-colors shadow-brand"
             >
               <Package className="w-5 h-5" />
               Бараа нэмэх

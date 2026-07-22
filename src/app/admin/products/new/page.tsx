@@ -649,7 +649,7 @@ export default function NewProductPage() {
                       onClick={() => toggleCommonColor(color)}
                       className={`group relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
                         isSelected
-                          ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm'
+                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
                           : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:shadow-sm'
                       }`}
                       title={color.name}
@@ -660,7 +660,7 @@ export default function NewProductPage() {
                       />
                       <span>{color.name}</span>
                       {isSelected && (
-                        <span className="text-orange-500 text-[10px]">✓</span>
+                        <span className="text-primary-500 text-[10px]">✓</span>
                       )}
                     </button>
                   );
@@ -674,7 +674,7 @@ export default function NewProductPage() {
                 <button
                   type="button"
                   onClick={() => setShowColorPicker(true)}
-                  className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                  className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
                 >
                   <Pipette className="w-4 h-4" />
                   Өөр өнгө нэмэх
@@ -697,7 +697,7 @@ export default function NewProductPage() {
                         value={customColorName}
                         onChange={(e) => setCustomColorName(e.target.value)}
                         placeholder="Өнгөний нэр (жнь: Тэнгэрийн цэнхэр)"
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomColor())}
                       />
                       <div className="flex items-center gap-2">
@@ -705,7 +705,7 @@ export default function NewProductPage() {
                           type="text"
                           value={customColorHex}
                           onChange={(e) => setCustomColorHex(e.target.value)}
-                          className="w-28 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-mono focus:border-orange-500 outline-none"
+                          className="w-28 px-3 py-1.5 rounded-lg border border-gray-200 text-sm font-mono focus:border-primary-500 outline-none"
                         />
                         <div
                           className="w-8 h-8 rounded-lg border border-gray-300"
@@ -718,7 +718,7 @@ export default function NewProductPage() {
                     <button
                       type="button"
                       onClick={addCustomColor}
-                      className="px-4 py-1.5 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 transition-colors"
+                      className="px-4 py-1.5 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 transition-colors"
                     >
                       Нэмэх
                     </button>
@@ -753,8 +753,8 @@ export default function NewProductPage() {
                     onClick={() => handleSizeTypeChange(type)}
                     className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
                       sizeType === type
-                        ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                        ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300 hover:bg-primary-50'
                     }`}
                   >
                     {SIZE_TYPE_LABELS[type]}
@@ -775,8 +775,8 @@ export default function NewProductPage() {
                       onClick={() => toggleSize(size)}
                       className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
                         selectedSizes.includes(size)
-                          ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                          : 'bg-white text-gray-700 border-gray-200 hover:border-orange-400'
+                          ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-primary-400'
                       }`}
                     >
                       {size}
@@ -801,12 +801,12 @@ export default function NewProductPage() {
                     onChange={(e) => setCustomSizeInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomSize())}
                     placeholder="Хэмжээ оруулах (жнь: One Size, 160cm)"
-                    className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                    className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm"
                   />
                   <button
                     type="button"
                     onClick={addCustomSize}
-                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -817,13 +817,13 @@ export default function NewProductPage() {
                     {selectedSizes.map((size) => (
                       <div
                         key={size}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-sm text-orange-700"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-200 text-sm text-primary-700"
                       >
                         {size}
                         <button
                           type="button"
                           onClick={() => removeSize(size)}
-                          className="text-orange-400 hover:text-red-500"
+                          className="text-primary-400 hover:text-red-500"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -887,7 +887,7 @@ export default function NewProductPage() {
           {/* Category - Two Step */}
           <div className="bg-white rounded-xl card-shadow p-6 space-y-5">
             <div className="flex items-center gap-2">
-              <FolderPlus className="w-5 h-5 text-orange-500" />
+              <FolderPlus className="w-5 h-5 text-primary-500" />
               <h2 className="text-lg font-semibold">Категори</h2>
             </div>
 
@@ -913,7 +913,7 @@ export default function NewProductPage() {
                   <select
                     value={selectedMainCat?._id || ''}
                     onChange={(e) => handleMainCategoryChange(e.target.value)}
-                    className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm bg-white"
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm bg-white"
                   >
                     <option value="">— Сонгоно уу —</option>
                     {categories.map(cat => (
@@ -924,7 +924,7 @@ export default function NewProductPage() {
                     type="button"
                     onClick={() => { setShowAddMainCat(v => !v); setShowAddSubCat(false); }}
                     title="Шинэ үндсэн ангилал нэмэх"
-                    className="p-2.5 rounded-lg border border-dashed border-orange-300 text-orange-500 hover:bg-orange-50 transition-colors"
+                    className="p-2.5 rounded-lg border border-dashed border-primary-300 text-primary-500 hover:bg-primary-50 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -933,15 +933,15 @@ export default function NewProductPage() {
 
               {/* ── inline new main cat form ── */}
               {showAddMainCat && (
-                <div className="mt-2 p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
-                  <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide">Шинэ үндсэн ангилал</p>
+                <div className="mt-2 p-4 bg-primary-50 border border-primary-200 rounded-xl space-y-3">
+                  <p className="text-xs font-semibold text-primary-700 uppercase tracking-wide">Шинэ үндсэн ангилал</p>
                   <input
                     type="text"
                     value={newMainCatName}
                     onChange={(e) => setNewMainCatName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCreateMainCategory())}
                     placeholder="Ангилалын нэр (жнь: Гутал)"
-                    className="w-full px-3 py-2 rounded-lg border border-orange-200 bg-white text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-primary-200 bg-white text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
                     autoFocus
                   />
                   {newMainCatName.trim() && (
@@ -954,7 +954,7 @@ export default function NewProductPage() {
                       type="button"
                       onClick={handleCreateMainCategory}
                       disabled={addingCat || !newMainCatName.trim()}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-orange-500 text-white text-sm rounded-lg hover:bg-orange-600 disabled:opacity-50 transition-colors font-medium"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 disabled:opacity-50 transition-colors font-medium"
                     >
                       {addingCat ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                       Нэмэх
@@ -962,7 +962,7 @@ export default function NewProductPage() {
                     <button
                       type="button"
                       onClick={() => { setShowAddMainCat(false); setNewMainCatName(''); }}
-                      className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-orange-100 transition-colors"
+                      className="px-4 py-2 text-sm text-gray-500 rounded-lg hover:bg-primary-100 transition-colors"
                     >
                       Болих
                     </button>
@@ -975,7 +975,7 @@ export default function NewProductPage() {
             {selectedMainCat && (
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
-                  <ChevronRight className="w-4 h-4 text-orange-400" />
+                  <ChevronRight className="w-4 h-4 text-primary-400" />
                   Дэд ангилал
                   <span className="text-xs font-normal text-gray-400 ml-1">(заавал биш)</span>
                 </div>
@@ -985,7 +985,7 @@ export default function NewProductPage() {
                     name="subcategory"
                     value={formData.subcategory}
                     onChange={(e) => setFormData(prev => ({ ...prev, subcategory: e.target.value }))}
-                    className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm bg-white"
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm bg-white"
                   >
                     <option value="">— Бүгд (үндсэн) —</option>
                     {subcategories.map(sub => (
@@ -996,7 +996,7 @@ export default function NewProductPage() {
                     type="button"
                     onClick={() => { setShowAddSubCat(v => !v); setShowAddMainCat(false); }}
                     title="Шинэ дэд ангилал нэмэх"
-                    className="p-2.5 rounded-lg border border-dashed border-orange-300 text-orange-500 hover:bg-orange-50 transition-colors"
+                    className="p-2.5 rounded-lg border border-dashed border-primary-300 text-primary-500 hover:bg-primary-50 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -1052,7 +1052,7 @@ export default function NewProductPage() {
                 {formData.subcategory && (
                   <>
                     <ChevronRight className="w-3 h-3" />
-                    <span className="font-medium text-orange-600">
+                    <span className="font-medium text-primary-600">
                       {subcategories.find(s => s._id === formData.subcategory)?.name}
                     </span>
                   </>
@@ -1085,7 +1085,7 @@ export default function NewProductPage() {
                       <select
                         value={attributes[filter.key] || ''}
                         onChange={(e) => handleAttributeChange(filter.key, e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm"
                       >
                         <option value="">Сонгоно уу</option>
                         {filter.options.map((opt: string) => (
@@ -1098,7 +1098,7 @@ export default function NewProductPage() {
                         value={attributes[filter.key] || ''}
                         onChange={(e) => handleAttributeChange(filter.key, e.target.value)}
                         placeholder={`${filter.label} оруулах`}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none text-sm"
+                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm"
                       />
                     )}
                   </div>

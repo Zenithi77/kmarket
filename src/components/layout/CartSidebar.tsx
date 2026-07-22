@@ -109,7 +109,7 @@ export default function CartSidebar() {
                       </div>
                       <button
                         onClick={() => removeItem(item.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-sale-500 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

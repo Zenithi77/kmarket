@@ -145,7 +145,7 @@ export default function ProductsPage() {
               placeholder="Бараа хайх..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
@@ -153,7 +153,7 @@ export default function ProductsPage() {
           <select
             value={selectedCategory}
             onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+            className="px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
           >
             <option value="">Бүх категори</option>
             {categories.map(cat => (
@@ -171,7 +171,7 @@ export default function ProductsPage() {
       <div className="bg-white rounded-xl card-shadow overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
@@ -281,7 +281,7 @@ export default function ProductsPage() {
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                      currentPage === page ? 'bg-orange-500 text-white' : 'hover:bg-gray-100'
+                      currentPage === page ? 'bg-primary-500 text-white' : 'hover:bg-gray-100'
                     }`}
                   >
                     {page}

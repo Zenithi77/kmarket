@@ -85,7 +85,7 @@ export default function ProfileLayout({
                   className="w-20 h-20 rounded-full object-cover mx-auto mb-4"
                 />
               ) : (
-                <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl font-bold">{mounted ? displayInitial : 'Х'}</span>
                 </div>
               )}
@@ -121,10 +121,10 @@ export default function ProfileLayout({
               <button 
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sale-500 hover:bg-sale-50 transition-colors disabled:opacity-50"
               >
                 {isLoggingOut ? (
-                  <div className="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-sale-500 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <LogOut className="w-5 h-5" />
                 )}
@@ -135,7 +135,7 @@ export default function ProfileLayout({
               {(session?.user as any)?.role === 'admin' && (
                 <Link
                   href="/admin"
-                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors mt-2"
+                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors mt-2"
                 >
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5" />

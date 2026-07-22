@@ -297,17 +297,7 @@ export default function CategoriesPage() {
     return cat?.icon || '📦';
   };
 
-  const getCategoryColor = (slug: string) => {
-    const colors: Record<string, string> = {
-      beauty: 'from-pink-500 to-rose-500',
-      fashion: 'from-purple-500 to-indigo-500',
-      shoes: 'from-blue-500 to-cyan-500',
-      dyson: 'from-gray-600 to-gray-800',
-      trendy: 'from-amber-500 to-orange-500',
-      best: 'from-yellow-500 to-amber-500',
-    };
-    return colors[slug] || 'from-gray-500 to-gray-600';
-  };
+  const getCategoryColor = (_slug: string) => 'bg-primary-600';
 
   // ========== Ангилал бүр дэх дэд ангилалуудын тоо + бэлэн загвар тоо ==========
   const getSubcategoryStats = (category: Category) => {
@@ -322,7 +312,7 @@ export default function CategoriesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -385,12 +375,12 @@ export default function CategoriesPage() {
 
       {/* ========== Нэг товчоор бүгдийг бүрдүүлэх ========== */}
       {(totalMissingSubs > 0 || !allMainExist) && (
-        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
+        <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <Layers className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+            <Layers className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm text-orange-800 font-medium">Бүх ангилал + дэд ангилалуудыг нэг дор бүрдүүлэх</p>
-              <p className="text-sm text-orange-600 mt-1">
+              <p className="text-sm text-primary-800 font-medium">Бүх ангилал + дэд ангилалуудыг нэг дор бүрдүүлэх</p>
+              <p className="text-sm text-primary-600 mt-1">
                 6 үндсэн ангилал + бүх дэд ангилалуудыг автоматаар үүсгэнэ. 
                 {totalMissingSubs > 0 && ` (${totalMissingSubs} дэд ангилал нэмэгдэх боломжтой)`}
               </p>
@@ -439,7 +429,7 @@ export default function CategoriesPage() {
                 className="flex items-center gap-4 p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => handleExpand(category._id)}
               >
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getCategoryColor(category.slug)} flex items-center justify-center text-2xl shadow-sm`}>
+                <div className={`w-14 h-14 rounded-xl ${getCategoryColor(category.slug)} flex items-center justify-center text-2xl shadow-sm`}>
                   {category.icon && !category.icon.startsWith('http') ? (
                     <span>{category.icon}</span>
                   ) : category.icon ? (
@@ -461,7 +451,7 @@ export default function CategoriesPage() {
                       {stats.existing} / {stats.total} дэд ангилал
                     </span>
                     {stats.missing.length > 0 && (
-                      <span className="inline-flex items-center gap-1 text-xs text-orange-500 font-medium">
+                      <span className="inline-flex items-center gap-1 text-xs text-primary-500 font-medium">
                         <AlertCircle className="w-3 h-3" />
                         {stats.missing.length} нэмэх боломжтой
                       </span>
@@ -602,7 +592,7 @@ export default function CategoriesPage() {
                     <div className="px-6 py-3 border-t border-gray-200">
                       <button
                         onClick={() => handleAddSubcategory(category._id, category.slug)}
-                        className="flex items-center gap-2 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                        className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
                       >
                         <Plus className="w-4 h-4" />
                         Дэд ангилал нэмэх
@@ -640,7 +630,7 @@ export default function CategoriesPage() {
       {/* ========== Бэлэн ангилалуудын бүтэц preview ========== */}
       <div className="bg-white rounded-xl card-shadow p-6">
         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Layers className="w-5 h-5 text-orange-500" />
+          <Layers className="w-5 h-5 text-primary-500" />
           Бэлэн ангилалын бүтэц (загвар)
         </h2>
         <p className="text-sm text-gray-500 mb-4">
@@ -718,7 +708,7 @@ export default function CategoriesPage() {
                   ) : (
                     <label className="cursor-pointer flex flex-col items-center">
                       {uploading ? (
-                        <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <Upload className="w-5 h-5 text-gray-400" />
                       )}
@@ -755,7 +745,7 @@ export default function CategoriesPage() {
                 type="number"
                 value={subFormData.order}
                 onChange={(e) => setSubFormData(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-orange-500 outline-none"
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-primary-500 outline-none"
               />
             </div>
 
@@ -876,7 +866,7 @@ function FilterConfigForm({
         <div
           key={filter.key + idx}
           className={`border rounded-lg p-4 transition-colors ${
-            editingFilterIdx === idx ? 'border-orange-300 bg-orange-50/30' : 'border-gray-200'
+            editingFilterIdx === idx ? 'border-primary-300 bg-primary-50/30' : 'border-gray-200'
           }`}
         >
           <div className="flex items-center justify-between mb-3">
@@ -888,7 +878,7 @@ function FilterConfigForm({
                   value={filter.label}
                   onChange={(e) => updateFilter(idx, { label: e.target.value })}
                   placeholder="Фильтерийн нэр"
-                  className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
+                  className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-primary-500 outline-none"
                 />
               ) : (
                 <span className="font-medium text-gray-800">{filter.label || 'Нэргүй'}</span>
@@ -919,7 +909,7 @@ function FilterConfigForm({
               <select
                 value={filter.type}
                 onChange={(e) => updateFilter(idx, { type: e.target.value as CategoryFilter['type'] })}
-                className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
+                className="px-2 py-1 border border-gray-200 rounded text-sm focus:border-primary-500 outline-none"
               >
                 <option value="select">Нэг сонголт</option>
                 <option value="multi-select">Олон сонголт</option>
@@ -952,12 +942,12 @@ function FilterConfigForm({
                 onChange={(e) => setNewOption(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(idx); } }}
                 placeholder="Утга оруулах..."
-                className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm focus:border-orange-500 outline-none"
+                className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm focus:border-primary-500 outline-none"
               />
               <button
                 type="button"
                 onClick={() => addOption(idx)}
-                className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600"
+                className="px-3 py-1 bg-primary-500 text-white text-sm rounded hover:bg-primary-600"
               >
                 Нэмэх
               </button>
@@ -971,7 +961,7 @@ function FilterConfigForm({
           <button
             type="button"
             onClick={addFilter}
-            className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700 font-medium"
+            className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
           >
             <Plus className="w-4 h-4" />
             Фильтер нэмэх

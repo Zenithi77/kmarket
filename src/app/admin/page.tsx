@@ -88,7 +88,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
       </div>
     );
   }
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
                       index === 0 ? 'bg-yellow-100 text-yellow-700' :
                       index === 1 ? 'bg-gray-200 text-gray-600' :
-                      index === 2 ? 'bg-orange-100 text-orange-700' :
+                      index === 2 ? 'bg-primary-100 text-primary-700' :
                       'bg-gray-100 text-gray-500'
                     }`}>
                       {index + 1}

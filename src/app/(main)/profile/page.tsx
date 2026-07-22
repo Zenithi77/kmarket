@@ -100,7 +100,7 @@ export default function ProfilePage() {
   if (!mounted || status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -127,7 +127,7 @@ export default function ProfilePage() {
                 className="w-24 h-24 rounded-full object-cover"
               />
             ) : (
-              <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center">
+              <div className="w-24 h-24 bg-primary-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-3xl font-bold">
                   {displayInitial}
                 </span>
@@ -149,13 +149,13 @@ export default function ProfilePage() {
             {/* Admin Badge & Button */}
             {userData?.role === 'admin' && (
               <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
                   <Shield className="w-3 h-3" />
                   Админ
                 </span>
                 <Link
                   href="/admin"
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-orange-500 text-white text-xs font-medium rounded-full hover:bg-orange-600 transition-colors"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-primary-500 text-white text-xs font-medium rounded-full hover:bg-primary-600 transition-colors"
                 >
                   <Shield className="w-3 h-3" />
                   Админ хуудас
@@ -205,7 +205,7 @@ export default function ProfilePage() {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="99001122"
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none"
                 />
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none appearance-none bg-white"
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none appearance-none bg-white"
                 >
                   <option value="">Сонгох</option>
                   <option value="male">Эрэгтэй</option>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
               onChange={handleChange}
               placeholder="Хүргэлтийн хаяг"
               rows={2}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none resize-none"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none resize-none"
             />
           </div>
 
@@ -257,19 +257,19 @@ export default function ProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl card-shadow p-4 text-center">
-          <p className="text-2xl font-bold text-orange-500">0</p>
+          <p className="text-2xl font-bold text-primary-500">0</p>
           <p className="text-sm text-gray-500">Захиалга</p>
         </div>
         <div className="bg-white rounded-xl card-shadow p-4 text-center">
-          <p className="text-2xl font-bold text-orange-500">0₮</p>
+          <p className="text-2xl font-bold text-primary-500">0₮</p>
           <p className="text-sm text-gray-500">Нийт зарцуулсан</p>
         </div>
         <div className="bg-white rounded-xl card-shadow p-4 text-center">
-          <p className="text-2xl font-bold text-orange-500">0</p>
+          <p className="text-2xl font-bold text-primary-500">0</p>
           <p className="text-sm text-gray-500">Сэтгэгдэл</p>
         </div>
         <div className="bg-white rounded-xl card-shadow p-4 text-center">
-          <p className="text-2xl font-bold text-orange-500">0</p>
+          <p className="text-2xl font-bold text-primary-500">0</p>
           <p className="text-sm text-gray-500">Хадгалсан бараа</p>
         </div>
       </div>

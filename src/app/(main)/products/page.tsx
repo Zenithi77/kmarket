@@ -147,7 +147,7 @@ function ProductsContent() {
     chips.push({
       key: 'cat',
       label: selectedCategoryObj.name,
-      tone: 'from-orange-100 to-orange-50 text-orange-700 ring-orange-200',
+      tone: 'bg-primary-50 text-primary-700 ring-primary-200',
       onRemove: () => setFilters({ ...filters, category: '', subcategory: '', attributes: {} }),
     });
   }
@@ -157,7 +157,7 @@ function ProductsContent() {
       chips.push({
         key: 'sub',
         label: sub.name,
-        tone: 'from-blue-100 to-blue-50 text-blue-700 ring-blue-200',
+        tone: 'bg-gray-100 text-gray-700 ring-gray-200',
         onRemove: () => setFilters({ ...filters, subcategory: '' }),
       });
   }
@@ -165,28 +165,28 @@ function ProductsContent() {
     chips.push({
       key: 'color',
       label: `Өнгө: ${filters.color}`,
-      tone: 'from-pink-100 to-pink-50 text-pink-700 ring-pink-200',
+      tone: 'bg-gray-100 text-gray-700 ring-gray-200',
       onRemove: () => setFilters({ ...filters, color: '' }),
     });
   if (filters.size)
     chips.push({
       key: 'size',
       label: `Хэмжээ: ${filters.size}`,
-      tone: 'from-gray-100 to-gray-50 text-gray-700 ring-gray-200',
+      tone: 'bg-gray-100 text-gray-700 ring-gray-200',
       onRemove: () => setFilters({ ...filters, size: '' }),
     });
   if (filters.brand)
     chips.push({
       key: 'brand',
       label: filters.brand,
-      tone: 'from-green-100 to-green-50 text-green-700 ring-green-200',
+      tone: 'bg-gray-100 text-gray-700 ring-gray-200',
       onRemove: () => setFilters({ ...filters, brand: '' }),
     });
   Object.entries(filters.attributes).forEach(([k, v]) => {
     chips.push({
       key: `attr-${k}`,
       label: v,
-      tone: 'from-purple-100 to-purple-50 text-purple-700 ring-purple-200',
+      tone: 'bg-primary-50 text-primary-700 ring-primary-200',
       onRemove: () => {
         const next = { ...filters.attributes };
         delete next[k];
@@ -196,17 +196,16 @@ function ProductsContent() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
-      <div className="relative overflow-hidden bg-white border-b">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-50/50 via-transparent to-pink-50/50" />
+    <div className="min-h-screen bg-soft-bone">
+      <div className="relative overflow-hidden bg-white border-b border-clay-gray">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-orange-700 bg-clip-text text-transparent">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-on-surface">
             Бүтээгдэхүүн
           </h1>
-          <p className="text-gray-500 mt-2 flex items-center flex-wrap gap-2">
-            <span>{products.length} бүтээгдэхүүн олдлоо</span>
+          <p className="text-on-surface-variant mt-2 flex items-center flex-wrap gap-2">
+            <span className="font-mono text-xs uppercase tracking-wide">{products.length} бүтээгдэхүүн олдлоо</span>
             {filters.category && selectedCategoryObj && (
-              <span className="px-2.5 py-0.5 bg-orange-100 text-orange-700 text-sm rounded-full font-medium">
+              <span className="px-2.5 py-0.5 bg-primary-50 text-primary-700 text-sm rounded-full font-medium">
                 {selectedCategoryObj.name}
               </span>
             )}
@@ -218,7 +217,7 @@ function ProductsContent() {
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="hidden lg:block w-72 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+              <div className="bg-white rounded p-5 border border-clay-gray shadow-soft">
                 <FilterSidebar
                   state={filters}
                   onChange={setFilters}
@@ -233,12 +232,12 @@ function ProductsContent() {
             <div className="flex items-center justify-between mb-5 gap-3">
               <button
                 onClick={() => setShowFilters(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all active:scale-95"
+                className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white rounded border border-clay-gray shadow-sm hover:shadow-md transition-all active:scale-95"
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 <span className="font-medium text-sm">Шүүлтүүр</span>
                 {chips.length > 0 && (
-                  <span className="w-5 h-5 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center">
+                  <span className="w-5 h-5 bg-primary-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center">
                     {chips.length}
                   </span>
                 )}
@@ -248,7 +247,7 @@ function ProductsContent() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium hover:border-orange-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all cursor-pointer"
+                  className="appearance-none bg-white border border-clay-gray rounded px-4 py-2.5 pr-10 text-sm font-medium hover:border-primary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all cursor-pointer"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -278,7 +277,7 @@ function ProductsContent() {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
                           transition={{ duration: 0.18 }}
-                          className={`inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 bg-gradient-to-r text-sm rounded-full ring-1 ${chip.tone}`}
+                          className={`inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 text-sm rounded-full ring-1 ${chip.tone}`}
                         >
                           {chip.label}
                           <button
@@ -336,7 +335,7 @@ function ProductsContent() {
                 <div className="pt-5 mt-4 border-t">
                   <button
                     onClick={() => setShowFilters(false)}
-                    className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity active:scale-[0.98]"
+                    className="w-full py-3.5 bg-primary-600 text-white rounded font-display font-bold uppercase tracking-wide hover:bg-primary-700 transition-colors active:scale-[0.98]"
                   >
                     Хэрэглэх ({products.length} бараа)
                   </button>
@@ -355,7 +354,7 @@ export default function ProductsPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500" />
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500" />
         </div>
       }
     >

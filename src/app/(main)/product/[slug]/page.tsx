@@ -253,7 +253,7 @@ export default function ProductDetailPage() {
               
               {/* Badges */}
               {isOnSale && (
-                <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                <div className="absolute top-4 left-4 bg-sale-500 text-white px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider">
                   -{discountPercent}%
                 </div>
               )}
@@ -311,24 +311,24 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-28 lg:self-start">
             {/* Brand */}
             {product.brand && (
-              <Link href={`/products?brand=${encodeURIComponent(product.brand)}`} className="text-sm text-primary-500 font-medium uppercase tracking-wider hover:underline">
+              <Link href={`/products?brand=${encodeURIComponent(product.brand)}`} className="font-mono text-sm text-primary-600 font-medium uppercase tracking-wider hover:underline">
                 {product.brand}
               </Link>
             )}
 
             {/* Name */}
-            <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
+            <h1 className="font-display text-3xl font-bold text-on-surface">{product.name}</h1>
 
             {/* Price */}
             <div className="flex items-baseline gap-4">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="price-lg">
                 {formatPrice(product.sale_price || product.price)}
               </span>
               {isOnSale && (
-                <span className="text-xl text-gray-400 line-through">
+                <span className="price-strike text-xl">
                   {formatPrice(product.price)}
                 </span>
               )}
@@ -337,13 +337,13 @@ export default function ProductDetailPage() {
             {/* Stock */}
             <div className="flex items-center gap-2">
               {isOutOfStock ? (
-                <span className="text-red-500 font-medium">Дууссан</span>
+                <span className="text-sale-500 font-medium">Дууссан</span>
               ) : product.stock < 10 ? (
-                <span className="text-orange-500 font-medium">
+                <span className="text-primary-600 font-medium">
                   Зөвхөн {product.stock} үлдсэн
                 </span>
               ) : (
-                <span className="text-green-500 font-medium">Бэлэн байгаа</span>
+                <span className="text-green-600 font-medium">Бэлэн байгаа</span>
               )}
             </div>
 
@@ -444,7 +444,7 @@ export default function ProductDetailPage() {
                 onClick={() => toggleItem(product)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                   isWishlisted
-                    ? 'bg-red-50 border-red-200 text-red-500'
+                    ? 'bg-sale-50 border-sale-200 text-sale-500'
                     : 'border-gray-200 hover:border-primary-500'
                 }`}
               >
@@ -486,9 +486,9 @@ export default function ProductDetailPage() {
 
         {/* Description */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Тайлбар</h2>
+          <h2 className="font-display text-2xl font-bold text-on-surface mb-6">Тайлбар</h2>
           <div className="prose max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-gray-600 leading-relaxed">
+            <pre className="whitespace-pre-wrap font-sans text-on-surface-variant leading-relaxed">
               {product.description}
             </pre>
           </div>
@@ -496,7 +496,7 @@ export default function ProductDetailPage() {
 
         {/* Related Products */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Холбоотой бүтээгдэхүүн</h2>
+          <h2 className="font-display text-2xl font-bold text-on-surface mb-6">Холбоотой бүтээгдэхүүн</h2>
           <ProductGrid products={relatedProducts} columns={4} />
         </div>
       </div>

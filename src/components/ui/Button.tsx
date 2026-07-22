@@ -17,22 +17,22 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary:   'bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white shadow-brand hover:shadow-md',
-  secondary: 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 hover:border-gray-300',
-  outline:   'bg-transparent hover:bg-primary-50 text-primary-600 border-2 border-primary-500',
+  primary:   'bg-primary-600 hover:bg-black active:bg-black text-white shadow-brand',
+  secondary: 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 hover:border-gray-400',
+  outline:   'bg-transparent hover:bg-gray-50 text-on-surface border-2 border-gray-900',
   ghost:     'bg-transparent hover:bg-gray-100 text-gray-700',
   danger:    'bg-sale-500 hover:bg-sale-600 text-white shadow-sale',
-  soft:      'bg-primary-50 hover:bg-primary-100 text-primary-700',
+  soft:      'bg-gray-100 hover:bg-gray-200 text-on-surface',
   dark:      'bg-gray-900 hover:bg-black text-white',
-  link:      'bg-transparent text-primary-600 hover:text-primary-700 hover:underline underline-offset-4 px-0 py-0',
+  link:      'bg-transparent text-on-surface hover:text-black hover:underline underline-offset-4 px-0 py-0',
 };
 
 const sizeClasses: Record<Size, string> = {
   xs: 'h-7 px-2.5 text-xs gap-1',
-  sm: 'h-9 px-3 text-sm gap-1.5',
-  md: 'h-10 px-4 text-sm gap-2',
-  lg: 'h-12 px-6 text-base gap-2',
-  xl: 'h-14 px-8 text-base gap-2.5',
+  sm: 'h-9 px-3 text-xs gap-1.5',
+  md: 'h-11 px-5 text-xs gap-2',
+  lg: 'h-12 px-6 text-sm gap-2',
+  xl: 'h-14 px-8 text-sm gap-2.5',
 };
 
 const roundedClasses = {
@@ -49,22 +49,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   fullWidth = false,
   leftIcon,
   rightIcon,
-  rounded = 'xl',
+  rounded = 'full',
   children,
   className = '',
   disabled,
   ...props
 }, ref) => {
   const base =
-    'inline-flex items-center justify-center font-semibold tracking-tight transition-all duration-200 ' +
+    'inline-flex items-center justify-center transition-all duration-200 ' +
     'active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ' +
     'kring select-none whitespace-nowrap';
+  const ctaText = 'font-medium uppercase tracking-wide';
 
   return (
     <button
       ref={ref}
       className={[
         base,
+        variant === 'link' ? 'font-medium' : ctaText,
         variantClasses[variant],
         variant === 'link' ? '' : sizeClasses[size],
         variant === 'link' ? '' : roundedClasses[rounded],

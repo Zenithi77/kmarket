@@ -27,26 +27,22 @@ interface CategorySliderProps {
   categories?: CategoryItem[];
 }
 
-// Slug-based icon & color mapping (Korean shop style — soft pastel)
+// Slug-based icon mapping (ECO-MINIMAL — single earth-tone accent, no rainbow)
 const SLUG_MAP: Record<string, { icon: LucideIcon; bg: string; iconColor: string }> = {
-  beauty:   { icon: Sparkles,   bg: 'bg-pink-50',    iconColor: 'text-pink-500' },
-  fashion:  { icon: Shirt,      bg: 'bg-purple-50',  iconColor: 'text-purple-500' },
-  shoes:    { icon: Footprints, bg: 'bg-blue-50',    iconColor: 'text-blue-500' },
-  dyson:    { icon: Wind,       bg: 'bg-cyan-50',    iconColor: 'text-cyan-500' },
-  trendy:   { icon: TrendingUp, bg: 'bg-rose-50',    iconColor: 'text-rose-500' },
-  best:     { icon: Award,      bg: 'bg-amber-50',   iconColor: 'text-amber-500' },
-  sale:     { icon: Tag,        bg: 'bg-red-50',     iconColor: 'text-red-500' },
-  new:      { icon: Star,       bg: 'bg-green-50',   iconColor: 'text-green-500' },
-  delivery: { icon: Truck,      bg: 'bg-indigo-50',  iconColor: 'text-indigo-500' },
+  beauty:   { icon: Sparkles,   bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
+  fashion:  { icon: Shirt,      bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
+  shoes:    { icon: Footprints, bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
+  dyson:    { icon: Wind,       bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
+  trendy:   { icon: TrendingUp, bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
+  best:     { icon: Award,      bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
+  sale:     { icon: Tag,        bg: 'bg-sale-50',     iconColor: 'text-sale-500' },
+  new:      { icon: Star,       bg: 'bg-primary-50',  iconColor: 'text-primary-600' },
+  delivery: { icon: Truck,      bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
 };
 
 const FALLBACK_CONFIGS = [
-  { bg: 'bg-orange-50',  iconColor: 'text-orange-500' },
-  { bg: 'bg-teal-50',    iconColor: 'text-teal-500' },
-  { bg: 'bg-violet-50',  iconColor: 'text-violet-500' },
-  { bg: 'bg-lime-50',    iconColor: 'text-lime-600' },
-  { bg: 'bg-sky-50',     iconColor: 'text-sky-500' },
-  { bg: 'bg-fuchsia-50', iconColor: 'text-fuchsia-500' },
+  { bg: 'bg-primary-50',  iconColor: 'text-primary-600' },
+  { bg: 'bg-gray-100',    iconColor: 'text-on-surface-variant' },
 ];
 
 export default function CategorySlider({ categories }: CategorySliderProps) {
@@ -154,7 +150,7 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
                     <span className={`text-base font-bold ${config.iconColor}`}>{initial}</span>
                   )}
                 </div>
-                <span className="text-[11px] font-medium text-gray-600 group-hover:text-orange-500 transition-colors whitespace-nowrap">
+                <span className="text-[11px] font-medium text-gray-600 group-hover:text-primary-500 transition-colors whitespace-nowrap">
                   {category.name}
                 </span>
               </Link>

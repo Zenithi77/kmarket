@@ -25,8 +25,8 @@ const defaultBanner = {
   description: '',
   image: '',
   link: '',
-  bg_color: '#FEE2E2',
-  text_color: '#F97316',
+  bg_color: '#FBE4D8',
+  text_color: '#A04100',
   order: 0,
   is_active: true,
 };
@@ -162,7 +162,7 @@ export default function BannersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -297,10 +297,10 @@ export default function BannersPage() {
                 ) : (
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-orange-500 transition-colors"
+                    className="h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors"
                   >
                     {uploading ? (
-                      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <Upload className="w-10 h-10 text-gray-400 mb-2" />
@@ -345,7 +345,7 @@ export default function BannersPage() {
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Солонгос гоо сайхны бүтээгдэхүүн"
                   rows={2}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-orange-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-primary-500 outline-none"
                 />
               </div>
 

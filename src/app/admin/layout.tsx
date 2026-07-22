@@ -74,7 +74,7 @@ export default function AdminLayout({
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 text-orange-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-10 h-10 text-primary-500 animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Шалгаж байна...</p>
         </div>
       </div>
@@ -179,12 +179,12 @@ export default function AdminLayout({
             {/* Notifications */}
             <button className="relative p-2 hover:bg-gray-100 rounded-lg">
               <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-sale-500 rounded-full" />
             </button>
 
             {/* User */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">
                   {(user?.full_name || session?.user?.name || 'A').charAt(0).toUpperCase()}
                 </span>

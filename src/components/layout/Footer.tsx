@@ -43,7 +43,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Хурдан холбоос</h3>
+            <h3 className="text-white font-display font-semibold uppercase tracking-wide text-sm mb-4">Хурдан холбоос</h3>
             <ul className="space-y-2">
               <li>
                 <span className="text-sm text-gray-400 cursor-default">
@@ -80,7 +80,7 @@ export default function Footer() {
 
           {/* Customer Service */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Хэрэглэгчийн үйлчилгээ</h3>
+            <h3 className="text-white font-display font-semibold uppercase tracking-wide text-sm mb-4">Хэрэглэгчийн үйлчилгээ</h3>
             <ul className="space-y-2">
               <li>
                 <span className="text-sm text-gray-400 cursor-default">
@@ -112,7 +112,7 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Холбоо барих</h3>
+            <h3 className="text-white font-display font-semibold uppercase tracking-wide text-sm mb-4">Холбоо барих</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />

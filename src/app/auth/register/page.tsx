@@ -130,19 +130,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center p-4 py-8">
+    <div className="min-h-screen bg-soft-bone flex items-center justify-center p-4 py-8">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-200 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-100 rounded-full opacity-10 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-200 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-100 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-100 rounded-full opacity-10 blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Back to Store */}
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-500 mb-6 transition-colors group"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-primary-500 mb-6 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Дэлгүүр рүү буцах</span>
@@ -151,7 +151,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+            <div className="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-200">
               <span className="text-white font-black text-3xl">K</span>
             </div>
           </Link>
@@ -174,7 +174,7 @@ export default function RegisterPage() {
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleInputChange}
-                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.full_name ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="Таны нэр"
@@ -200,7 +200,7 @@ export default function RegisterPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.email ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="example@email.com"
@@ -226,7 +226,7 @@ export default function RegisterPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.phone ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="99001122"
@@ -252,7 +252,7 @@ export default function RegisterPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.password ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="••••••••"
@@ -299,7 +299,7 @@ export default function RegisterPage() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="••••••••"
@@ -327,12 +327,12 @@ export default function RegisterPage() {
                   type="checkbox"
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className="w-5 h-5 mt-0.5 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+                  className="w-5 h-5 mt-0.5 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
                 />
                 <span className="text-sm text-gray-600">
-                  <Link href="/terms" className="text-orange-500 hover:text-orange-600 font-medium">Үйлчилгээний нөхцөл</Link>
+                  <Link href="/terms" className="text-primary-500 hover:text-primary-600 font-medium">Үйлчилгээний нөхцөл</Link>
                   {' '}болон{' '}
-                  <Link href="/privacy" className="text-orange-500 hover:text-orange-600 font-medium">Нууцлалын бодлого</Link>
+                  <Link href="/privacy" className="text-primary-500 hover:text-primary-600 font-medium">Нууцлалын бодлого</Link>
                   -г зөвшөөрч байна
                 </span>
               </label>
@@ -347,7 +347,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:scale-[1.02] active:scale-[0.98] mt-6"
+              className="w-full bg-primary-600 text-white py-4 rounded font-display font-bold uppercase tracking-wide hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary-200 hover:shadow-primary-300 hover:scale-[1.02] active:scale-[0.98] mt-6"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -391,7 +391,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-gray-500 mt-8 text-sm">
             Бүртгэлтэй юу?{' '}
-            <Link href="/auth/login" className="text-orange-500 font-semibold hover:text-orange-600">
+            <Link href="/auth/login" className="text-primary-500 font-semibold hover:text-primary-600">
               Нэвтрэх
             </Link>
           </p>
@@ -401,7 +401,7 @@ export default function RegisterPage() {
         <div className="text-center mt-6">
           <Link 
             href="/products" 
-            className="inline-flex items-center gap-2 text-gray-500 hover:text-orange-500 text-sm transition-colors"
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-primary-500 text-sm transition-colors"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Дэлгүүрээр үзэх</span>

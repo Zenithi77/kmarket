@@ -136,32 +136,32 @@ export default function CategoryPage() {
       chips.push({
         key: 'sub',
         label: sub.name,
-        tone: 'from-blue-100 to-blue-50 text-blue-700 ring-blue-200',
+        tone: 'bg-gray-100 text-gray-700 ring-gray-200',
         onRemove: () => setFilters({ ...filters, subcategory: '' }),
       });
   }
   if (filters.color)
     chips.push({
       key: 'color', label: `Өнгө: ${filters.color}`,
-      tone: 'from-pink-100 to-pink-50 text-pink-700 ring-pink-200',
+      tone: 'bg-gray-100 text-gray-700 ring-gray-200',
       onRemove: () => setFilters({ ...filters, color: '' }),
     });
   if (filters.size)
     chips.push({
       key: 'size', label: `Хэмжээ: ${filters.size}`,
-      tone: 'from-gray-100 to-gray-50 text-gray-700 ring-gray-200',
+      tone: 'bg-gray-100 text-gray-700 ring-gray-200',
       onRemove: () => setFilters({ ...filters, size: '' }),
     });
   if (filters.brand)
     chips.push({
       key: 'brand', label: filters.brand,
-      tone: 'from-green-100 to-green-50 text-green-700 ring-green-200',
+      tone: 'bg-gray-100 text-gray-700 ring-gray-200',
       onRemove: () => setFilters({ ...filters, brand: '' }),
     });
   Object.entries(filters.attributes).forEach(([k, v]) =>
     chips.push({
       key: `attr-${k}`, label: v,
-      tone: 'from-purple-100 to-purple-50 text-purple-700 ring-purple-200',
+      tone: 'bg-primary-50 text-primary-700 ring-primary-200',
       onRemove: () => {
         const next = { ...filters.attributes };
         delete next[k];
@@ -182,18 +182,13 @@ export default function CategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
-      <div className="relative overflow-hidden bg-white border-b">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-50/60 via-transparent to-pink-50/60" />
-        <div
-          className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-gradient-to-br from-orange-200/30 to-pink-200/30 blur-3xl"
-          aria-hidden
-        />
+    <div className="min-h-screen bg-soft-bone">
+      <div className="relative overflow-hidden bg-white border-b border-clay-gray">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-3">
-            <Link href="/" className="hover:text-orange-600 transition-colors">Нүүр</Link>
+            <Link href="/" className="hover:text-primary-600 transition-colors">Нүүр</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <Link href="/products" className="hover:text-orange-600 transition-colors">Бүтээгдэхүүн</Link>
+            <Link href="/products" className="hover:text-primary-600 transition-colors">Бүтээгдэхүүн</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-gray-900 font-medium">{category?.name || slug}</span>
           </nav>
@@ -201,7 +196,7 @@ export default function CategoryPage() {
             key={slug}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-orange-700 bg-clip-text text-transparent"
+            className="font-display text-3xl md:text-4xl font-bold text-on-surface"
           >
             {category?.name || slug}
           </motion.h1>
@@ -215,7 +210,7 @@ export default function CategoryPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="hidden lg:block w-72 flex-shrink-0">
             <div className="sticky top-24">
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+              <div className="bg-white rounded p-5 border border-clay-gray shadow-soft">
                 <FilterSidebar
                   state={filters}
                   onChange={setFilters}
@@ -237,7 +232,7 @@ export default function CategoryPage() {
                 <SlidersHorizontal className="w-4 h-4" />
                 <span className="font-medium text-sm">Шүүлтүүр</span>
                 {chips.length > 0 && (
-                  <span className="w-5 h-5 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center">
+                  <span className="w-5 h-5 bg-primary-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center">
                     {chips.length}
                   </span>
                 )}
@@ -247,7 +242,7 @@ export default function CategoryPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium hover:border-orange-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all cursor-pointer"
+                  className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm font-medium hover:border-primary-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all cursor-pointer"
                 >
                   {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>{option.label}</option>
@@ -275,7 +270,7 @@ export default function CategoryPage() {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
                           transition={{ duration: 0.18 }}
-                          className={`inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 bg-gradient-to-r text-sm rounded-full ring-1 ${chip.tone}`}
+                          className={`inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 text-sm rounded-full ring-1 ${chip.tone}`}
                         >
                           {chip.label}
                           <button
@@ -335,7 +330,7 @@ export default function CategoryPage() {
                 <div className="pt-5 mt-4 border-t">
                   <button
                     onClick={() => setShowFilters(false)}
-                    className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity active:scale-[0.98]"
+                    className="w-full py-3.5 bg-primary-600 text-white rounded font-display font-bold uppercase tracking-wide hover:bg-primary-700 transition-colors active:scale-[0.98]"
                   >
                     Хэрэглэх ({products.length} бараа)
                   </button>

@@ -24,7 +24,7 @@ export default function ProductSlider({
   products, 
   viewAllLink, 
   badge,
-  badgeColor = 'bg-red-500'
+  badgeColor = 'bg-sale-500'
 }: ProductSliderProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -99,13 +99,13 @@ export default function ProductSlider({
                   {badge}
                 </span>
               )}
-              <span className="text-orange-500">{title.split(' ')[0]}</span>
+              <span className="text-primary-500">{title.split(' ')[0]}</span>
               {title.split(' ').slice(1).join(' ')}
             </h2>
             {subtitle && <span className="text-sm text-gray-500">{subtitle}</span>}
           </div>
           {viewAllLink && (
-            <Link href={viewAllLink} className="text-sm text-gray-500 hover:text-orange-500">
+            <Link href={viewAllLink} className="text-sm text-gray-500 hover:text-primary-500">
               Бүгдийг харах &gt;
             </Link>
           )}
@@ -151,7 +151,7 @@ export default function ProductSlider({
                       />
                       {/* Badge */}
                       {isOnSale && (
-                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded">
+                        <span className="absolute top-2 left-2 bg-sale-500 text-white text-xs font-bold px-2 py-0.5 rounded">
                           On Sale
                         </span>
                       )}
@@ -160,8 +160,8 @@ export default function ProductSlider({
                         onClick={(e) => handleToggleWishlist(e, product)}
                         className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                           isWishlisted
-                            ? 'bg-red-500 text-white'
-                            : 'bg-white/80 text-gray-500 hover:text-red-500'
+                            ? 'bg-sale-500 text-white'
+                            : 'bg-white/80 text-gray-500 hover:text-sale-500'
                         }`}
                       >
                         <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -169,7 +169,7 @@ export default function ProductSlider({
                       {/* Quick Add */}
                       <button
                         onClick={(e) => handleAddToCart(e, product)}
-                        className="absolute bottom-2 right-2 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity hover:bg-orange-600"
+                        className="absolute bottom-2 right-2 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity hover:bg-primary-600"
                       >
                         <ShoppingCart className="w-4 h-4" />
                       </button>
@@ -185,7 +185,7 @@ export default function ProductSlider({
                       {/* Discount */}
                       <div className="h-5 mb-1">
                         {isOnSale && (
-                          <span className="text-red-500 font-bold text-sm">
+                          <span className="text-sale-500 font-bold text-sm">
                             {discountPercent}% OFF
                           </span>
                         )}

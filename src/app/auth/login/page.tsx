@@ -100,18 +100,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-soft-bone flex items-center justify-center p-4">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-200 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-200 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-100 rounded-full opacity-20 blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Back to Store */}
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-500 mb-6 transition-colors group"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-primary-500 mb-6 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Дэлгүүр рүү буцах</span>
@@ -120,7 +120,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+            <div className="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-200">
               <span className="text-white font-black text-3xl">K</span>
             </div>
           </Link>
@@ -141,7 +141,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.email ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="example@email.com"
@@ -165,7 +165,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-orange-500 transition-all ${
+                  className={`w-full pl-12 pr-12 py-3.5 bg-gray-50 border-2 rounded-xl focus:outline-none focus:bg-white focus:border-primary-500 transition-all ${
                     errors.password ? 'border-red-400 bg-red-50' : 'border-transparent'
                   }`}
                   placeholder="••••••••"
@@ -188,10 +188,10 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2" />
+                <input type="checkbox" className="w-4 h-4 text-primary-500 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2" />
                 <span className="ml-2 text-sm text-gray-600">Намайг сана</span>
               </label>
-              <Link href="/auth/forgot-password" className="text-sm text-orange-500 hover:text-orange-600 font-medium">
+              <Link href="/auth/forgot-password" className="text-sm text-primary-500 hover:text-primary-600 font-medium">
                 Нууц үг мартсан?
               </Link>
             </div>
@@ -199,7 +199,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-primary-600 text-white py-4 rounded font-display font-bold uppercase tracking-wide hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary-200 hover:shadow-primary-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -246,7 +246,7 @@ export default function LoginPage() {
 
           <p className="text-center text-gray-500 mt-8 text-sm">
             Бүртгэл байхгүй юу?{' '}
-            <Link href="/auth/register" className="text-orange-500 font-semibold hover:text-orange-600">
+            <Link href="/auth/register" className="text-primary-500 font-semibold hover:text-primary-600">
               Бүртгүүлэх
             </Link>
           </p>
@@ -256,7 +256,7 @@ export default function LoginPage() {
         <div className="text-center mt-6">
           <Link 
             href="/products" 
-            className="inline-flex items-center gap-2 text-gray-500 hover:text-orange-500 text-sm transition-colors"
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-primary-500 text-sm transition-colors"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Дэлгүүрээр үзэх</span>

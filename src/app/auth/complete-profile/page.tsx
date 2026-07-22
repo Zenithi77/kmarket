@@ -117,7 +117,7 @@ export default function CompleteProfilePage() {
   if (!mounted || status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function CompleteProfilePage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-2xl">K</span>
             </div>
             <span className="text-2xl font-bold text-gray-900">KMarket</span>
@@ -142,7 +142,7 @@ export default function CompleteProfilePage() {
           </h1>
           <p className="text-gray-500 text-center mb-8">
             {session?.user?.email && (
-              <span className="block text-sm text-orange-500">{session.user.email}</span>
+              <span className="block text-sm text-primary-500">{session.user.email}</span>
             )}
             Нэмэлт мэдээллээ оруулна уу
           </p>
@@ -160,7 +160,7 @@ export default function CompleteProfilePage() {
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                     errors.full_name ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Таны нэр"
@@ -183,7 +183,7 @@ export default function CompleteProfilePage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                     errors.phone ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="99001122"
@@ -208,7 +208,7 @@ export default function CompleteProfilePage() {
                     setFormData(prev => ({ ...prev, gender: e.target.value }));
                     if (errors.gender) setErrors(prev => ({ ...prev, gender: '' }));
                   }}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none bg-white ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-white ${
                     errors.gender ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
@@ -235,7 +235,7 @@ export default function CompleteProfilePage() {
                   value={formData.address}
                   onChange={handleInputChange}
                   rows={3}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none ${
                     errors.address ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="Хүргэлтийн хаяг"
@@ -249,7 +249,7 @@ export default function CompleteProfilePage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-primary-500 text-white py-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

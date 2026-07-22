@@ -91,7 +91,7 @@ export default function OrdersPage() {
   if (!mounted || status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function OrdersPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 outline-none text-sm"
+            className="px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 outline-none text-sm"
           >
             <option value="all">Бүх статус</option>
             <option value="Pending">Хүлээгдэж байна</option>
@@ -121,7 +121,7 @@ export default function OrdersPage() {
             <p className="text-gray-500 mb-4">Захиалга байхгүй байна</p>
             <button
               onClick={() => router.push('/products')}
-              className="text-orange-500 hover:text-orange-600 font-medium"
+              className="text-primary-500 hover:text-primary-600 font-medium"
             >
               Бараа үзэх
             </button>
@@ -131,11 +131,11 @@ export default function OrdersPage() {
             {filteredOrders.map((order) => (
               <div
                 key={order._id}
-                className="border rounded-xl p-4 hover:border-orange-200 transition-colors"
+                className="border rounded-xl p-4 hover:border-primary-200 transition-colors"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-4">
-                    <span className="font-mono font-medium text-orange-500">
+                    <span className="font-mono font-medium text-primary-500">
                       #{order._id.slice(-8).toUpperCase()}
                     </span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}`}>
@@ -179,7 +179,7 @@ export default function OrdersPage() {
                   <p className="font-bold text-lg">{formatPrice(order.total)}</p>
                   <button
                     onClick={() => setSelectedOrder(order)}
-                    className="flex items-center gap-2 text-orange-500 hover:text-orange-600 font-medium text-sm"
+                    className="flex items-center gap-2 text-primary-500 hover:text-primary-600 font-medium text-sm"
                   >
                     Дэлгэрэнгүй
                     <ChevronRight className="w-4 h-4" />
@@ -218,7 +218,7 @@ export default function OrdersPage() {
                   return (
                     <div key={status} className="flex flex-col items-center">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isCompleted ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-400'
+                        isCompleted ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-400'
                       }`}>
                         {index + 1}
                       </div>
@@ -231,7 +231,7 @@ export default function OrdersPage() {
               </div>
               <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10">
                 <div 
-                  className="h-full bg-orange-500"
+                  className="h-full bg-primary-500"
                   style={{ 
                     width: `${(['Pending', 'Processing', 'Shipped', 'Delivered'].indexOf(selectedOrder.status) / 3) * 100}%` 
                   }}
@@ -278,7 +278,7 @@ export default function OrdersPage() {
             <div className="border-t pt-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Нийт дүн:</span>
-                <span className="text-xl font-bold text-orange-500">{formatPrice(selectedOrder.total)}</span>
+                <span className="text-xl font-bold text-primary-500">{formatPrice(selectedOrder.total)}</span>
               </div>
             </div>
           </div>

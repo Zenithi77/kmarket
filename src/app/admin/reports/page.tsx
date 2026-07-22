@@ -84,7 +84,7 @@ export default function ReportsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
       </div>
     );
   }
@@ -155,8 +155,8 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl p-6 card-shadow">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-green-500" />
+            <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-primary-600" />
             </div>
             {stats && stats.revenueChange !== 0 && (
               <div className={`flex items-center gap-1 text-sm ${
@@ -177,8 +177,8 @@ export default function ReportsPage() {
 
         <div className="bg-white rounded-xl p-6 card-shadow">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <ShoppingCart className="w-6 h-6 text-blue-500" />
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+              <ShoppingCart className="w-6 h-6 text-on-surface-variant" />
             </div>
             {stats && stats.ordersChange !== 0 && (
               <div className={`flex items-center gap-1 text-sm ${
@@ -199,8 +199,8 @@ export default function ReportsPage() {
 
         <div className="bg-white rounded-xl p-6 card-shadow">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-purple-500" />
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+              <Package className="w-6 h-6 text-on-surface-variant" />
             </div>
           </div>
           <p className="text-2xl font-bold">{stats?.totalProducts || 0}</p>
@@ -311,7 +311,7 @@ export default function ReportsPage() {
                       <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                         index === 0 ? 'bg-yellow-100 text-yellow-700' :
                         index === 1 ? 'bg-gray-100 text-gray-600' :
-                        index === 2 ? 'bg-orange-100 text-orange-700' :
+                        index === 2 ? 'bg-primary-100 text-primary-700' :
                         'bg-gray-50 text-gray-500'
                       }`}>
                         {index + 1}
