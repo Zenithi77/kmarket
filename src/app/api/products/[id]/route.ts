@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import { Product } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function withMongoShape(row: any) {
+  return { ...row, _id: row.id };
+}
 
 // GET /api/products/[id]
 export async function GET(
@@ -8,22 +13,33 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const { id } = await params;
 
-    // Check if id is slug or ObjectId
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
-    const query = isObjectId ? { _id: id } : { slug: id };
-
-    const product = await Product.findOne(query)
-      .populate('category_id', 'name slug')
-      .lean();
+    // Check if id is a UUID or a slug
+    const isId = UUID_RE.test(id);
+    const query = supabase.from('products').select('*');
+    const { data: product } = isId
+      ? await query.eq('id', id).maybeSingle()
+      : await query.eq('slug', id).maybeSingle();
 
     if (!product) {
       return NextResponse.json({ error: 'Бараа олдсонгүй' }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    // Populate category_id (name/slug only), mirroring the old .populate() shape
+    if (product.category_id) {
+      const { data: category } = await supabase
+        .from('categories')
+        .select('id, name, slug')
+        .eq('id', product.category_id)
+        .maybeSingle();
+      if (category) {
+        (product as any).category_id = withMongoShape(category);
+      }
+    }
+
+    return NextResponse.json(withMongoShape(product));
   } catch (error) {
     console.error('Product GET error:', error);
     return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
@@ -36,21 +52,22 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const { id } = await params;
     const body = await request.json();
 
-    const product = await Product.findByIdAndUpdate(
-      id,
-      { ...body, updated_at: new Date() },
-      { new: true }
-    );
+    const { data: product, error } = await supabase
+      .from('products')
+      .update({ ...body, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .maybeSingle();
 
-    if (!product) {
+    if (error || !product) {
       return NextResponse.json({ error: 'Бараа олдсонгүй' }, { status: 404 });
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(withMongoShape(product));
   } catch (error) {
     console.error('Product PUT error:', error);
     return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
@@ -63,10 +80,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const { id } = await params;
 
-    const product = await Product.findByIdAndDelete(id);
+    const { data: product } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id)
+      .select()
+      .maybeSingle();
 
     if (!product) {
       return NextResponse.json({ error: 'Бараа олдсонгүй' }, { status: 404 });

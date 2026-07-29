@@ -9,14 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/supabase-js": "^2.111.0",
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.3",
     "cloudinary": "^2.9.0",
     "framer-motion": "^11.0.8",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.7.0",
-    "mongoose": "^9.1.5",
     "next": "^16.2.2",
     "next-auth": "^4.24.13",
     "next-cloudinary": "^6.17.5",
@@ -35,6 +34,7 @@
     "autoprefixer": "^10.4.17",
     "eslint": "^10.2.0",
     "eslint-config-next": "^16.2.2",
+    "mongodb": "^7.5.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"

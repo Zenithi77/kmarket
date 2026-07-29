@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import { Order } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
 
 // POST /api/payment/webhook - Bank SMS webhook
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const body = await request.json();
 
     // Parse SMS content for payment info
     // Example format: "KM12345678 100000 MNT Khan Bank"
-    const { sms_content, sender } = body;
+    const { sms_content } = body;
 
     // Extract order number from SMS
     const orderMatch = sms_content.match(/KM\d{8}/i);
@@ -21,22 +20,24 @@ export async function POST(request: NextRequest) {
     const orderNumber = orderMatch[0].toUpperCase();
 
     // Find and update order
-    const order = await Order.findOneAndUpdate(
-      { order_number: orderNumber, payment_status: 'pending' },
-      { 
+    const { data: order, error } = await supabase
+      .from('orders')
+      .update({
         payment_status: 'paid',
         status: 'confirmed',
-        updated_at: new Date(),
-      },
-      { new: true }
-    );
+        updated_at: new Date().toISOString(),
+      })
+      .eq('order_number', orderNumber)
+      .eq('payment_status', 'pending')
+      .select()
+      .maybeSingle();
 
-    if (!order) {
+    if (error || !order) {
       return NextResponse.json({ error: 'Захиалга олдсонгүй эсвэл төлбөр төлөгдсөн' }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'Төлбөр баталгаажлаа',
       order_number: order.order_number,
     });
@@ -49,8 +50,8 @@ export async function POST(request: NextRequest) {
 // GET /api/payment/check/[orderId] - Check payment status
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
-    
+    const supabase = getSupabase();
+
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('order_id');
 
@@ -58,7 +59,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Захиалгын ID шаардлагатай' }, { status: 400 });
     }
 
-    const order = await Order.findById(orderId).select('payment_status status order_number').lean();
+    const { data: order } = await supabase
+      .from('orders')
+      .select('payment_status, status, order_number')
+      .eq('id', orderId)
+      .maybeSingle();
 
     if (!order) {
       return NextResponse.json({ error: 'Захиалга олдсонгүй' }, { status: 404 });

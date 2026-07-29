@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import connectDB from '@/lib/mongodb';
-import { Banner, User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
+
+function withMongoShape(row: any) {
+  return { ...row, _id: row.id };
+}
 
 // GET - Бүх banner авах
 export async function GET() {
   try {
-    await connectDB();
-    
-    const banners = await Banner.find({ is_active: true })
-      .sort({ order: 1, created_at: -1 });
-    
-    return NextResponse.json({ banners });
+    const supabase = getSupabase();
+
+    const { data, error } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('order', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ banners: (data || []).map(withMongoShape) });
   } catch (error) {
     console.error('Banners fetch error:', error);
     return NextResponse.json(
@@ -30,10 +39,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
     }
 
-    await connectDB();
+    const supabase = getSupabase();
 
     // Check admin role
-    const user = await User.findOne({ email: session.user.email });
+    const { data: user } = await supabase
+      .from('users')
+      .select('role')
+      .eq('email', session.user.email)
+      .maybeSingle();
     if (!user || user.role !== 'admin') {
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
@@ -48,19 +61,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const banner = await Banner.create({
-      title,
-      subtitle,
-      description,
-      image,
-      link,
-      bg_color: bg_color || '#FEE2E2',
-      text_color: text_color || '#F97316',
-      order: order || 0,
-      is_active: true,
-    });
+    const { data: banner, error } = await supabase
+      .from('banners')
+      .insert({
+        title,
+        subtitle,
+        description,
+        image,
+        link,
+        bg_color: bg_color || '#FEE2E2',
+        text_color: text_color || '#F97316',
+        order: order || 0,
+        is_active: true,
+      })
+      .select()
+      .single();
 
-    return NextResponse.json({ banner }, { status: 201 });
+    if (error) throw error;
+
+    return NextResponse.json({ banner: withMongoShape(banner) }, { status: 201 });
   } catch (error) {
     console.error('Banner create error:', error);
     return NextResponse.json(

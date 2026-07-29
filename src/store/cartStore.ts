@@ -107,14 +107,17 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'kmarket-cart',
+      // Bumped when the product ID format changed (Mongo ObjectId -> Postgres/Supabase UUID)
+      // so carts persisted under the old format are dropped rather than silently breaking.
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          // Clean up invalid cart items (e.g. old mock IDs that aren't valid MongoDB ObjectIds)
+          // Clean up invalid cart items (e.g. stale IDs that aren't valid Supabase UUIDs)
           const validItems = state.items.filter((item) => {
             const id = item.product?.id;
-            return id && /^[0-9a-fA-F]{24}$/.test(id);
+            return id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
           });
           if (validItems.length !== state.items.length) {
             state.items = validItems;

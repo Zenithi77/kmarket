@@ -1,21 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import connectDB from '@/lib/mongodb';
-import { Category, User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
+
+// Mongo responses exposed `_id` everywhere; keep the frontend contract identical.
+function withMongoShape(row: any) {
+  return { ...row, _id: row.id };
+}
+
+async function requireAdmin(email: string) {
+  const supabase = getSupabase();
+  const { data: user } = await supabase
+    .from('users')
+    .select('role')
+    .eq('email', email)
+    .maybeSingle();
+  return user?.role === 'admin';
+}
 
 // GET /api/categories
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
 
     const { searchParams } = new URL(request.url);
     const parentSlug = searchParams.get('parent');
     const flat = searchParams.get('flat') === 'true';
 
-    const categories = await Category.find({ is_active: true })
-      .sort({ order: 1, name: 1 })
-      .lean();
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('order', { ascending: true })
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    const categories = (data || []).map(withMongoShape);
 
     // If requesting flat list (for dropdowns)
     if (flat) {
@@ -24,21 +44,19 @@ export async function GET(request: NextRequest) {
 
     // If requesting subcategories of a specific parent
     if (parentSlug) {
-      const parent = categories.find(c => c.slug === parentSlug && !c.parent_id);
+      const parent = categories.find((c) => c.slug === parentSlug && !c.parent_id);
       if (!parent) {
         return NextResponse.json([]);
       }
-      const subs = categories.filter(c => c.parent_id?.toString() === parent._id.toString());
+      const subs = categories.filter((c) => c.parent_id === parent._id);
       return NextResponse.json(subs);
     }
 
     // Default: organize into parent/child structure
-    const parents = categories.filter(c => !c.parent_id);
-    const result = parents.map(parent => ({
+    const parents = categories.filter((c) => !c.parent_id);
+    const result = parents.map((parent) => ({
       ...parent,
-      subcategories: categories.filter(c => 
-        c.parent_id?.toString() === parent._id.toString()
-      ),
+      subcategories: categories.filter((c) => c.parent_id === parent._id),
     }));
 
     return NextResponse.json(result, {
@@ -62,14 +80,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
     }
 
-    await connectDB();
-
-    // Check admin
-    const user = await User.findOne({ email: session.user.email });
-    if (!user || user.role !== 'admin') {
+    if (!(await requireAdmin(session.user.email))) {
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
 
+    const supabase = getSupabase();
     const body = await request.json();
 
     const slug = body.slug || body.name
@@ -78,23 +93,34 @@ export async function POST(request: NextRequest) {
       .replace(/(^-|-$)/g, '');
 
     // Check if slug already exists
-    const existing = await Category.findOne({ slug });
+    const { data: existing } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+
     if (existing) {
       return NextResponse.json({ error: 'Энэ slug аль хэдийн байна' }, { status: 400 });
     }
 
-    const category = await Category.create({ 
-      name: body.name,
-      slug,
-      icon: body.icon,
-      image: body.image,
-      parent_id: body.parent_id || undefined,
-      filters: body.filters || [],
-      order: body.order || 0,
-      is_active: true,
-    });
-    
-    return NextResponse.json(category, { status: 201 });
+    const { data: category, error } = await supabase
+      .from('categories')
+      .insert({
+        name: body.name,
+        slug,
+        icon: body.icon,
+        image: body.image,
+        parent_id: body.parent_id || null,
+        filters: body.filters || [],
+        order: body.order || 0,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(withMongoShape(category), { status: 201 });
   } catch (error) {
     console.error('Categories POST error:', error);
     return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
@@ -109,27 +135,27 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
     }
 
-    await connectDB();
-
-    const user = await User.findOne({ email: session.user.email });
-    if (!user || user.role !== 'admin') {
+    if (!(await requireAdmin(session.user.email))) {
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
 
+    const supabase = getSupabase();
     const body = await request.json();
-    const { _id, ...updateData } = body;
+    const { _id, id, ...updateData } = body;
+    const categoryId = _id || id;
 
-    const category = await Category.findByIdAndUpdate(
-      _id,
-      updateData,
-      { new: true }
-    );
+    const { data: category, error } = await supabase
+      .from('categories')
+      .update(updateData)
+      .eq('id', categoryId)
+      .select()
+      .maybeSingle();
 
-    if (!category) {
+    if (error || !category) {
       return NextResponse.json({ error: 'Категори олдсонгүй' }, { status: 404 });
     }
 
-    return NextResponse.json(category);
+    return NextResponse.json(withMongoShape(category));
   } catch (error) {
     console.error('Categories PUT error:', error);
     return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
@@ -144,13 +170,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
     }
 
-    await connectDB();
-
-    const user = await User.findOne({ email: session.user.email });
-    if (!user || user.role !== 'admin') {
+    if (!(await requireAdmin(session.user.email))) {
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
 
+    const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -158,9 +182,9 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID шаардлагатай' }, { status: 400 });
     }
 
-    await Category.findByIdAndDelete(id);
     // Also delete subcategories
-    await Category.deleteMany({ parent_id: id });
+    await supabase.from('categories').delete().eq('parent_id', id);
+    await supabase.from('categories').delete().eq('id', id);
 
     return NextResponse.json({ message: 'Устгагдлаа' });
   } catch (error) {

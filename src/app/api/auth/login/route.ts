@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import { User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -9,12 +8,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'kmarket-secret-key';
 // POST /api/auth/login
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const body = await request.json();
     const { email, password } = body;
 
     // Find user
-    const user = await User.findOne({ email: email.toLowerCase(), is_active: true });
+    const { data: user } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .eq('is_active', true)
+      .maybeSingle();
+
     if (!user) {
       return NextResponse.json({ error: 'Имэйл эсвэл нууц үг буруу' }, { status: 401 });
     }
@@ -32,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -40,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       token,
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         full_name: user.full_name,
         phone: user.phone,

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import connectDB from '@/lib/mongodb';
-import { User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,38 +54,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await connectDB();
+    const supabase = getSupabase();
 
     // Find and update the user
-    const user = await User.findOne({ email: session.user.email });
+    const { data: user, error } = await supabase
+      .from('users')
+      .update({
+        full_name: full_name.trim(),
+        phone: cleanPhone,
+        address: address.trim(),
+        gender,
+        profile_completed: true,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('email', session.user.email)
+      .select()
+      .maybeSingle();
 
-    if (!user) {
+    if (error || !user) {
       return NextResponse.json(
         { error: 'Хэрэглэгч олдсонгүй' },
         { status: 404 }
       );
     }
 
-    // Update user profile
-    user.full_name = full_name.trim();
-    user.phone = cleanPhone;
-    user.address = address.trim();
-    user.gender = gender;
-    user.profileCompleted = true;
-
-    await user.save();
-
     return NextResponse.json({
       success: true,
       message: 'Бүртгэл амжилттай шинэчлэгдлээ',
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         full_name: user.full_name,
         phone: user.phone,
         address: user.address,
         gender: user.gender,
-        profileCompleted: user.profileCompleted,
+        profileCompleted: user.profile_completed,
       }
     });
   } catch (error) {

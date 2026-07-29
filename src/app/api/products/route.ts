@@ -1,21 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import connectDB from '@/lib/mongodb';
-import { Product, Category } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
 
-const isObjectId = (v: string) => mongoose.Types.ObjectId.isValid(v) && /^[a-f0-9]{24}$/i.test(v);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function resolveCategoryId(value: string | null): Promise<string | null> {
   if (!value) return null;
-  if (isObjectId(value)) return value;
-  const cat = await Category.findOne({ slug: value }).select('_id').lean<{ _id: mongoose.Types.ObjectId }>();
-  return cat ? cat._id.toString() : '__NOMATCH__';
+  if (UUID_RE.test(value)) return value;
+  const supabase = getSupabase();
+  const { data: cat } = await supabase
+    .from('categories')
+    .select('id')
+    .eq('slug', value)
+    .maybeSingle();
+  return cat ? cat.id : '__NOMATCH__';
+}
+
+function withMongoShape(row: any) {
+  return { ...row, _id: row.id };
+}
+
+// Attaches populated category_id/subcategory_id objects, mirroring the old Mongoose
+// .populate() shape the frontend's mapProduct() already knows how to read.
+async function attachCategories(products: any[]) {
+  const supabase = getSupabase();
+  const ids = Array.from(
+    new Set(products.flatMap((p) => [p.category_id, p.subcategory_id]).filter(Boolean))
+  );
+  if (ids.length === 0) return products;
+
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name, slug, filters')
+    .in('id', ids);
+
+  const byId = new Map((categories || []).map((c) => [c.id, withMongoShape(c)]));
+
+  return products.map((p) => ({
+    ...p,
+    category_id: p.category_id ? byId.get(p.category_id) || p.category_id : p.category_id,
+    subcategory_id: p.subcategory_id ? byId.get(p.subcategory_id) || p.subcategory_id : p.subcategory_id,
+  }));
 }
 
 // GET /api/products
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
@@ -41,10 +71,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Size filter
     const sizeFilter = searchParams.get('size');
-
-    const query: any = { is_active: true };
 
     // Resolve category/subcategory by slug or id
     const [categoryId, subcategoryId] = await Promise.all([
@@ -59,57 +86,51 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    if (categoryId) query.category_id = categoryId;
-    if (subcategoryId) query.subcategory_id = subcategoryId;
-    if (brand) query.brand = brand;
-    if (featured === 'true') query.is_featured = true;
-    if (isNew === 'true') query.is_new = true;
-    if (sale === 'true') query.sale_price = { $exists: true, $ne: null };
+    let query = supabase.from('products').select('*', { count: 'exact' }).eq('is_active', true);
+
+    if (categoryId) query = query.eq('category_id', categoryId);
+    if (subcategoryId) query = query.eq('subcategory_id', subcategoryId);
+    if (brand) query = query.eq('brand', brand);
+    if (featured === 'true') query = query.eq('is_featured', true);
+    if (isNew === 'true') query = query.eq('is_new', true);
+    if (sale === 'true') query = query.not('sale_price', 'is', null);
 
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { brand: { $regex: search, $options: 'i' } },
-      ];
+      const escaped = search.replace(/[%_]/g, '\\$&');
+      query = query.or(
+        `name.ilike.%${escaped}%,description.ilike.%${escaped}%,brand.ilike.%${escaped}%`
+      );
     }
 
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = parseInt(minPrice);
-      if (maxPrice) query.price.$lte = parseInt(maxPrice);
-    }
+    if (minPrice) query = query.gte('price', parseInt(minPrice));
+    if (maxPrice) query = query.lte('price', parseInt(maxPrice));
 
-    // Size filter
-    if (sizeFilter) {
-      query.sizes = sizeFilter;
-    }
+    if (sizeFilter) query = query.contains('sizes', [sizeFilter]);
 
-    // Color filter (match by color name, case-insensitive)
-    if (color) {
-      query['colors.name'] = { $regex: `^${color}$`, $options: 'i' };
-    }
-
-    // Attribute filters
     for (const [key, value] of Object.entries(attrFilters)) {
-      query[`attributes.${key}`] = value;
+      query = query.eq(`attributes->>${key}`, value);
     }
-
-    const sortOptions: any = {};
-    sortOptions[sort] = order === 'asc' ? 1 : -1;
 
     const skip = (page - 1) * limit;
-    const [products, total] = await Promise.all([
-      Product.find(query)
-        .populate('category_id', 'name slug filters')
-        .populate('subcategory_id', 'name slug')
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Product.countDocuments(query),
-    ]);
+    query = query.order(sort, { ascending: order === 'asc' }).range(skip, skip + limit - 1);
 
+    const { data, count, error } = await query;
+    if (error) throw error;
+
+    let products = data || [];
+
+    // Color filter (jsonb array of {name,hex} — matched case-insensitively in JS,
+    // since PostgREST has no case-insensitive containment operator for jsonb arrays)
+    if (color) {
+      products = products.filter((p: any) =>
+        Array.isArray(p.colors) && p.colors.some((c: any) => c.name?.toLowerCase() === color.toLowerCase())
+      );
+    }
+
+    products = await attachCategories(products);
+    products = products.map(withMongoShape);
+
+    const total = count || 0;
     return NextResponse.json({
       products,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
@@ -123,16 +144,23 @@ export async function GET(request: NextRequest) {
 // POST /api/products (Admin)
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const body = await request.json();
-    
+
     const slug = body.slug || (body.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '') + '-' + Date.now());
 
-    const product = await Product.create({ ...body, slug });
-    return NextResponse.json(product, { status: 201 });
+    const { data: product, error } = await supabase
+      .from('products')
+      .insert({ ...body, slug })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(withMongoShape(product), { status: 201 });
   } catch (error) {
     console.error('Products POST error:', error);
     return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });

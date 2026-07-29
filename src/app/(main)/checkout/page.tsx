@@ -121,8 +121,8 @@ export default function CheckoutPage() {
 
     try {
       // Filter out any cart items with invalid product IDs
-      const validItems = items.filter(item => 
-        item.product.id && /^[0-9a-fA-F]{24}$/.test(item.product.id)
+      const validItems = items.filter(item =>
+        item.product.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.product.id)
       );
 
       if (validItems.length === 0) {

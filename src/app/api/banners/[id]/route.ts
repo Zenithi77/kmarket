@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import connectDB from '@/lib/mongodb';
-import { Banner, User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
+
+function withMongoShape(row: any) {
+  return { ...row, _id: row.id };
+}
+
+async function requireAdmin(email: string) {
+  const supabase = getSupabase();
+  const { data: user } = await supabase
+    .from('users')
+    .select('role')
+    .eq('email', email)
+    .maybeSingle();
+  return user?.role === 'admin';
+}
 
 // GET - Нэг banner авах
 export async function GET(
@@ -10,16 +23,20 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
+    const supabase = getSupabase();
     const { id } = await params;
 
-    const banner = await Banner.findById(id);
-    
+    const { data: banner } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
     if (!banner) {
       return NextResponse.json({ error: 'Banner олдсонгүй' }, { status: 404 });
     }
-    
-    return NextResponse.json({ banner });
+
+    return NextResponse.json({ banner: withMongoShape(banner) });
   } catch (error) {
     console.error('Banner fetch error:', error);
     return NextResponse.json(
@@ -41,20 +58,17 @@ export async function PUT(
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
     }
 
-    await connectDB();
-
-    // Check admin role
-    const user = await User.findOne({ email: session.user.email });
-    if (!user || user.role !== 'admin') {
+    if (!(await requireAdmin(session.user.email))) {
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
 
+    const supabase = getSupabase();
     const body = await req.json();
     const { title, subtitle, description, image, link, bg_color, text_color, order, is_active } = body;
 
-    const banner = await Banner.findByIdAndUpdate(
-      id,
-      {
+    const { data: banner, error } = await supabase
+      .from('banners')
+      .update({
         title,
         subtitle,
         description,
@@ -64,15 +78,17 @@ export async function PUT(
         text_color,
         order,
         is_active,
-      },
-      { new: true }
-    );
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .maybeSingle();
 
-    if (!banner) {
+    if (error || !banner) {
       return NextResponse.json({ error: 'Banner олдсонгүй' }, { status: 404 });
     }
 
-    return NextResponse.json({ banner });
+    return NextResponse.json({ banner: withMongoShape(banner) });
   } catch (error) {
     console.error('Banner update error:', error);
     return NextResponse.json(
@@ -94,15 +110,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
     }
 
-    await connectDB();
-
-    // Check admin role
-    const user = await User.findOne({ email: session.user.email });
-    if (!user || user.role !== 'admin') {
+    if (!(await requireAdmin(session.user.email))) {
       return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
     }
 
-    const banner = await Banner.findByIdAndDelete(id);
+    const supabase = getSupabase();
+    const { data: banner } = await supabase
+      .from('banners')
+      .delete()
+      .eq('id', id)
+      .select()
+      .maybeSingle();
 
     if (!banner) {
       return NextResponse.json({ error: 'Banner олдсонгүй' }, { status: 404 });

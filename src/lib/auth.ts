@@ -1,8 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import connectDB from '@/lib/mongodb';
-import { User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
 import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
@@ -22,9 +21,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error('И-мэйл болон нууц үг оруулна уу');
         }
 
-        await connectDB();
+        const supabase = getSupabase();
 
-        const user = await User.findOne({ email: credentials.email });
+        const { data: user } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', credentials.email)
+          .maybeSingle();
 
         if (!user) {
           throw new Error('Хэрэглэгч олдсонгүй');
@@ -44,7 +47,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user._id.toString(),
+          id: user.id,
           email: user.email,
           name: user.full_name,
           image: user.avatar,
@@ -56,33 +59,39 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
-        await connectDB();
+        const supabase = getSupabase();
 
         // Check if user already exists
-        const existingUser = await User.findOne({ email: user.email ?? undefined });
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', user.email ?? '')
+          .maybeSingle();
 
         if (!existingUser) {
           // Create new user for OAuth - mark as needing profile completion
-          const newUser = await User.create({
+          await supabase.from('users').insert({
             email: user.email ?? '',
             full_name: user.name ?? '',
             avatar: user.image ?? undefined,
             provider: account.provider,
-            providerId: account.providerAccountId,
+            provider_id: account.providerAccountId,
             role: 'user',
-            profileCompleted: false,
+            profile_completed: false,
           });
           // Add flag to redirect to complete-profile
           (user as any).isNewUser = true;
         } else if (!existingUser.provider) {
           // Update existing user with OAuth info
-          existingUser.provider = account.provider as 'google';
-          existingUser.providerId = account.providerAccountId;
-          if (!existingUser.avatar && user.image) {
-            existingUser.avatar = user.image;
-          }
-          await existingUser.save();
-        } else if (!existingUser.profileCompleted) {
+          await supabase
+            .from('users')
+            .update({
+              provider: account.provider,
+              provider_id: account.providerAccountId,
+              avatar: existingUser.avatar || user.image || undefined,
+            })
+            .eq('id', existingUser.id);
+        } else if (!existingUser.profile_completed) {
           // Existing OAuth user without completed profile
           (user as any).isNewUser = true;
         }
@@ -91,26 +100,34 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token, user, account, trigger }) {
       if (user) {
-        await connectDB();
-        const dbUser = await User.findOne({ email: user.email ?? undefined });
-        
-        token.id = dbUser?._id.toString() || user.id;
+        const supabase = getSupabase();
+        const { data: dbUser } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', user.email ?? '')
+          .maybeSingle();
+
+        token.id = dbUser?.id || user.id;
         token.role = dbUser?.role || 'user';
         token.provider = account?.provider;
-        token.profileCompleted = dbUser?.profileCompleted ?? true;
+        token.profileCompleted = dbUser?.profile_completed ?? true;
         token.isNewUser = (user as any).isNewUser || false;
       }
-      
+
       // Handle session update (when profile is completed)
       if (trigger === 'update') {
-        await connectDB();
-        const dbUser = await User.findOne({ email: token.email ?? undefined });
+        const supabase = getSupabase();
+        const { data: dbUser } = await supabase
+          .from('users')
+          .select('profile_completed')
+          .eq('email', token.email ?? '')
+          .maybeSingle();
         if (dbUser) {
-          token.profileCompleted = dbUser.profileCompleted;
+          token.profileCompleted = dbUser.profile_completed;
           token.isNewUser = false;
         }
       }
-      
+
       return token;
     },
     async session({ session, token }) {

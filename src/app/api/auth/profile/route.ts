@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import connectDB from '@/lib/mongodb';
-import { User } from '@/lib/models';
+import { getSupabase } from '@/lib/supabase';
 
 // GET user profile
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Нэвтрэх шаардлагатай' },
@@ -16,10 +15,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    await connectDB();
-    
-    const user = await User.findOne({ email: session.user.email }).select('-password');
-    
+    const supabase = getSupabase();
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('id, email, full_name, phone, address, gender, provider, profile_completed')
+      .eq('email', session.user.email)
+      .maybeSingle();
+
     if (!user) {
       return NextResponse.json(
         { error: 'Хэрэглэгч олдсонгүй' },
@@ -29,14 +32,14 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       user: {
-        _id: user._id,
+        _id: user.id,
         email: user.email,
         full_name: user.full_name,
         phone: user.phone || '',
         address: user.address || '',
         gender: user.gender || '',
         provider: user.provider || 'credentials',
-        profileCompleted: user.profileCompleted,
+        profileCompleted: user.profile_completed,
       }
     });
   } catch (error) {
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Нэвтрэх шаардлагатай' },
@@ -63,20 +66,22 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { full_name, phone, address, gender } = body;
 
-    await connectDB();
-    
-    const user = await User.findOneAndUpdate(
-      { email: session.user.email },
-      {
+    const supabase = getSupabase();
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update({
         full_name: full_name || undefined,
         phone: phone || undefined,
         address: address || undefined,
         gender: gender || undefined,
-      },
-      { new: true }
-    ).select('-password');
+        updated_at: new Date().toISOString(),
+      })
+      .eq('email', session.user.email)
+      .select('id, email, full_name, phone, address, gender, provider, profile_completed')
+      .maybeSingle();
 
-    if (!user) {
+    if (error || !user) {
       return NextResponse.json(
         { error: 'Хэрэглэгч олдсонгүй' },
         { status: 404 }
@@ -86,14 +91,14 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       message: 'Профайл амжилттай шинэчлэгдлээ',
       user: {
-        _id: user._id,
+        _id: user.id,
         email: user.email,
         full_name: user.full_name,
         phone: user.phone || '',
         address: user.address || '',
         gender: user.gender || '',
         provider: user.provider || 'credentials',
-        profileCompleted: user.profileCompleted,
+        profileCompleted: user.profile_completed,
       }
     });
   } catch (error) {
