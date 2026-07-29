@@ -69,38 +69,70 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-soft-bone/95 backdrop-blur-md shadow-sm">
-      {/* Main Header */}
-      <div className="border-b border-clay-gray">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Row 1: Logo and Icons */}
-          <div className="flex items-center justify-between h-14">
-            {/* Left: Hamburger + Logo */}
-            <div className="flex items-center gap-2">
-              {/* Mobile Menu Button */}
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-clay-gray shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Row 1: logo (left) — search (centered, wide) — icons (right) */}
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 h-16">
+          {/* Left: hamburger + logo */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 -ml-2 text-on-surface-variant hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200 flex-shrink-0"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+
+            <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
+              <Image
+                src="/1.jpg"
+                alt="KMarket"
+                width={44}
+                height={44}
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover"
+                priority
+                unoptimized
+              />
+              <span className="hidden sm:block font-display text-lg font-extrabold tracking-tight text-on-surface">
+                KMarket
+              </span>
+            </Link>
+          </div>
+
+          {/* Search — centered in the row, grows wide on larger screens */}
+          <form onSubmit={handleSearch} className="w-full min-w-0 max-w-2xl mx-auto">
+            <div className="flex items-center w-full h-11 bg-gray-50 border border-clay-gray rounded-full pl-1.5 pr-1.5 gap-1 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-soft transition-all duration-200">
+              <div className="relative flex-shrink-0 hidden md:block">
+                <select
+                  value={searchCategory}
+                  onChange={(e) => setSearchCategory(e.target.value)}
+                  className="h-8 pl-3 pr-6 rounded-full bg-transparent text-xs font-medium text-on-surface-variant focus:outline-none appearance-none cursor-pointer border-r border-clay-gray"
+                >
+                  <option value="All">Бүгд</option>
+                  <option value="Beauty">Beauty</option>
+                  <option value="Fashion">Fashion</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Home">Home</option>
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Хайх бүтээгдэхүүний нэрийг оруулна уу..."
+                className="flex-1 min-w-0 h-8 px-2 bg-transparent text-sm focus:outline-none placeholder:text-gray-400"
+              />
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-on-surface-variant hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+                type="submit"
+                className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-all duration-200 flex items-center justify-center shadow-brand active:scale-95"
               >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                <Search className="w-4 h-4" />
               </button>
-
-              {/* Logo */}
-              <Link href="/" className="flex-shrink-0 flex items-center group">
-                <Image
-                  src="/1.jpg"
-                  alt="KMarket"
-                  width={48}
-                  height={48}
-                  className="w-11 h-11 md:w-12 md:h-12 rounded-full object-cover"
-                  priority
-                  unoptimized
-                />
-              </Link>
             </div>
+          </form>
 
-            {/* Right Icons */}
-            <div className="flex items-center gap-1 md:gap-2">
+          {/* Right Icons */}
+          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
               {/* Login/Register or Profile Dropdown */}
               {mounted && isAuthenticated ? (
                 <div className="relative" ref={profileDropdownRef}>
@@ -238,85 +270,34 @@ export default function Header() {
                 )}
               </button>
             </div>
-          </div>
+        </div>
 
-          {/* Row 2: Search Bar - Full Width */}
-          <div className="pb-3">
-            <form onSubmit={handleSearch} className="w-full flex items-center group">
-              {/* Category Dropdown */}
-              <div className="relative hidden sm:block">
-                <select
-                  value={searchCategory}
-                  onChange={(e) => setSearchCategory(e.target.value)}
-                  className="h-11 pl-4 pr-9 border-2 border-r-0 border-clay-gray group-focus-within:border-primary-500 rounded-l bg-gray-50 group-focus-within:bg-white text-sm text-on-surface-variant focus:outline-none appearance-none cursor-pointer font-medium transition-all duration-200"
-                >
-                  <option value="All">Бүгд</option>
-                  <option value="Beauty">Beauty</option>
-                  <option value="Fashion">Fashion</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Home">Home</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* Search Input */}
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Хайх бүтээгдэхүүний нэрийг оруулна уу..."
-                  className="w-full h-11 px-4 border-2 border-clay-gray focus:border-primary-500 sm:border-l-0 sm:rounded-l-none rounded-l rounded-r-none text-sm focus:outline-none placeholder:text-gray-400 bg-gray-50 focus:bg-white transition-all duration-200"
-                />
-              </div>
-
-              {/* Search Button */}
-              <button
-                type="submit"
-                className="h-11 px-6 bg-primary-600 hover:bg-primary-700 text-white rounded-r transition-all duration-200 flex items-center justify-center shadow-brand active:scale-100"
+        {/* Row 2: category nav, directly below row 1 (desktop only) */}
+        <nav className="hidden lg:flex items-center justify-center gap-1 pb-3">
+          {CATEGORIES.map((category) => {
+            const IconComponent = category.icon;
+            const active = activeDropdown === category.slug;
+            return (
+              <Link
+                key={category.id}
+                href={`/category/${category.slug}`}
+                className={`relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-semibold transition-colors ${
+                  active ? 'text-primary-600 bg-primary-50' : 'text-on-surface-variant hover:text-primary-600 hover:bg-primary-50/70'
+                }`}
+                onMouseEnter={() => setActiveDropdown(category.slug)}
+                onMouseLeave={() => setActiveDropdown(null)}
               >
-                <Search className="w-5 h-5" />
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      {/* Category Navigation */}
-      <div className="border-b border-clay-gray hidden lg:block bg-soft-bone">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-center gap-2 h-12">
-            {CATEGORIES.map((category) => {
-              const IconComponent = category.icon;
-              return (
-                <div
-                  key={category.id}
-                  className="relative group"
-                  onMouseEnter={() => setActiveDropdown(category.slug)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <Link
-                    href={`/category/${category.slug}`}
-                    className={`flex items-center gap-2 px-4 py-2 font-display text-xs font-semibold uppercase tracking-wide text-on-surface-variant transition-all duration-200 rounded ${category.color} ${category.bgColor}`}
-                  >
-                    <IconComponent className={`w-4 h-4 ${category.iconColor} transition-colors`} />
-                    <span>{category.name}</span>
-                  </Link>
-
-                  {/* Dropdown indicator dot */}
-                  <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-600 transform transition-all duration-300 ${
-                    activeDropdown === category.slug ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                  }`} />
-                </div>
-              );
-            })}
-          </nav>
-        </div>
+                <IconComponent className="w-4 h-4" />
+                <span>{category.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Mobile Menu Overlay – rendered via portal so it escapes header's backdrop-filter containing block */}
       {mounted && createPortal(
-      <div className="md:hidden" {...(!isMenuOpen ? { inert: '' as any } : {})}>
+      <div className="lg:hidden" inert={!isMenuOpen}>
         {/* Backdrop */}
         <div
           className={`fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${

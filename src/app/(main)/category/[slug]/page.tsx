@@ -330,7 +330,7 @@ export default function CategoryPage() {
                 <div className="pt-5 mt-4 border-t">
                   <button
                     onClick={() => setShowFilters(false)}
-                    className="w-full py-3.5 bg-primary-600 text-white rounded font-display font-bold uppercase tracking-wide hover:bg-primary-700 transition-colors active:scale-[0.98]"
+                    className="w-full py-3.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-colors active:scale-[0.98]"
                   >
                     Хэрэглэх ({products.length} бараа)
                   </button>

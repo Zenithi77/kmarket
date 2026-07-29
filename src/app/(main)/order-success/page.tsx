@@ -3,29 +3,35 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Package, ArrowRight } from 'lucide-react';
-import { formatPrice, formatDate } from '@/lib/constants';
-import { Order } from '@/types';
+import { CheckCircle, ArrowRight } from 'lucide-react';
+import { formatPrice } from '@/lib/constants';
 import confetti from 'canvas-confetti';
+
+interface OrderSummary {
+  order_number: string;
+  final_amount: number;
+  items: { name: string; quantity: number }[];
+}
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('id');
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderSummary | null>(null);
 
   useEffect(() => {
-    // Trigger confetti on mount
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 }
     });
 
-    // Fetch order details
-    if (orderId) {
-      // In real app, fetch from API
-      // For now, just show success message
-    }
+    if (!orderId) return;
+    fetch(`/api/orders/${orderId}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setOrder(data);
+      })
+      .catch(() => {});
   }, [orderId]);
 
   return (
@@ -42,10 +48,28 @@ function OrderSuccessContent() {
           Таны захиалга баталгаажлаа. Удахгүй хүргэлт хийгдэнэ.
         </p>
 
-        {orderId && (
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
-            <p className="text-sm text-gray-500 mb-1">Захиалгын дугаар</p>
-            <p className="font-mono font-bold text-lg">{orderId}</p>
+        {(order || orderId) && (
+          <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500">Захиалгын дугаар</p>
+              <p className="font-mono font-bold">{order?.order_number || orderId}</p>
+            </div>
+            {order && (
+              <>
+                <div className="border-t border-gray-200 pt-3 space-y-1">
+                  {order.items.map((item, i) => (
+                    <div key={i} className="flex justify-between text-sm text-gray-600">
+                      <span className="truncate pr-2">{item.name}</span>
+                      <span className="flex-shrink-0">x{item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-gray-200 pt-3 flex justify-between">
+                  <span className="font-medium text-gray-900">Нийт дүн</span>
+                  <span className="font-bold text-primary-600">{formatPrice(order.final_amount)}</span>
+                </div>
+              </>
+            )}
           </div>
         )}
 

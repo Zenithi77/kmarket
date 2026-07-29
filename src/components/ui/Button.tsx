@@ -29,10 +29,10 @@ const variantClasses: Record<Variant, string> = {
 
 const sizeClasses: Record<Size, string> = {
   xs: 'h-7 px-2.5 text-xs gap-1',
-  sm: 'h-9 px-3 text-xs gap-1.5',
-  md: 'h-11 px-5 text-xs gap-2',
-  lg: 'h-12 px-6 text-sm gap-2',
-  xl: 'h-14 px-8 text-sm gap-2.5',
+  sm: 'h-9 px-3 text-sm gap-1.5',
+  md: 'h-11 px-5 text-sm gap-2',
+  lg: 'h-12 px-6 text-base gap-2',
+  xl: 'h-14 px-8 text-base gap-2.5',
 };
 
 const roundedClasses = {
@@ -49,7 +49,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   fullWidth = false,
   leftIcon,
   rightIcon,
-  rounded = 'full',
+  rounded = 'xl',
   children,
   className = '',
   disabled,
@@ -59,7 +59,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
     'inline-flex items-center justify-center transition-all duration-200 ' +
     'active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ' +
     'kring select-none whitespace-nowrap';
-  const ctaText = 'font-medium uppercase tracking-wide';
+  const ctaText = 'font-semibold tracking-tight';
 
   return (
     <button

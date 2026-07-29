@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Truck, ShieldCheck, RotateCcw, Headphones } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown } from 'lucide-react';
 import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
 import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
@@ -467,30 +467,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── TRUST / SERVICE BAR (Korean shop footer feature row) ── */}
-      <section className="mt-2 bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { Icon: Truck,        title: 'Хурдан хүргэлт', desc: 'УБ дотор 24 цагт' },
-              { Icon: ShieldCheck,  title: 'Баталгаат',       desc: '100% эх барааны' },
-              { Icon: RotateCcw,    title: 'Буцаалт',         desc: '7 хоногийн дотор' },
-              { Icon: Headphones,   title: '24/7 Тусламж',    desc: 'Хэзээ ч холбогдоорой' },
-            ].map(({ Icon, title, desc }) => (
-              <div key={title} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  <Icon className="w-5 h-5 text-primary-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900 truncate">{title}</p>
-                  <p className="text-[11px] text-gray-500 truncate">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── EMPTY STATE (no products at all) ── */}
       {featuredProducts.length === 0 && saleProducts.length === 0 && allProducts.length === 0 && categories.length === 0 && (
         <section className="py-24 bg-white">
@@ -504,7 +480,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-display font-bold uppercase tracking-wide rounded hover:bg-primary-700 transition-colors shadow-brand"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-colors shadow-brand"
             >
               <Package className="w-5 h-5" />
               Бараа нэмэх

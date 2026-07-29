@@ -1,127 +1,90 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
-import { ProductCard } from '@/components/product';
+import { ProductGrid } from '@/components/product';
 import { Button, LoadingSpinner } from '@/components/ui';
+import { Product } from '@/types';
 
-// Mock products
-const mockProducts = [
-  {
-    id: '1',
-    name: 'Dyson Airwrap Complete',
-    slug: 'dyson-airwrap-complete',
-    price: 2200000,
-    originalPrice: 2500000,
-    images: ['/placeholder.svg'],
-    category: { id: '4', name: 'Dyson', slug: 'dyson' },
-    isNew: true,
-    isOnSale: true,
-    rating: 4.8,
-    reviewCount: 156,
-    sizes: [],
-    stock: 15,
-    description: ''
-  },
-  {
-    id: '2',
-    name: 'Nike Air Force 1 07',
-    slug: 'nike-air-force-1-07',
-    price: 450000,
-    originalPrice: null,
-    images: ['/placeholder.svg'],
-    category: { id: '3', name: 'Гутал', slug: 'shoes' },
-    isNew: false,
-    isOnSale: false,
-    rating: 4.9,
-    reviewCount: 234,
-    sizes: ['40', '41', '42', '43', '44'],
-    stock: 42,
-    description: ''
-  },
-  {
-    id: '3',
-    name: 'MAC Matte Lipstick - Ruby Woo',
-    slug: 'mac-lipstick-ruby-woo',
-    price: 95000,
-    originalPrice: 120000,
-    images: ['/placeholder.svg'],
-    category: { id: '1', name: 'Гоо сайхан', slug: 'beauty' },
-    isNew: false,
-    isOnSale: true,
-    rating: 4.7,
-    reviewCount: 89,
-    sizes: [],
-    stock: 28,
-    description: ''
-  },
-  {
-    id: '4',
-    name: 'Adidas Ultraboost 22',
-    slug: 'adidas-ultraboost-22',
-    price: 450000,
-    originalPrice: 520000,
-    images: ['/placeholder.svg'],
-    category: { id: '3', name: 'Гутал', slug: 'shoes' },
-    isNew: true,
-    isOnSale: true,
-    rating: 4.6,
-    reviewCount: 178,
-    sizes: ['40', '41', '42', '43', '44', '45'],
-    stock: 35,
-    description: ''
-  }
-];
+function mapProduct(p: any): Product {
+  return {
+    id: p._id || p.id,
+    name: p.name,
+    slug: p.slug,
+    description: p.description,
+    price: p.price,
+    sale_price: p.sale_price,
+    sku: p.sku || '',
+    brand: p.brand,
+    weight: p.weight,
+    category_id: typeof p.category_id === 'object' ? p.category_id._id : p.category_id,
+    category: p.category_id && typeof p.category_id === 'object' ? { id: p.category_id._id, name: p.category_id.name, slug: p.category_id.slug, is_active: true, created_at: '' } : undefined,
+    images: p.images || [],
+    colors: p.colors || [],
+    size_type: p.size_type || 'none',
+    sizes: p.sizes || [],
+    stock: p.stock ?? 0,
+    is_active: p.is_active ?? true,
+    is_featured: p.is_featured ?? false,
+    rating: p.rating ?? 0,
+    review_count: p.review_count ?? 0,
+    created_at: p.created_at || '',
+    updated_at: p.updated_at || '',
+  };
+}
+
+const POPULAR_SEARCHES = ['Dyson', 'Nike', 'MAC', 'Adidas', 'Гутал', 'Хувцас'];
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<typeof mockProducts>([]);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<Product[]>([]);
+
+  const runSearch = useCallback(async (q: string) => {
+    if (!q) {
+      setResults([]);
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/products?search=${encodeURIComponent(q)}&limit=40`);
+      const data = await res.json();
+      setResults(data.products ? data.products.map(mapProduct) : []);
+    } catch (error) {
+      console.error('Search failed:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Simulate search
-    setLoading(true);
-    setTimeout(() => {
-      if (query) {
-        const filtered = mockProducts.filter(p => 
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.category.name.toLowerCase().includes(query.toLowerCase())
-        );
-        setResults(filtered);
-      } else {
-        setResults([]);
-      }
-      setLoading(false);
-    }, 500);
-  }, [query]);
+    runSearch(query);
+  }, [query, runSearch]);
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Results */}
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <LoadingSpinner size="lg" />
-        </div>
-      ) : query ? (
+      {query ? (
         <>
           <div className="mb-6">
             <h1 className="text-xl font-bold text-gray-900">
-              "{query}" хайлтын үр дүн
+              &quot;{query}&quot; хайлтын үр дүн
             </h1>
-            <p className="text-gray-500 mt-1">
-              {results.length} бараа олдлоо
-            </p>
+            {!loading && (
+              <p className="text-gray-500 mt-1">
+                {results.length} бараа олдлоо
+              </p>
+            )}
           </div>
 
-          {results.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-              {results.map((product) => (
-                <ProductCard key={product.id} product={product as any} />
-              ))}
-            </div>
+          {loading ? (
+            <ProductGrid products={[]} loading columns={4} />
+          ) : results.length > 0 ? (
+            <ProductGrid products={results} columns={4} />
           ) : (
             <div className="text-center py-16">
               <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -154,7 +117,7 @@ function SearchContent() {
         <div className="max-w-2xl mx-auto mt-8">
           <h3 className="text-sm font-medium text-gray-500 mb-4">Түгээмэл хайлтууд</h3>
           <div className="flex flex-wrap gap-2">
-            {['Dyson', 'Nike', 'MAC', 'Adidas', 'Zara', 'Гутал', 'Хувцас'].map((term) => (
+            {POPULAR_SEARCHES.map((term) => (
               <Link
                 key={term}
                 href={`/search?q=${encodeURIComponent(term)}`}

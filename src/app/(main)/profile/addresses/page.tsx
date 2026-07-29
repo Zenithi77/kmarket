@@ -1,37 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Edit, Trash2, MapPin, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, Check, Info } from 'lucide-react';
 import { Button, Modal, Input } from '@/components/ui';
 
-// Mock addresses
-const mockAddresses = [
-  {
-    id: '1',
-    name: 'Гэр',
-    recipient: 'Батболд Ганзориг',
-    phone: '99112233',
-    city: 'Улаанбаатар',
-    district: 'БЗД',
-    address: '3-р хороо, 45-р байр, 304 тоот',
-    isDefault: true
-  },
-  {
-    id: '2',
-    name: 'Ажлын газар',
-    recipient: 'Батболд Ганзориг',
-    phone: '99112233',
-    city: 'Улаанбаатар',
-    district: 'СБД',
-    address: 'Олимпик гудамж, Шангри-Ла оффис, 5 давхар',
-    isDefault: false
-  }
-];
+interface Address {
+  id: string;
+  name: string;
+  recipient: string;
+  phone: string;
+  city: string;
+  district: string;
+  address: string;
+  isDefault: boolean;
+}
+
+const emptyForm = { name: '', recipient: '', phone: '', city: '', district: '', address: '' };
 
 export default function AddressesPage() {
-  const [addresses, setAddresses] = useState(mockAddresses);
-  const [editModal, setEditModal] = useState<any>(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [editModal, setEditModal] = useState<Address | null>(null);
+  const [formData, setFormData] = useState(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const openAddModal = () => {
+    setFormData(emptyForm);
+    setEditModal({ id: '', isDefault: false, ...emptyForm });
+  };
+
+  const openEditModal = (address: Address) => {
+    setFormData({
+      name: address.name,
+      recipient: address.recipient,
+      phone: address.phone,
+      city: address.city,
+      district: address.district,
+      address: address.address,
+    });
+    setEditModal(address);
+  };
 
   const setDefaultAddress = (id: string) => {
     setAddresses(prev => prev.map(addr => ({
@@ -40,8 +47,16 @@ export default function AddressesPage() {
     })));
   };
 
-  const handleSave = (data: any) => {
-    console.log('Save:', data);
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editModal?.id) {
+      setAddresses(prev => prev.map(a => a.id === editModal.id ? { ...a, ...formData } : a));
+    } else {
+      setAddresses(prev => [
+        ...prev,
+        { ...formData, id: crypto.randomUUID(), isDefault: prev.length === 0 },
+      ]);
+    }
     setEditModal(null);
   };
 
@@ -52,10 +67,15 @@ export default function AddressesPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+        <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <p>Энэ хуудас одоогоор зөвхөн урьдчилан харах горимд ажиллаж байна — нэмсэн хаяг серверт хадгалагдахгүй бөгөөд хуудас шинэчлэгдэхэд арилна.</p>
+      </div>
+
       <div className="bg-white rounded-xl card-shadow p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Хаягууд</h2>
-          <Button onClick={() => setEditModal({})}>
+          <Button onClick={openAddModal}>
             <Plus className="w-4 h-4 mr-2" />
             Хаяг нэмэх
           </Button>
@@ -110,16 +130,16 @@ export default function AddressesPage() {
                   )}
                   <div className="flex-1" />
                   <button
-                    onClick={() => setEditModal(address)}
+                    onClick={() => openEditModal(address)}
                     className="p-2 hover:bg-gray-100 rounded-lg"
                   >
                     <Edit className="w-4 h-4 text-gray-500" />
                   </button>
                   <button
                     onClick={() => setDeleteId(address.id)}
-                    className="p-2 hover:bg-red-50 rounded-lg"
+                    className="p-2 hover:bg-sale-50 rounded-lg"
                   >
-                    <Trash2 className="w-4 h-4 text-red-500" />
+                    <Trash2 className="w-4 h-4 text-sale-500" />
                   </button>
                 </div>
               </div>
@@ -135,23 +155,26 @@ export default function AddressesPage() {
         title={editModal?.id ? 'Хаяг засах' : 'Шинэ хаяг нэмэх'}
       >
         {editModal && (
-          <form onSubmit={(e) => { e.preventDefault(); handleSave({}); }} className="space-y-4">
+          <form onSubmit={handleSave} className="space-y-4">
             <Input
               label="Хаягийн нэр"
-              defaultValue={editModal.name || ''}
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="Жнь: Гэр, Ажил"
               required
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Хүлээн авагчийн нэр"
-                defaultValue={editModal.recipient || ''}
+                value={formData.recipient}
+                onChange={(e) => setFormData(prev => ({ ...prev, recipient: e.target.value }))}
                 required
               />
               <Input
                 label="Утасны дугаар"
-                defaultValue={editModal.phone || ''}
+                value={formData.phone}
+                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                 required
               />
             </div>
@@ -159,19 +182,22 @@ export default function AddressesPage() {
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Хот/Аймаг"
-                defaultValue={editModal.city || ''}
+                value={formData.city}
+                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                 required
               />
               <Input
                 label="Дүүрэг/Сум"
-                defaultValue={editModal.district || ''}
+                value={formData.district}
+                onChange={(e) => setFormData(prev => ({ ...prev, district: e.target.value }))}
                 required
               />
             </div>
 
             <Input
               label="Дэлгэрэнгүй хаяг"
-              defaultValue={editModal.address || ''}
+              value={formData.address}
+              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
               placeholder="Хороо, гудамж, байр, тоот"
               required
             />
@@ -202,9 +228,9 @@ export default function AddressesPage() {
             <Button variant="outline" onClick={() => setDeleteId(null)}>
               Болих
             </Button>
-            <Button 
+            <Button
               onClick={() => handleDelete(deleteId!)}
-              className="bg-red-500 hover:bg-red-600"
+              variant="danger"
             >
               Устгах
             </Button>

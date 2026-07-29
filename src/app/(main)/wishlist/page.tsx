@@ -2,72 +2,17 @@
 
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCartStore } from '@/store/cartStore';
-import { ProductCard } from '@/components/product';
+import { ProductGrid } from '@/components/product';
 import { Button } from '@/components/ui';
 import { Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
-// Mock product data with wishlist items
-const mockProducts = [
-  {
-    id: '1',
-    name: 'Dyson Airwrap Complete',
-    slug: 'dyson-airwrap-complete',
-    price: 2200000,
-    originalPrice: 2500000,
-    images: ['/placeholder.svg'],
-    category: { id: '4', name: 'Dyson', slug: 'dyson' },
-    isNew: true,
-    isOnSale: true,
-    rating: 4.8,
-    reviewCount: 156,
-    sizes: [],
-    stock: 15,
-    description: ''
-  },
-  {
-    id: '2',
-    name: 'Nike Air Force 1 07',
-    slug: 'nike-air-force-1-07',
-    price: 450000,
-    originalPrice: null,
-    images: ['/placeholder.svg'],
-    category: { id: '3', name: 'Гутал', slug: 'shoes' },
-    isNew: false,
-    isOnSale: false,
-    rating: 4.9,
-    reviewCount: 234,
-    sizes: ['40', '41', '42', '43', '44'],
-    stock: 42,
-    description: ''
-  },
-  {
-    id: '3',
-    name: 'MAC Matte Lipstick - Ruby Woo',
-    slug: 'mac-lipstick-ruby-woo',
-    price: 95000,
-    originalPrice: 120000,
-    images: ['/placeholder.svg'],
-    category: { id: '1', name: 'Гоо сайхан', slug: 'beauty' },
-    isNew: false,
-    isOnSale: true,
-    rating: 4.7,
-    reviewCount: 89,
-    sizes: [],
-    stock: 28,
-    description: ''
-  }
-];
-
 export default function WishlistPage() {
-  const { items, removeItem, clearWishlist } = useWishlistStore();
+  const { items, clearWishlist } = useWishlistStore();
   const { addItem } = useCartStore();
 
-  // Wishlist items are already Product objects
-  const wishlistProducts = items;
-
   const handleAddAllToCart = () => {
-    wishlistProducts.forEach(product => {
+    items.forEach((product) => {
       addItem(product, 1, product.sizes[0] || undefined);
     });
   };
@@ -117,14 +62,7 @@ export default function WishlistPage() {
       </div>
 
       {/* Wishlist Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
-        {wishlistProducts.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product as any}
-          />
-        ))}
-      </div>
+      <ProductGrid products={items} columns={4} />
     </div>
   );
 }

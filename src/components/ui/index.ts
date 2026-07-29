@@ -6,5 +6,6 @@ export { Select } from './Select';
 export { Modal } from './Modal';
 export { LoadingSpinner } from './LoadingSpinner';
 export { Badge } from './Badge';
+export { StatusBadge, ORDER_STATUS_OPTIONS, ORDER_LABELS } from './StatusBadge';
 export { Card, CardHeader, CardBody, CardFooter } from './Card';
 export { Skeleton, SkeletonText, ProductCardSkeleton } from './Skeleton';

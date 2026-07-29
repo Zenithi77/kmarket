@@ -4,12 +4,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  User, 
+import {
+  ArrowLeft,
+  MapPin,
+  User,
   Truck,
   Building2,
   Package
@@ -18,7 +16,7 @@ import { useCartStore, useAuthStore } from '@/store';
 import { formatPrice, SHIPPING_COSTS, SHIPPING_LABELS } from '@/lib/constants';
 import { Button, Input, Textarea, Select } from '@/components/ui';
 import { PaymentModal } from '@/components/checkout';
-import { Order, DeliveryType } from '@/types';
+import { DeliveryType } from '@/types';
 import toast from 'react-hot-toast';
 
 const deliveryOptions: { value: DeliveryType; label: string; price: number; icon: any }[] = [
@@ -217,7 +215,8 @@ export default function CheckoutPage() {
             <div className="lg:col-span-2 space-y-6">
               {/* Contact Info */}
               <div className="bg-white rounded-xl p-6 card-shadow">
-                <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-semibold mb-6 flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
                   <User className="w-5 h-5 text-primary-500" />
                   Холбоо барих мэдээлэл
                 </h2>
@@ -257,7 +256,8 @@ export default function CheckoutPage() {
 
               {/* Delivery Method */}
               <div className="bg-white rounded-xl p-6 card-shadow">
-                <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                <h2 className="text-lg font-semibold mb-6 flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
                   <Truck className="w-5 h-5 text-primary-500" />
                   Хүргэлтийн хэлбэр
                 </h2>
@@ -293,7 +293,8 @@ export default function CheckoutPage() {
               {/* Shipping Address */}
               {deliveryType !== 'pickup' && (
                 <div className="bg-white rounded-xl p-6 card-shadow">
-                  <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold mb-6 flex items-center gap-2.5">
+                    <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
                     <MapPin className="w-5 h-5 text-primary-500" />
                     Хүргэлтийн хаяг
                   </h2>

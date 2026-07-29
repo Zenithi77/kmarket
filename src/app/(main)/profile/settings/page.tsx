@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Shield, Bell, Eye, EyeOff, Lock } from 'lucide-react';
+import { Shield, Bell, Eye, EyeOff, Lock, Info } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
 import toast from 'react-hot-toast';
 
@@ -49,6 +49,11 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+        <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <p>Нууц үг солих болон мэдэгдлийн тохиргоо одоогоор урьдчилан харах горимд ажиллаж байна — серверт хадгалагдахгүй.</p>
+      </div>
+
       {/* Password Change */}
       <div className="bg-white rounded-xl card-shadow p-6">
         <div className="flex items-center gap-3 mb-6">
@@ -180,8 +185,8 @@ export default function SettingsPage() {
       {/* Delete Account */}
       <div className="bg-white rounded-xl card-shadow p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-            <Shield className="w-5 h-5 text-red-500" />
+          <div className="w-10 h-10 bg-sale-100 rounded-lg flex items-center justify-center">
+            <Shield className="w-5 h-5 text-sale-500" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-900">Аккаунт устгах</h2>
@@ -193,7 +198,10 @@ export default function SettingsPage() {
           Аккаунтаа устгахад таны бүх мэдээлэл, захиалгын түүх устах болно. Энэ үйлдлийг буцаах боломжгүй.
         </p>
 
-        <Button className="bg-red-500 hover:bg-red-600">
+        <Button
+          variant="danger"
+          onClick={() => toast('Энэ үйлдэл одоогоор идэвхжээгүй байна. Тусламжийн багтай холбогдоно уу.')}
+        >
           Аккаунт устгах
         </Button>
       </div>

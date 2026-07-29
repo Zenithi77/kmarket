@@ -58,13 +58,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/product/${product.slug}`}>
-      <div className="product-card group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-cardHover transition-shadow duration-300 h-full flex flex-col">
+      <div className="product-card group bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-cardHover transition-shadow duration-300 h-full flex flex-col">
         {/* Image/Video Container */}
-        <div className="relative aspect-square bg-white flex-shrink-0 overflow-hidden p-6">
+        <div className="relative aspect-square bg-gray-50 flex-shrink-0 overflow-hidden">
           {isFirstMediaVideo ? (
             <video
               src={firstMedia}
-              className="w-full h-full object-contain product-image"
+              className="w-full h-full object-cover product-image"
               muted
               playsInline
               loop
@@ -80,24 +80,25 @@ export function ProductCard({ product }: ProductCardProps) {
               src={firstMedia}
               alt={product.name}
               fill
-              className="product-image object-contain p-4"
+              className="product-image object-cover"
             />
           )}
+          <div className="product-overlay" />
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
             {isOnSale && (
-              <span className="bg-sale-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                -{discountPercent}%
+              <span className="bg-sale-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+                {discountPercent}%
               </span>
             )}
             {!isOnSale && product.is_featured && (
-              <span className="bg-gray-100 text-on-surface text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wide">
-                Bestseller
+              <span className="bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded-md">
+                BEST
               </span>
             )}
             {isOutOfStock && (
-              <span className="bg-gray-100 text-on-surface-variant text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wide">
+              <span className="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded-md">
                 Дууссан
               </span>
             )}
@@ -119,58 +120,64 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="absolute bottom-3 right-3 w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="absolute bottom-3 right-3 w-9 h-9 bg-primary-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-primary-600 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-brand"
           >
             <ShoppingCart className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="px-4 pb-4 flex flex-col flex-grow">
+        <div className="p-3.5 flex flex-col flex-grow">
+          {/* Brand */}
+          {product.brand && (
+            <p className="text-[11px] text-gray-400 font-medium mb-0.5 truncate">
+              {product.brand}
+            </p>
+          )}
+
           {/* Name */}
-          <h3 className="text-xs font-bold uppercase tracking-wide text-on-surface line-clamp-1 group-hover:text-black transition-colors">
+          <h3 className="text-sm font-medium text-on-surface line-clamp-2 group-hover:text-primary-600 transition-colors leading-snug">
             {product.name}
           </h3>
 
           {/* Color/variant name */}
-          <div className="h-5 mt-0.5">
-            {product.colors && product.colors.length > 0 && (
-              <p className="text-xs text-on-surface-variant truncate">
-                {product.colors[0].name}
-              </p>
+          {product.colors && product.colors.length > 0 && (
+            <p className="text-xs text-gray-400 mt-0.5 truncate">
+              {product.colors[0].name}
+            </p>
+          )}
+
+          {/* Price row — Korean-style: red % + bold price + strikethrough */}
+          <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+            {isOnSale && (
+              <span className="text-sale-500 font-bold text-base tabular">{discountPercent}%</span>
+            )}
+            <span className="text-base font-bold text-on-surface tabular">
+              {formatPrice(product.sale_price || product.price)}
+            </span>
+            {isOnSale && (
+              <span className="price-strike text-xs block w-full basis-full">
+                {formatPrice(product.price)}
+              </span>
             )}
           </div>
 
-          {/* Bottom row: color swatches + price */}
-          <div className="flex items-center justify-between mt-auto pt-2">
-            <div className="flex items-center gap-1">
-              {product.colors && product.colors.length > 0 ? (
-                <>
-                  {product.colors.slice(0, 4).map((c, i) => (
-                    <span
-                      key={`${c.hex}-${i}`}
-                      className="w-4 h-4 rounded-full border border-gray-200"
-                      style={{ backgroundColor: c.hex }}
-                      title={c.name}
-                    />
-                  ))}
-                  {product.colors.length > 4 && (
-                    <span className="text-[11px] text-gray-400 ml-0.5">+{product.colors.length - 4}</span>
-                  )}
-                </>
-              ) : <span />}
-            </div>
-            <div className="flex items-center gap-1.5">
-              {isOnSale && (
-                <span className="price-strike text-xs">
-                  {formatPrice(product.price)}
-                </span>
+          {/* Color swatches */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="flex items-center gap-1 mt-2">
+              {product.colors.slice(0, 5).map((c, i) => (
+                <span
+                  key={`${c.hex}-${i}`}
+                  className="w-3.5 h-3.5 rounded-full border border-gray-200"
+                  style={{ backgroundColor: c.hex }}
+                  title={c.name}
+                />
+              ))}
+              {product.colors.length > 5 && (
+                <span className="text-[11px] text-gray-400 ml-0.5">+{product.colors.length - 5}</span>
               )}
-              <span className="text-sm font-bold text-on-surface tabular">
-                {formatPrice(product.sale_price || product.price)}
-              </span>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Link>

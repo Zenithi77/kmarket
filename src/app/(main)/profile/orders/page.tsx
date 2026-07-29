@@ -5,7 +5,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Package, ChevronRight } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/constants';
-import { Modal } from '@/components/ui';
+import { Modal, StatusBadge, ORDER_STATUS_OPTIONS, ORDER_LABELS } from '@/components/ui';
+import type { OrderStatus } from '@/types';
 
 interface OrderItem {
   name: string;
@@ -18,7 +19,7 @@ interface Order {
   _id: string;
   items: OrderItem[];
   total: number;
-  status: string;
+  status: OrderStatus;
   paymentRef: string;
   delivery: string;
   address: string;
@@ -26,23 +27,7 @@ interface Order {
   deliveredAt?: string;
 }
 
-const statusColors: Record<string, string> = {
-  Pending: 'bg-yellow-100 text-yellow-700',
-  Paid: 'bg-blue-100 text-blue-700',
-  Processing: 'bg-blue-100 text-blue-700',
-  Shipped: 'bg-purple-100 text-purple-700',
-  Delivered: 'bg-green-100 text-green-700',
-  Cancelled: 'bg-red-100 text-red-700'
-};
-
-const statusLabels: Record<string, string> = {
-  Pending: 'Төлбөр хүлээж байна',
-  Paid: 'Төлбөр хийгдсэн',
-  Processing: 'Бэлтгэж байна',
-  Shipped: 'Хүргэлтэнд гарсан',
-  Delivered: 'Хүргэгдсэн',
-  Cancelled: 'Цуцлагдсан'
-};
+const PROGRESS_STEPS: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered'];
 
 export default function OrdersPage() {
   const { data: session, status } = useSession();
@@ -108,10 +93,15 @@ export default function OrdersPage() {
             className="px-4 py-2 rounded-lg border border-gray-200 focus:border-primary-500 outline-none text-sm"
           >
             <option value="all">Бүх статус</option>
-            <option value="Pending">Хүлээгдэж байна</option>
-            <option value="Processing">Бэлтгэж байна</option>
-            <option value="Shipped">Хүргэлтэнд гарсан</option>
-            <option value="Delivered">Хүргэгдсэн</option>
+            {ORDER_STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s === 'Pending' ? 'Хүлээгдэж байна'
+                  : s === 'Processing' ? 'Бэлтгэж байна'
+                  : s === 'Shipped' ? 'Хүргэлтэнд гарсан'
+                  : s === 'Delivered' ? 'Хүргэгдсэн'
+                  : 'Цуцлагдсан'}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -138,9 +128,7 @@ export default function OrdersPage() {
                     <span className="font-mono font-medium text-primary-500">
                       #{order._id.slice(-8).toUpperCase()}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                      {statusLabels[order.status] || order.status}
-                    </span>
+                    <StatusBadge kind="order" status={order.status} />
                   </div>
                   <span className="text-sm text-gray-500">{formatDate(order.createdAt)}</span>
                 </div>
@@ -202,42 +190,42 @@ export default function OrdersPage() {
           <div className="space-y-6">
             {/* Status */}
             <div className="flex items-center justify-between">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[selectedOrder.status] || 'bg-gray-100 text-gray-700'}`}>
-                {statusLabels[selectedOrder.status] || selectedOrder.status}
-              </span>
+              <StatusBadge kind="order" status={selectedOrder.status} size="md" />
               <span className="text-sm text-gray-500">{formatDate(selectedOrder.createdAt)}</span>
             </div>
 
             {/* Status Progress */}
-            <div className="relative">
-              <div className="flex justify-between mb-2">
-                {['Pending', 'Processing', 'Shipped', 'Delivered'].map((status, index) => {
-                  const statusIndex = ['Pending', 'Processing', 'Shipped', 'Delivered'].indexOf(selectedOrder.status);
-                  const isCompleted = index <= statusIndex;
-                  
-                  return (
-                    <div key={status} className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isCompleted ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-400'
-                      }`}>
-                        {index + 1}
+            {selectedOrder.status !== 'Cancelled' && (
+              <div className="relative">
+                <div className="flex justify-between mb-2">
+                  {PROGRESS_STEPS.map((status, index) => {
+                    const statusIndex = PROGRESS_STEPS.indexOf(selectedOrder.status);
+                    const isCompleted = index <= statusIndex;
+
+                    return (
+                      <div key={status} className="flex flex-col items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          isCompleted ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-400'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <span className="text-xs text-gray-500 mt-1 text-center max-w-[60px]">
+                          {ORDER_LABELS[status]}
+                        </span>
                       </div>
-                      <span className="text-xs text-gray-500 mt-1 text-center max-w-[60px]">
-                        {statusLabels[status]}
-                      </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10">
+                  <div
+                    className="h-full bg-primary-500"
+                    style={{
+                      width: `${(PROGRESS_STEPS.indexOf(selectedOrder.status) / 3) * 100}%`
+                    }}
+                  />
+                </div>
               </div>
-              <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -z-10">
-                <div 
-                  className="h-full bg-primary-500"
-                  style={{ 
-                    width: `${(['Pending', 'Processing', 'Shipped', 'Delivered'].indexOf(selectedOrder.status) / 3) * 100}%` 
-                  }}
-                />
-              </div>
-            </div>
+            )}
 
             {/* Items */}
             <div>
