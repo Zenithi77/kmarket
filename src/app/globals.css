@@ -278,6 +278,18 @@ body {
   animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Rotating neon-orange light that traces an element's outer frame (used on
+   the header search bar). Uses an SVG rect stroke with pathLength="100" so
+   the dash animation is normalized to the perimeter regardless of the
+   element's aspect ratio — a conic-gradient would smear diagonally near
+   the corners instead of staying a thin ring on a non-square box. */
+.neon-trace {
+  animation: neon-trace-move 3.5s linear infinite;
+}
+@keyframes neon-trace-move {
+  to { stroke-dashoffset: -100; }
+}
+
 /* Custom Component Styles */
 .btn-primary {
   @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-6 py-2.5 rounded-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;

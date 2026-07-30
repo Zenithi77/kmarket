@@ -6,16 +6,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X, Shield, Sparkles, Shirt, Footprints, Wind, TrendingUp, Award, Package, Percent, LogOut, Settings, ShoppingBag, ChevronRight } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, ChevronDown, Menu, X, Shield, Sparkles, Shirt, Footprints, Wind, Flame, Crown, Package, Percent, LogOut, Settings, ShoppingBag, ChevronRight } from 'lucide-react';
 import { useCartStore, useWishlistStore, useAuthStore } from '@/store';
 
 const CATEGORIES = [
-  { id: '1', name: 'Beauty', slug: 'beauty', color: 'group-hover:text-primary-600', bgColor: 'group-hover:bg-primary-50', icon: Sparkles, iconColor: 'text-on-surface-variant' },
-  { id: '2', name: 'Fashion', slug: 'fashion', color: 'group-hover:text-primary-600', bgColor: 'group-hover:bg-primary-50', icon: Shirt, iconColor: 'text-on-surface-variant' },
-  { id: '3', name: 'Shoes', slug: 'shoes', color: 'group-hover:text-primary-600', bgColor: 'group-hover:bg-primary-50', icon: Footprints, iconColor: 'text-on-surface-variant' },
-  { id: '4', name: 'Dyson', slug: 'dyson', color: 'group-hover:text-primary-600', bgColor: 'group-hover:bg-primary-50', icon: Wind, iconColor: 'text-on-surface-variant' },
-  { id: '5', name: 'Trendy', slug: 'trendy', color: 'group-hover:text-primary-600', bgColor: 'group-hover:bg-primary-50', icon: TrendingUp, iconColor: 'text-on-surface-variant' },
-  { id: '6', name: 'Best', slug: 'best', color: 'group-hover:text-primary-600', bgColor: 'group-hover:bg-primary-50', icon: Award, iconColor: 'text-on-surface-variant' },
+  { id: '1', name: 'Beauty', slug: 'beauty', icon: Sparkles },
+  { id: '2', name: 'Fashion', slug: 'fashion', icon: Shirt },
+  { id: '3', name: 'Shoes', slug: 'shoes', icon: Footprints },
+  { id: '4', name: 'Dyson', slug: 'dyson', icon: Wind },
+  { id: '5', name: 'Trendy', slug: 'trendy', icon: Flame },
+  { id: '6', name: 'Best', slug: 'best', icon: Crown },
 ];
 
 export default function Header() {
@@ -85,6 +85,7 @@ export default function Header() {
 
             <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
               <Image
+                id="header-logo-icon"
                 src="/1.jpg"
                 alt="KMarket"
                 width={44}
@@ -93,14 +94,42 @@ export default function Header() {
                 priority
                 unoptimized
               />
-              <span className="hidden sm:block font-display text-lg font-extrabold tracking-tight text-on-surface">
+              <span id="header-logo-text" className="hidden sm:block font-display text-lg font-extrabold tracking-tight text-on-surface">
                 KMarket
               </span>
             </Link>
           </div>
 
-          {/* Search — centered in the row, grows wide on larger screens */}
-          <form onSubmit={handleSearch} className="w-full min-w-0 max-w-2xl mx-auto">
+          {/* Search — centered in the row, grows wide on larger screens, with a neon trace ring around it */}
+          <div className="relative w-full min-w-0 max-w-2xl mx-auto p-[2px]">
+            <svg
+              className="absolute inset-0 w-full h-full overflow-visible pointer-events-none"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="neon-grad-search" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#f97316" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#f97316" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#ffedd5" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <rect
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                rx="24"
+                ry="24"
+                fill="none"
+                stroke="url(#neon-grad-search)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                pathLength={100}
+                strokeDasharray="18 82"
+                className="neon-trace"
+              />
+            </svg>
+            <form onSubmit={handleSearch} className="relative w-full">
             <div className="flex items-center w-full h-11 bg-gray-50 border border-clay-gray rounded-full pl-1.5 pr-1.5 gap-1 focus-within:border-primary-500 focus-within:bg-white focus-within:shadow-soft transition-all duration-200">
               <div className="relative flex-shrink-0 hidden md:block">
                 <select
@@ -130,7 +159,8 @@ export default function Header() {
                 <Search className="w-4 h-4" />
               </button>
             </div>
-          </form>
+            </form>
+          </div>
 
           {/* Right Icons */}
           <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
@@ -274,7 +304,7 @@ export default function Header() {
         </div>
 
         {/* Row 2: category nav, directly below row 1 (desktop only) */}
-        <nav className="hidden lg:flex items-center justify-center gap-1 pb-3">
+        <nav className="hidden lg:flex items-center justify-center gap-2 pb-3">
           {CATEGORIES.map((category) => {
             const IconComponent = category.icon;
             const active = activeDropdown === category.slug;
@@ -282,13 +312,19 @@ export default function Header() {
               <Link
                 key={category.id}
                 href={`/category/${category.slug}`}
-                className={`relative flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-semibold transition-colors ${
-                  active ? 'text-primary-600 bg-primary-50' : 'text-on-surface-variant hover:text-primary-600 hover:bg-primary-50/70'
-                }`}
+                className="group relative flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-semibold text-on-surface-variant transition-colors duration-200 hover:text-primary-600"
                 onMouseEnter={() => setActiveDropdown(category.slug)}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
-                <IconComponent className="w-4 h-4" />
+                <span
+                  className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 ${
+                    active
+                      ? 'bg-primary-50 text-primary-600 shadow-[0_0_0_4px_rgba(249,115,22,0.15)]'
+                      : 'bg-gray-50 text-on-surface-variant group-hover:bg-primary-50 group-hover:text-primary-600 group-hover:shadow-[0_0_16px_rgba(249,115,22,0.45)] group-hover:scale-110'
+                  }`}
+                >
+                  <IconComponent className="w-4 h-4" />
+                </span>
                 <span>{category.name}</span>
               </Link>
             );
@@ -338,8 +374,8 @@ export default function Header() {
                   className="flex items-center gap-4 px-5 py-3.5 text-sm font-medium text-on-surface-variant hover:bg-gray-50 active:bg-gray-100 group transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors flex-shrink-0">
-                    <IconComponent className={`w-5 h-5 ${category.iconColor}`} />
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-on-surface-variant transition-all duration-300 flex-shrink-0 group-hover:bg-primary-50 group-hover:text-primary-600 group-hover:shadow-[0_0_16px_rgba(249,115,22,0.45)]">
+                    <IconComponent className="w-5 h-5" />
                   </div>
                   <span className="flex-1">{category.name}</span>
                   <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-0.5 transition-all" />
