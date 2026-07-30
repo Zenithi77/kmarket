@@ -62,7 +62,7 @@ export default function LoginPage() {
       localStorage.setItem('token', data.token);
 
       setUser({
-        id: data.user._id,
+        id: data.user.id,
         email: data.user.email,
         full_name: data.user.full_name,
         phone: data.user.phone || '',

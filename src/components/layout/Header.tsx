@@ -52,6 +52,7 @@ export default function Header() {
   
   // Check both NextAuth session and Zustand store (only after mounted)
   const isAuthenticated = mounted && (!!session || zustandAuth);
+  const isAdmin = mounted && (user?.role === 'admin' || (session?.user as any)?.role === 'admin');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +148,7 @@ export default function Header() {
                   >
                     <div className="relative">
                       <User className="w-5 h-5" />
-                      {user?.role === 'admin' && (
+                      {isAdmin && (
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary-600 rounded-full ring-2 ring-white" />
                       )}
                     </div>
@@ -164,7 +165,7 @@ export default function Header() {
                       </div>
 
                       {/* Admin Link - Only for admin users */}
-                      {user?.role === 'admin' && (
+                      {isAdmin && (
                         <>
                           <div className="px-2 py-2">
                             <Link
@@ -376,7 +377,7 @@ export default function Header() {
               <span className="ml-auto px-2 py-0.5 bg-sale-500 text-white text-[10px] font-bold rounded-full">HOT</span>
             </Link>
 
-            {mounted && isAuthenticated && user?.role === 'admin' && (
+            {isAuthenticated && isAdmin && (
               <Link
                 href="/admin"
                 className="flex items-center gap-4 px-5 py-3.5 text-sm text-primary-700 font-medium hover:bg-primary-50 active:bg-primary-100 transition-colors group"
