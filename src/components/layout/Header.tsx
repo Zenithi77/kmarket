@@ -58,6 +58,8 @@ export default function Header() {
   const [liveResults, setLiveResults] = useState<Product[]>([]);
   const [liveLoading, setLiveLoading] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const [profileMenuPos, setProfileMenuPos] = useState<{ top: number; right: number } | null>(null);
   const searchAreaRef = useRef<HTMLDivElement>(null);
   const mobileSearchAreaRef = useRef<HTMLDivElement>(null);
   const resultsAreaRef = useRef<HTMLDivElement>(null);
@@ -74,17 +76,33 @@ export default function Header() {
     setMounted(true);
   }, []);
 
-  // Close profile dropdown when clicking outside
+  // Close profile dropdown when clicking outside (the dropdown itself renders in a
+  // portal, so both the trigger button and the portaled menu count as "inside")
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
-        setIsProfileDropdownOpen(false);
-      }
+      const target = event.target as Node;
+      if (profileDropdownRef.current?.contains(target)) return;
+      if (profileMenuRef.current?.contains(target)) return;
+      setIsProfileDropdownOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  
+
+  // The portaled menu is positioned with a snapshot of the button's screen coords,
+  // so just close it on scroll/resize rather than trying to keep it glued in place.
+  useEffect(() => {
+    if (!isProfileDropdownOpen) return;
+    const close = () => setIsProfileDropdownOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [isProfileDropdownOpen]);
+
+
   // Check both NextAuth session and Zustand store (only after mounted)
   const isAuthenticated = mounted && (!!session || zustandAuth);
   const isAdmin = mounted && (user?.role === 'admin' || (session?.user as any)?.role === 'admin');
@@ -273,7 +291,13 @@ export default function Header() {
               {mounted && isAuthenticated ? (
                 <div className="relative" ref={profileDropdownRef}>
                   <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    onClick={() => {
+                      if (!isProfileDropdownOpen && profileDropdownRef.current) {
+                        const rect = profileDropdownRef.current.getBoundingClientRect();
+                        setProfileMenuPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+                      }
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen);
+                    }}
                     className={`flex items-center gap-1 p-2.5 rounded-lg transition-all duration-200 ${
                       isProfileDropdownOpen
                         ? 'text-primary-600 bg-primary-50'
@@ -289,86 +313,6 @@ export default function Header() {
                     </div>
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
-
-                  {/* Profile Dropdown Menu */}
-                  {isProfileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded shadow-xl shadow-gray-200/50 border border-clay-gray py-2 z-50 animate-dropdown">
-                      {/* User Info Header */}
-                      <div className="px-4 py-3 border-b border-clay-gray">
-                        <p className="text-sm font-semibold text-on-surface truncate">{user?.full_name || 'Хэрэглэгч'}</p>
-                        <p className="text-xs text-on-surface-variant truncate">{user?.email}</p>
-                      </div>
-
-                      {/* Admin Link - Only for admin users */}
-                      {isAdmin && (
-                        <>
-                          <div className="px-2 py-2">
-                            <Link
-                              href="/admin"
-                              onClick={() => setIsProfileDropdownOpen(false)}
-                              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all duration-200"
-                            >
-                              <div className="p-1.5 bg-primary-600 rounded">
-                                <Shield className="w-4 h-4 text-white" />
-                              </div>
-                              <span>Админ хуудас</span>
-                              <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
-                            </Link>
-                          </div>
-                          <div className="border-t border-clay-gray my-1" />
-                        </>
-                      )}
-                      
-                      <div className="px-2 py-1 space-y-0.5">
-                        <Link
-                          href="/profile"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-on-surface-variant hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                        >
-                          <div className="p-1.5 bg-gray-100 group-hover:bg-gray-200 rounded transition-colors">
-                            <User className="w-4 h-4 text-on-surface-variant" />
-                          </div>
-                          <span>Миний профайл</span>
-                        </Link>
-
-                        <Link
-                          href="/profile/orders"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-on-surface-variant hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                        >
-                          <div className="p-1.5 bg-gray-100 group-hover:bg-gray-200 rounded transition-colors">
-                            <ShoppingBag className="w-4 h-4 text-on-surface-variant" />
-                          </div>
-                          <span>Миний захиалга</span>
-                        </Link>
-
-                        <Link
-                          href="/profile/settings"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-on-surface-variant hover:bg-gray-50 rounded-lg transition-all duration-200 group"
-                        >
-                          <div className="p-1.5 bg-gray-100 group-hover:bg-gray-200 rounded transition-colors">
-                            <Settings className="w-4 h-4 text-on-surface-variant" />
-                          </div>
-                          <span>Тохиргоо</span>
-                        </Link>
-                      </div>
-
-                      <div className="border-t border-clay-gray my-2" />
-
-                      <div className="px-2 pb-1">
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-sale-600 hover:bg-sale-50 rounded-lg transition-all duration-200 w-full group"
-                        >
-                          <div className="p-1.5 bg-sale-100 group-hover:bg-sale-100/70 rounded transition-colors">
-                            <LogOut className="w-4 h-4" />
-                          </div>
-                          <span>Гарах</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <Link
@@ -513,6 +457,93 @@ export default function Header() {
           )}
         </div>
       </div>
+
+      {/* Profile Dropdown Menu — rendered via portal (fixed-positioned from the button's
+          measured screen coords) so it isn't clipped by the collapsing right-icons
+          cell's overflow-hidden ancestor */}
+      {mounted && isProfileDropdownOpen && profileMenuPos && createPortal(
+        <div
+          ref={profileMenuRef}
+          style={{ position: 'fixed', top: profileMenuPos.top, right: profileMenuPos.right }}
+          className="w-56 bg-white rounded shadow-xl shadow-gray-200/50 border border-clay-gray py-2 z-[110] animate-dropdown"
+        >
+          {/* User Info Header */}
+          <div className="px-4 py-3 border-b border-clay-gray">
+            <p className="text-sm font-semibold text-on-surface truncate">{user?.full_name || 'Хэрэглэгч'}</p>
+            <p className="text-xs text-on-surface-variant truncate">{user?.email}</p>
+          </div>
+
+          {/* Admin Link - Only for admin users */}
+          {isAdmin && (
+            <>
+              <div className="px-2 py-2">
+                <Link
+                  href="/admin"
+                  onClick={() => setIsProfileDropdownOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all duration-200"
+                >
+                  <div className="p-1.5 bg-primary-600 rounded">
+                    <Shield className="w-4 h-4 text-white" />
+                  </div>
+                  <span>Админ хуудас</span>
+                  <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
+                </Link>
+              </div>
+              <div className="border-t border-clay-gray my-1" />
+            </>
+          )}
+
+          <div className="px-2 py-1 space-y-0.5">
+            <Link
+              href="/profile"
+              onClick={() => setIsProfileDropdownOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm text-on-surface-variant hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+            >
+              <div className="p-1.5 bg-gray-100 group-hover:bg-gray-200 rounded transition-colors">
+                <User className="w-4 h-4 text-on-surface-variant" />
+              </div>
+              <span>Миний профайл</span>
+            </Link>
+
+            <Link
+              href="/profile/orders"
+              onClick={() => setIsProfileDropdownOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm text-on-surface-variant hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+            >
+              <div className="p-1.5 bg-gray-100 group-hover:bg-gray-200 rounded transition-colors">
+                <ShoppingBag className="w-4 h-4 text-on-surface-variant" />
+              </div>
+              <span>Миний захиалга</span>
+            </Link>
+
+            <Link
+              href="/profile/settings"
+              onClick={() => setIsProfileDropdownOpen(false)}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm text-on-surface-variant hover:bg-gray-50 rounded-lg transition-all duration-200 group"
+            >
+              <div className="p-1.5 bg-gray-100 group-hover:bg-gray-200 rounded transition-colors">
+                <Settings className="w-4 h-4 text-on-surface-variant" />
+              </div>
+              <span>Тохиргоо</span>
+            </Link>
+          </div>
+
+          <div className="border-t border-clay-gray my-2" />
+
+          <div className="px-2 pb-1">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm text-sale-600 hover:bg-sale-50 rounded-lg transition-all duration-200 w-full group"
+            >
+              <div className="p-1.5 bg-sale-100 group-hover:bg-sale-100/70 rounded transition-colors">
+                <LogOut className="w-4 h-4" />
+              </div>
+              <span>Гарах</span>
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Mobile Menu Overlay – rendered via portal so it escapes header's backdrop-filter containing block */}
       {mounted && createPortal(
