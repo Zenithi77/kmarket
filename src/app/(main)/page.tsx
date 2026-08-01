@@ -237,34 +237,30 @@ export default function HomePage() {
               {banners.map((banner, index) => (
                 <div
                   key={banner._id}
-                  className="w-full flex-shrink-0 relative"
+                  className="w-full flex-shrink-0 relative aspect-[2/1]"
                   style={{ backgroundColor: banner.bg_color }}
                 >
-                  <Link href={banner.link || '/products'} className="block">
-                    <div className="px-6 lg:px-12 py-6 lg:py-10">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="w-full lg:w-1/2 z-10">
-                          {banner.subtitle && (
-                            <p className="text-sm lg:text-base font-medium mb-2 opacity-80" style={{ color: banner.text_color }}>
-                              {banner.subtitle}
-                            </p>
-                          )}
-                          <h1 className="text-3xl lg:text-5xl xl:text-6xl font-extrabold mb-3 tracking-tight leading-tight" style={{ color: banner.text_color }}>
-                            {banner.title}
-                          </h1>
-                          {banner.description && (
-                            <p className="text-gray-700/80 text-sm lg:text-base mb-5 line-clamp-2">{banner.description}</p>
-                          )}
-                          <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/90 backdrop-blur text-gray-900 text-sm font-semibold hover:bg-white transition-all">
-                            SHOP NOW <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
-                        <div className="hidden lg:block w-1/2 relative h-[220px]">
-                          <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
-                        </div>
-                      </div>
+                  <Link
+                    href={banner.link || '/products'}
+                    className="absolute inset-0 flex items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-12"
+                  >
+                    <div className="w-1/2 z-10 min-w-0">
+                      {banner.subtitle && (
+                        <p className="text-[11px] sm:text-sm lg:text-base font-medium mb-1 sm:mb-2 opacity-80 truncate" style={{ color: banner.text_color }}>
+                          {banner.subtitle}
+                        </p>
+                      )}
+                      <h1 className="text-lg sm:text-2xl lg:text-5xl xl:text-6xl font-extrabold mb-1 sm:mb-3 tracking-tight leading-tight truncate" style={{ color: banner.text_color }}>
+                        {banner.title}
+                      </h1>
+                      {banner.description && (
+                        <p className="hidden sm:block text-gray-700/80 text-xs lg:text-base mb-2 lg:mb-5 line-clamp-2">{banner.description}</p>
+                      )}
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full bg-white/90 backdrop-blur text-gray-900 text-[11px] sm:text-sm font-semibold hover:bg-white transition-all">
+                        SHOP NOW <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </span>
                     </div>
-                    <div className="lg:hidden relative h-[120px]">
+                    <div className="relative w-1/2 h-full max-h-[85%] shrink-0">
                       <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
                     </div>
                   </Link>
