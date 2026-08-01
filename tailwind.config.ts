@@ -102,6 +102,7 @@ const config: Config = {
         slideDown: { '0%': { opacity: '0', transform: 'translateY(-12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
         scaleIn:   { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
         shimmer:   { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+        glowPulse: { '0%, 100%': { opacity: '0.55', transform: 'scale(1)' }, '50%': { opacity: '1', transform: 'scale(1.15)' } },
       },
       animation: {
         'fade-in':    'fadeIn 0.3s ease-out',
@@ -109,6 +110,7 @@ const config: Config = {
         'slide-down': 'slideDown 0.35s ease-out',
         'scale-in':   'scaleIn 0.2s ease-out',
         'shimmer':    'shimmer 1.6s linear infinite',
+        'glow-pulse': 'glowPulse 2.4s ease-in-out infinite',
       },
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',

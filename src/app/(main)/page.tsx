@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Sparkles, Shirt, Footprints, Wind } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
 import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
@@ -55,6 +56,28 @@ interface Category {
   image?: string;
   order: number;
 }
+
+// Default main-category tiles (fallback until real categories load from the API)
+const FALLBACK_MAIN_CATEGORIES: Category[] = [
+  { _id: 'beauty', name: 'Beauty', slug: 'beauty', icon: '💄', order: 0 },
+  { _id: 'fashion', name: 'Fashion', slug: 'fashion', icon: '👗', order: 1 },
+  { _id: 'shoes', name: 'Shoes', slug: 'shoes', icon: '👟', order: 2 },
+  { _id: 'dyson', name: 'Dyson', slug: 'dyson', icon: '💨', order: 3 },
+  { _id: 'trendy', name: 'Trendy', slug: 'trendy', icon: '✨', order: 4 },
+  { _id: 'best', name: 'Best Sellers', slug: 'best', icon: '🏆', order: 5 },
+];
+
+// Per-category icon + accent color, used for the glowing fallback tile when no
+// admin-uploaded photo exists yet — chosen to feel like one cohesive palette
+// rather than a random rainbow.
+const CATEGORY_STYLE: Record<string, { Icon: LucideIcon; from: string; to: string; accent: string }> = {
+  beauty: { Icon: Sparkles, from: 'from-pink-50', to: 'to-rose-100', accent: '#f472b6' },
+  fashion: { Icon: Shirt, from: 'from-violet-50', to: 'to-indigo-100', accent: '#8b5cf6' },
+  shoes: { Icon: Footprints, from: 'from-sky-50', to: 'to-cyan-100', accent: '#38bdf8' },
+  dyson: { Icon: Wind, from: 'from-slate-50', to: 'to-gray-200', accent: '#94a3b8' },
+  trendy: { Icon: Flame, from: 'from-orange-50', to: 'to-amber-100', accent: '#f97316' },
+  best: { Icon: Crown, from: 'from-yellow-50', to: 'to-amber-100', accent: '#eab308' },
+};
 
 // Default Hero Banner Slides (fallback)
 const defaultSlides: Banner[] = [
@@ -208,6 +231,9 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
+  // ── 6 main categories for the Coupang-style square grid, right below the banner ──
+  const mainCategories = categories.length > 0 ? categories.slice(0, 6) : FALLBACK_MAIN_CATEGORIES;
+
   // ── Top ranking list (sale > featured > all, top 5) ──
   const rankingProducts = useMemo(() => {
     const pool = [...saleProducts, ...featuredProducts, ...allProducts];
@@ -281,6 +307,75 @@ export default function HomePage() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── MAIN CATEGORIES (Coupang-style 3x2 grid of square tiles) ── */}
+      <section className="bg-white pb-2">
+        <div className="max-w-7xl mx-auto px-3 pt-1">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            {mainCategories.map((cat) => {
+              const hasPhoto = cat.image || (cat.icon && cat.icon.startsWith('http'));
+              const style = CATEGORY_STYLE[cat.slug];
+              const IconComp = style?.Icon || Package;
+              const accent = style?.accent || '#f97316';
+              return (
+                <Link
+                  key={cat.slug}
+                  href={`/category/${cat.slug}`}
+                  className="group flex flex-col items-center gap-1.5"
+                >
+                  <div className="relative w-full aspect-square p-[2px]">
+                    {/* Rotating neon trace ring, normalized via pathLength so it stays a clean
+                        stroke regardless of the tile's actual pixel size. */}
+                    <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" aria-hidden="true">
+                      <defs>
+                        <linearGradient id={`neon-grad-cat-${cat.slug}`} x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor={accent} stopOpacity="0" />
+                          <stop offset="50%" stopColor={accent} stopOpacity="1" />
+                          <stop offset="100%" stopColor={accent} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <rect
+                        x="0" y="0" width="100%" height="100%"
+                        rx="20" ry="20" fill="none"
+                        stroke={`url(#neon-grad-cat-${cat.slug})`}
+                        strokeWidth="2" strokeLinecap="round"
+                        pathLength={100}
+                        strokeDasharray="22 78"
+                        className="neon-trace"
+                      />
+                    </svg>
+
+                    <div className="relative w-full h-full rounded-[20px] overflow-hidden bg-gray-100 shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-lg group-active:scale-95">
+                      {hasPhoto ? (
+                        <Image
+                          src={(cat.image || cat.icon) as string}
+                          alt={cat.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${style?.from || 'from-primary-50'} ${style?.to || 'to-primary-100'}`}>
+                          <div
+                            className="absolute w-12 h-12 sm:w-14 sm:h-14 rounded-full blur-lg animate-glow-pulse"
+                            style={{ backgroundColor: accent }}
+                          />
+                          <IconComp
+                            className="relative w-7 h-7 sm:w-8 sm:h-8 text-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:text-primary-700"
+                            strokeWidth={1.75}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs sm:text-sm font-semibold text-gray-800 text-center line-clamp-1">
+                    {cat.name}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

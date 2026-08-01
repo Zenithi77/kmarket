@@ -20,6 +20,7 @@ import {
   AlertCircle,
   RefreshCw,
   Loader2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { Button, Modal, Input } from '@/components/ui';
 import { CATEGORIES, CATEGORY_FILTERS, DEFAULT_SUBCATEGORIES } from '@/lib/constants';
@@ -63,6 +64,9 @@ export default function CategoriesPage() {
   const [uploading, setUploading] = useState(false);
   const [initializingAll, setInitializingAll] = useState(false);
   const [initializingSubcats, setInitializingSubcats] = useState<string | null>(null);
+  const [mainImageModal, setMainImageModal] = useState<{ category: Category } | null>(null);
+  const [mainImageValue, setMainImageValue] = useState('');
+  const [mainImageUploading, setMainImageUploading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -212,6 +216,51 @@ export default function CategoriesPage() {
       toast.error('Зураг оруулахад алдаа гарлаа');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleOpenMainImage = (category: Category) => {
+    setMainImageValue(category.icon && category.icon.startsWith('http') ? category.icon : '');
+    setMainImageModal({ category });
+  };
+
+  const handleMainImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMainImageUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.url) {
+        setMainImageValue(data.url);
+        toast.success('Зураг оруулагдлаа');
+      }
+    } catch {
+      toast.error('Зураг оруулахад алдаа гарлаа');
+    } finally {
+      setMainImageUploading(false);
+    }
+  };
+
+  const handleSaveMainImage = async () => {
+    if (!mainImageModal) return;
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _id: mainImageModal.category._id, icon: mainImageValue }),
+      });
+      if (res.ok) {
+        toast.success('Зураг хадгалагдлаа');
+        setMainImageModal(null);
+        fetchCategories();
+      } else {
+        toast.error('Алдаа гарлаа');
+      }
+    } catch {
+      toast.error('Алдаа гарлаа');
     }
   };
 
@@ -470,6 +519,13 @@ export default function CategoriesPage() {
                 </div>
 
                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => handleOpenMainImage(category)}
+                    className="p-2 hover:bg-purple-50 rounded-lg transition-colors"
+                    title="Зураг/icon тохируулах (нүүр хуудасны 6 ангиллын дөрвөлжинд ашиглагдана)"
+                  >
+                    <ImageIcon className="w-4 h-4 text-purple-500" />
+                  </button>
                   <button
                     onClick={() => setFilterModal({ category })}
                     className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
@@ -757,6 +813,54 @@ export default function CategoriesPage() {
               </Button>
             </div>
           </form>
+        )}
+      </Modal>
+
+      {/* Үндсэн ангиллын зураг тохируулах modal */}
+      <Modal
+        isOpen={!!mainImageModal}
+        onClose={() => setMainImageModal(null)}
+        title={`${mainImageModal?.category?.name || ''} - Зураг тохируулах`}
+      >
+        {mainImageModal && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Энэ зураг нүүр хуудасны 6 үндсэн ангиллын дөрвөлжин блокт ашиглагдана.
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 flex-shrink-0">
+                {mainImageValue ? (
+                  <div className="relative w-full h-full">
+                    <Image src={mainImageValue} alt="Зураг" fill className="object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setMainImageValue('')}
+                      className="absolute -top-1 -right-1 p-0.5 bg-red-500 text-white rounded-full"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer flex flex-col items-center">
+                    {mainImageUploading ? (
+                      <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Upload className="w-5 h-5 text-gray-400" />
+                    )}
+                    <input type="file" accept="image/*" onChange={handleMainImageUpload} className="hidden" />
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-gray-400">Зураг оруулаагүй бол одоогийн emoji icon харагдана.</p>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setMainImageModal(null)}>Болих</Button>
+              <Button onClick={handleSaveMainImage}>
+                <Save className="w-4 h-4 mr-2" />
+                Хадгалах
+              </Button>
+            </div>
+          </div>
         )}
       </Modal>
 
