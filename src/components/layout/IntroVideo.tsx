@@ -56,6 +56,38 @@ export default function IntroVideo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
+  useEffect(() => {
+    if (!visible || !candidates) return;
+    const v = videoRef.current;
+    if (!v) return;
+    // Try to play with sound first. Browsers block autoplay-with-sound
+    // without a prior user gesture — if that happens, fall back to muted
+    // so playback still starts instead of silently failing.
+    v.muted = false;
+    const playPromise = v.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {
+        v.muted = true;
+        v.play().catch(() => {});
+      });
+    }
+
+    // If the browser blocked unmuted autoplay, the very first tap/click/key
+    // anywhere on the page counts as a user gesture — use it to unmute
+    // in-place (no new play() call needed) so sound kicks in instantly
+    // without requiring a dedicated "tap to unmute" button.
+    const unmuteOnFirstInteraction = () => {
+      if (v.muted) v.muted = false;
+    };
+    const opts = { once: true, capture: true } as const;
+    document.addEventListener('pointerdown', unmuteOnFirstInteraction, opts);
+    document.addEventListener('keydown', unmuteOnFirstInteraction, opts);
+    return () => {
+      document.removeEventListener('pointerdown', unmuteOnFirstInteraction, opts);
+      document.removeEventListener('keydown', unmuteOnFirstInteraction, opts);
+    };
+  }, [visible, candidates, candidateIndex]);
+
   const dismiss = () => {
     setClosing(true);
     try {
@@ -139,8 +171,6 @@ export default function IntroVideo() {
           morphing ? 'opacity-0' : 'opacity-100'
         }`}
         src={candidates[candidateIndex]}
-        autoPlay
-        muted
         playsInline
         onTimeUpdate={handleTimeUpdate}
         onEnded={startMorph}
