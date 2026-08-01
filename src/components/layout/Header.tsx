@@ -59,6 +59,7 @@ export default function Header() {
   const [liveLoading, setLiveLoading] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const searchAreaRef = useRef<HTMLDivElement>(null);
+  const mobileSearchAreaRef = useRef<HTMLDivElement>(null);
   const resultsAreaRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -131,7 +132,7 @@ export default function Header() {
     if (!isSearchActive) return;
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      const inSearch = searchAreaRef.current?.contains(target);
+      const inSearch = searchAreaRef.current?.contains(target) || mobileSearchAreaRef.current?.contains(target);
       const inResults = resultsAreaRef.current?.contains(target);
       if (!inSearch && !inResults) {
         closeLiveSearch();
@@ -158,12 +159,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-clay-gray shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Row 1: logo (left) — search (centered, wide) — icons (right) */}
-        <div className="relative flex items-center gap-3 h-16">
-          {/* Left: hamburger + logo — collapses out of view while the smart search is expanded */}
+        {/* Row 1: logo (left) — search (centered, wide, desktop only) — icons (right) */}
+        <div className="relative flex items-center justify-between gap-3 h-16">
+          {/* Left: hamburger + logo — stays put on mobile (search lives on its own row there);
+              on desktop it collapses out of view while the smart search is expanded */}
           <div
-            className={`flex items-center gap-2 flex-shrink-0 overflow-hidden transition-all duration-500 ease-out-expo ${
-              isSearchActive ? 'max-w-0 opacity-0 -translate-x-3 pointer-events-none' : 'max-w-[220px] opacity-100'
+            className={`flex items-center gap-2 flex-shrink-0 overflow-hidden max-w-[220px] opacity-100 transition-all duration-500 ease-out-expo ${
+              isSearchActive ? 'lg:max-w-0 lg:opacity-0 lg:-translate-x-3 lg:pointer-events-none' : ''
             }`}
           >
             <button
@@ -184,17 +186,18 @@ export default function Header() {
                 priority
                 unoptimized
               />
-              <span id="header-logo-text" className="hidden sm:block font-display text-lg font-extrabold tracking-tight text-on-surface">
+              <span id="header-logo-text" className="block font-logo text-xl sm:text-2xl leading-none text-on-surface">
                 KMarket
               </span>
             </Link>
           </div>
 
-          {/* Search — centered in the row, grows wide on larger screens, with a neon trace ring around it.
-              Expands to the full row width (both directions) once activated, as the side cells collapse. */}
+          {/* Search — desktop only (row1). Mobile gets its own full-width search row below,
+              Coupang-style. Grows wide on larger screens, with a neon trace ring around it,
+              expanding to the full row width (both directions) once activated. */}
           <div
             ref={searchAreaRef}
-            className={`relative w-full min-w-0 mx-auto p-[2px] transition-[max-width] duration-500 ease-out-expo ${
+            className={`hidden lg:block relative w-full min-w-0 mx-auto p-[2px] transition-[max-width] duration-500 ease-out-expo ${
               isSearchActive ? 'max-w-full' : 'max-w-2xl'
             }`}
           >
@@ -259,15 +262,16 @@ export default function Header() {
             </form>
           </div>
 
-          {/* Right Icons — collapses out of view while the smart search is expanded */}
+          {/* Right Icons — stays put on mobile (profile + cart, Coupang-style); on desktop it
+              collapses out of view while the smart search is expanded */}
           <div
-            className={`flex items-center gap-1 md:gap-2 flex-shrink-0 overflow-hidden transition-all duration-500 ease-out-expo ${
-              isSearchActive ? 'max-w-0 opacity-0 translate-x-3 pointer-events-none' : 'max-w-[220px] opacity-100'
+            className={`flex items-center gap-1 md:gap-2 flex-shrink-0 overflow-hidden max-w-[220px] opacity-100 transition-all duration-500 ease-out-expo ${
+              isSearchActive ? 'lg:max-w-0 lg:opacity-0 lg:translate-x-3 lg:pointer-events-none' : ''
             }`}
           >
-              {/* Login/Register or Profile Dropdown — desktop only, folded into the hamburger panel on mobile */}
+              {/* Login/Register or Profile Dropdown */}
               {mounted && isAuthenticated ? (
-                <div className="relative hidden lg:block" ref={profileDropdownRef}>
+                <div className="relative" ref={profileDropdownRef}>
                   <button
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                     className={`flex items-center gap-1 p-2.5 rounded-lg transition-all duration-200 ${
@@ -369,7 +373,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="hidden lg:flex items-center p-2.5 text-on-surface-variant hover:text-primary-600 hover:bg-primary-50/80 rounded-lg transition-all duration-200"
+                  className="flex items-center p-2.5 text-on-surface-variant hover:text-primary-600 hover:bg-primary-50/80 rounded-lg transition-all duration-200"
                   title="Нэвтрэх"
                 >
                   <User className="w-5 h-5" />
@@ -402,6 +406,42 @@ export default function Header() {
                 )}
               </button>
             </div>
+        </div>
+
+        {/* Row 2 (mobile only): full-width Coupang-style search bar — category dropdown, input, mic, search */}
+        <div className="lg:hidden pb-3" ref={mobileSearchAreaRef}>
+          <form onSubmit={handleSearch} className="relative w-full">
+            <div className="flex items-center w-full h-11 bg-white border-2 border-primary-200 rounded-full pl-1.5 pr-1.5 gap-1 focus-within:border-primary-500 transition-all duration-200">
+              <div className="relative flex-shrink-0">
+                <select
+                  value={searchCategory}
+                  onChange={(e) => setSearchCategory(e.target.value)}
+                  className="h-8 pl-3 pr-6 rounded-full bg-transparent text-xs font-medium text-on-surface-variant focus:outline-none appearance-none cursor-pointer border-r border-clay-gray"
+                >
+                  <option value="All">Бүгд</option>
+                  <option value="Beauty">Beauty</option>
+                  <option value="Fashion">Fashion</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Home">Home</option>
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchActive(true)}
+                placeholder="Хайх бүтээгдэхүүний нэрийг оруулна уу..."
+                className="flex-1 min-w-0 h-8 px-2 bg-transparent text-sm focus:outline-none placeholder:text-gray-400"
+              />
+              <button
+                type="submit"
+                className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-all duration-200 flex items-center justify-center shadow-brand active:scale-95"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
         </div>
 
         {/* Row 2: category nav, directly below row 1 (desktop only) — collapses while the smart search is expanded */}

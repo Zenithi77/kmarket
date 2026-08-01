@@ -12,6 +12,7 @@ interface Banner {
   subtitle?: string;
   description?: string;
   image: string;
+  mobile_image?: string;
   link?: string;
   bg_color: string;
   text_color: string;
@@ -24,6 +25,7 @@ const defaultBanner = {
   subtitle: '',
   description: '',
   image: '',
+  mobile_image: '',
   link: '',
   bg_color: '#FBE4D8',
   text_color: '#A04100',
@@ -38,7 +40,9 @@ export default function BannersPage() {
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [formData, setFormData] = useState(defaultBanner);
   const [uploading, setUploading] = useState(false);
+  const [uploadingMobile, setUploadingMobile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchBanners();
@@ -78,6 +82,31 @@ export default function BannersPage() {
       toast.error('Зураг оруулахад алдаа гарлаа');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleMobileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMobile(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setFormData(prev => ({ ...prev, mobile_image: data.url }));
+        toast.success('Мобайл зураг оруулагдлаа');
+      }
+    } catch (error) {
+      toast.error('Зураг оруулахад алдаа гарлаа');
+    } finally {
+      setUploadingMobile(false);
     }
   };
 
@@ -121,6 +150,7 @@ export default function BannersPage() {
       subtitle: banner.subtitle || '',
       description: banner.description || '',
       image: banner.image,
+      mobile_image: banner.mobile_image || '',
       link: banner.link || '',
       bg_color: banner.bg_color,
       text_color: banner.text_color,
@@ -274,49 +304,98 @@ export default function BannersPage() {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Зураг *
-                </label>
-                {formData.image ? (
-                  <div className="relative h-48 rounded-lg overflow-hidden">
-                    <Image
-                      src={formData.image}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Desktop зураг * <span className="text-gray-400 font-normal">(харьцаа 4:1)</span>
+                  </label>
+                  {formData.image ? (
+                    <div className="relative h-32 rounded-lg overflow-hidden">
+                      <Image
+                        src={formData.image}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors"
                     >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors"
-                  >
-                    {uploading ? (
-                      <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Upload className="w-10 h-10 text-gray-400 mb-2" />
-                        <p className="text-gray-500">Зураг сонгох</p>
-                      </>
-                    )}
-                  </div>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                      {uploading ? (
+                        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <p className="text-gray-500 text-sm">Зураг сонгох</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mobile зураг <span className="text-gray-400 font-normal">(заавал биш, харьцаа 2:1)</span>
+                  </label>
+                  {formData.mobile_image ? (
+                    <div className="relative h-32 rounded-lg overflow-hidden">
+                      <Image
+                        src={formData.mobile_image}
+                        alt="Mobile preview"
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, mobile_image: '' }))}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => mobileFileInputRef.current?.click()}
+                      className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 transition-colors"
+                    >
+                      {uploadingMobile ? (
+                        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <p className="text-gray-500 text-sm">Заавал биш</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  <input
+                    ref={mobileFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleMobileImageUpload}
+                    className="hidden"
+                  />
+                </div>
               </div>
+              <p className="text-xs text-gray-400 -mt-2">
+                Mobile зураг оруулаагүй бол Desktop зураг хоёуланд нь ашиглагдана.
+              </p>
 
               {/* Title & Subtitle */}
               <div className="grid grid-cols-2 gap-4">

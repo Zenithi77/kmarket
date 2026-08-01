@@ -64,25 +64,35 @@ export async function PUT(
 
     const supabase = getSupabase();
     const body = await req.json();
-    const { title, subtitle, description, image, link, bg_color, text_color, order, is_active } = body;
+    const { title, subtitle, description, image, mobile_image, link, bg_color, text_color, order, is_active } = body;
 
-    const { data: banner, error } = await supabase
+    const payload: Record<string, unknown> = {
+      title,
+      subtitle,
+      description,
+      image,
+      mobile_image: mobile_image || null,
+      link,
+      bg_color,
+      text_color,
+      order,
+      is_active,
+      updated_at: new Date().toISOString(),
+    };
+
+    let { data: banner, error } = await supabase
       .from('banners')
-      .update({
-        title,
-        subtitle,
-        description,
-        image,
-        link,
-        bg_color,
-        text_color,
-        order,
-        is_active,
-        updated_at: new Date().toISOString(),
-      })
+      .update(payload)
       .eq('id', id)
       .select()
       .maybeSingle();
+
+    // The `mobile_image` column may not exist yet if the schema migration hasn't been
+    // applied — fall back to updating without it rather than hard-failing the edit.
+    if (error?.code === '42703') {
+      delete payload.mobile_image;
+      ({ data: banner, error } = await supabase.from('banners').update(payload).eq('id', id).select().maybeSingle());
+    }
 
     if (error || !banner) {
       return NextResponse.json({ error: 'Banner олдсонгүй' }, { status: 404 });

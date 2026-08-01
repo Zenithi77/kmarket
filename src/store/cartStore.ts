@@ -110,6 +110,8 @@ export const useCartStore = create<CartStore>()(
       // Bumped when the product ID format changed (Mongo ObjectId -> Postgres/Supabase UUID)
       // so carts persisted under the old format are dropped rather than silently breaking.
       version: 2,
+      // Older persisted shapes (pre-UUID cart items) can't be transformed, only discarded.
+      migrate: () => ({ items: [] }),
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { Inter, Pacifico, JetBrains_Mono } from 'next/font/google';
 import { Providers } from './providers';
 import './globals.css';
 
@@ -9,10 +9,12 @@ const inter = Inter({
   display: 'swap',
 });
 
-const hanken = Hanken_Grotesk({
+// Playful script used only for the "KMarket" wordmark, to give the brand logo
+// more character than the sans-serif UI font used everywhere else.
+const pacifico = Pacifico({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-hanken',
+  weight: '400',
+  variable: '--font-pacifico',
   display: 'swap',
 });
 
@@ -41,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="mn" className={`${inter.variable} ${hanken.variable} ${jetbrainsMono.variable}`}>
+    <html lang="mn" className={`${inter.variable} ${pacifico.variable} ${jetbrainsMono.variable}`}>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />

@@ -180,7 +180,7 @@ export default function IntroVideo() {
       {morphing && (
         <span
           aria-hidden="true"
-          className="fixed font-display font-extrabold tracking-tight text-primary-600 whitespace-nowrap"
+          className="fixed font-logo text-primary-600 whitespace-nowrap"
           style={{
             transitionProperty: 'top, left, font-size, opacity, transform',
             transitionDuration: `${MORPH_DURATION}ms`,

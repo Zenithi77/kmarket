@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Sparkles, Shirt, Footprints, Wind } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Sparkles, Shirt, Footprints, Wind, Percent, LayoutGrid } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
@@ -42,6 +42,7 @@ interface Banner {
   subtitle?: string;
   description?: string;
   image: string;
+  mobile_image?: string;
   link?: string;
   bg_color: string;
   text_color: string;
@@ -78,6 +79,28 @@ const CATEGORY_STYLE: Record<string, { Icon: LucideIcon; from: string; to: strin
   trendy: { Icon: Flame, from: 'from-orange-50', to: 'to-amber-100', accent: '#f97316' },
   best: { Icon: Crown, from: 'from-yellow-50', to: 'to-amber-100', accent: '#eab308' },
 };
+
+// Unified shape for the homepage's 8-tile category grid — either a real DB
+// category (linking to /category/[slug]) or one of the two static filter
+// shortcuts below (linking straight into the already-working /products filters).
+interface CategoryTile {
+  key: string;
+  href: string;
+  name: string;
+  imageSrc?: string;
+  Icon: LucideIcon;
+  from: string;
+  to: string;
+  accent: string;
+}
+
+// "Sale" and "Others" aren't real categories in the DB (a sale item can belong to
+// any category) — they link straight into /products' existing sale/all-products
+// filters, which already work, rather than a nonexistent /category/sale.
+const EXTRA_CATEGORY_TILES: CategoryTile[] = [
+  { key: 'sale-tile', href: '/products?sale=true', name: 'Sale', Icon: Percent, from: 'from-red-50', to: 'to-orange-100', accent: '#ef4444' },
+  { key: 'others-tile', href: '/products', name: 'Others', Icon: LayoutGrid, from: 'from-emerald-50', to: 'to-teal-100', accent: '#14b8a6' },
+];
 
 // Default Hero Banner Slides (fallback)
 const defaultSlides: Banner[] = [
@@ -233,6 +256,23 @@ export default function HomePage() {
 
   // ── 6 main categories for the Coupang-style square grid, right below the banner ──
   const mainCategories = categories.length > 0 ? categories.slice(0, 6) : FALLBACK_MAIN_CATEGORIES;
+  const categoryTiles: CategoryTile[] = [
+    ...mainCategories.map((cat) => {
+      const hasPhoto = cat.image || (cat.icon && cat.icon.startsWith('http'));
+      const style = CATEGORY_STYLE[cat.slug];
+      return {
+        key: cat.slug,
+        href: `/category/${cat.slug}`,
+        name: cat.name,
+        imageSrc: hasPhoto ? ((cat.image || cat.icon) as string) : undefined,
+        Icon: style?.Icon || Package,
+        from: style?.from || 'from-primary-50',
+        to: style?.to || 'to-primary-100',
+        accent: style?.accent || '#f97316',
+      };
+    }),
+    ...EXTRA_CATEGORY_TILES,
+  ];
 
   // ── Top ranking list (sale > featured > all, top 5) ──
   const rankingProducts = useMemo(() => {
@@ -263,7 +303,7 @@ export default function HomePage() {
               {banners.map((banner, index) => (
                 <div
                   key={banner._id}
-                  className="w-full flex-shrink-0 relative aspect-[2/1]"
+                  className="w-full flex-shrink-0 relative aspect-[2/1] lg:aspect-[4/1]"
                   style={{ backgroundColor: banner.bg_color }}
                 >
                   <Link
@@ -287,7 +327,20 @@ export default function HomePage() {
                       </span>
                     </div>
                     <div className="relative w-1/2 h-full max-h-[85%] shrink-0">
-                      <Image src={banner.image} alt={banner.title} fill className="object-contain" priority={index === 0} />
+                      <Image
+                        src={banner.mobile_image || banner.image}
+                        alt={banner.title}
+                        fill
+                        className="object-contain lg:hidden"
+                        priority={index === 0}
+                      />
+                      <Image
+                        src={banner.image}
+                        alt={banner.title}
+                        fill
+                        className="hidden lg:block object-contain"
+                        priority={index === 0}
+                      />
                     </div>
                   </Link>
                 </div>
@@ -311,19 +364,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── MAIN CATEGORIES (Coupang-style 3x2 grid of square tiles) ── */}
+      {/* ── MAIN CATEGORIES (Coupang-style 4x2 grid of square tiles) ── */}
       <section className="bg-white pb-2">
         <div className="max-w-7xl mx-auto px-3 pt-1">
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {mainCategories.map((cat) => {
-              const hasPhoto = cat.image || (cat.icon && cat.icon.startsWith('http'));
-              const style = CATEGORY_STYLE[cat.slug];
-              const IconComp = style?.Icon || Package;
-              const accent = style?.accent || '#f97316';
+          <div className="grid grid-cols-4 gap-2 sm:gap-3">
+            {categoryTiles.map((tile) => {
+              const IconComp = tile.Icon;
               return (
                 <Link
-                  key={cat.slug}
-                  href={`/category/${cat.slug}`}
+                  key={tile.key}
+                  href={tile.href}
                   className="group flex flex-col items-center gap-1.5"
                 >
                   <div className="relative w-full aspect-square p-[2px]">
@@ -331,16 +381,16 @@ export default function HomePage() {
                         stroke regardless of the tile's actual pixel size. */}
                     <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" aria-hidden="true">
                       <defs>
-                        <linearGradient id={`neon-grad-cat-${cat.slug}`} x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor={accent} stopOpacity="0" />
-                          <stop offset="50%" stopColor={accent} stopOpacity="1" />
-                          <stop offset="100%" stopColor={accent} stopOpacity="0" />
+                        <linearGradient id={`neon-grad-cat-${tile.key}`} x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor={tile.accent} stopOpacity="0" />
+                          <stop offset="50%" stopColor={tile.accent} stopOpacity="1" />
+                          <stop offset="100%" stopColor={tile.accent} stopOpacity="0" />
                         </linearGradient>
                       </defs>
                       <rect
                         x="0" y="0" width="100%" height="100%"
                         rx="20" ry="20" fill="none"
-                        stroke={`url(#neon-grad-cat-${cat.slug})`}
+                        stroke={`url(#neon-grad-cat-${tile.key})`}
                         strokeWidth="2" strokeLinecap="round"
                         pathLength={100}
                         strokeDasharray="22 78"
@@ -349,21 +399,21 @@ export default function HomePage() {
                     </svg>
 
                     <div className="relative w-full h-full rounded-[20px] overflow-hidden bg-gray-100 shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-lg group-active:scale-95">
-                      {hasPhoto ? (
+                      {tile.imageSrc ? (
                         <Image
-                          src={(cat.image || cat.icon) as string}
-                          alt={cat.name}
+                          src={tile.imageSrc}
+                          alt={tile.name}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       ) : (
-                        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${style?.from || 'from-primary-50'} ${style?.to || 'to-primary-100'}`}>
+                        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${tile.from} ${tile.to}`}>
                           <div
-                            className="absolute w-12 h-12 sm:w-14 sm:h-14 rounded-full blur-lg animate-glow-pulse"
-                            style={{ backgroundColor: accent }}
+                            className="absolute w-8 h-8 sm:w-16 sm:h-16 rounded-full blur-lg animate-glow-pulse"
+                            style={{ backgroundColor: tile.accent }}
                           />
                           <IconComp
-                            className="relative w-7 h-7 sm:w-8 sm:h-8 text-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:text-primary-700"
+                            className="relative w-5 h-5 sm:w-9 sm:h-9 text-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:text-primary-700"
                             strokeWidth={1.75}
                           />
                         </div>
@@ -371,7 +421,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <span className="text-xs sm:text-sm font-semibold text-gray-800 text-center line-clamp-1">
-                    {cat.name}
+                    {tile.name}
                   </span>
                 </Link>
               );

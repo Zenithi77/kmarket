@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, subtitle, description, image, link, bg_color, text_color, order } = body;
+    const { title, subtitle, description, image, mobile_image, link, bg_color, text_color, order } = body;
 
     if (!title || !image) {
       return NextResponse.json(
@@ -61,21 +61,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: banner, error } = await supabase
-      .from('banners')
-      .insert({
-        title,
-        subtitle,
-        description,
-        image,
-        link,
-        bg_color: bg_color || '#FEE2E2',
-        text_color: text_color || '#F97316',
-        order: order || 0,
-        is_active: true,
-      })
-      .select()
-      .single();
+    const payload: Record<string, unknown> = {
+      title,
+      subtitle,
+      description,
+      image,
+      mobile_image: mobile_image || null,
+      link,
+      bg_color: bg_color || '#FEE2E2',
+      text_color: text_color || '#F97316',
+      order: order || 0,
+      is_active: true,
+    };
+
+    let { data: banner, error } = await supabase.from('banners').insert(payload).select().single();
+
+    // The `mobile_image` column may not exist yet if the schema migration hasn't been
+    // applied — fall back to inserting without it rather than hard-failing banner creation.
+    if (error?.code === '42703') {
+      delete payload.mobile_image;
+      ({ data: banner, error } = await supabase.from('banners').insert(payload).select().single());
+    }
 
     if (error) throw error;
 

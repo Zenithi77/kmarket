@@ -73,6 +73,7 @@ const config: Config = {
         sans: ['var(--font-inter)', 'Inter', 'Pretendard', 'system-ui', 'sans-serif'],
         display: ['var(--font-inter)', 'Inter', 'Pretendard', 'system-ui', 'sans-serif'],
         mono: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        logo: ['var(--font-pacifico)', 'cursive'],
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],

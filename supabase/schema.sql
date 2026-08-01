@@ -182,6 +182,7 @@ create table banners (
   subtitle text,
   description text,
   image text not null,
+  mobile_image text,
   link text,
   bg_color text not null default '#FEE2E2',
   text_color text not null default '#F97316',
