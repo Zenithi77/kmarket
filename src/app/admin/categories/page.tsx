@@ -199,18 +199,32 @@ export default function CategoriesPage() {
     setExpandedCategory(prev => prev === id ? null : id);
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const base64 = await fileToBase64(file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: base64, folder: 'kmarket/categories' }),
+      });
       const data = await res.json();
       if (data.url) {
         setSubFormData(prev => ({ ...prev, icon: data.url }));
         toast.success('Зураг оруулагдлаа');
+      } else {
+        toast.error(data.error || 'Зураг оруулахад алдаа гарлаа');
       }
     } catch {
       toast.error('Зураг оруулахад алдаа гарлаа');
@@ -228,14 +242,19 @@ export default function CategoriesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setMainImageUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const base64 = await fileToBase64(file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: base64, folder: 'kmarket/categories' }),
+      });
       const data = await res.json();
       if (data.url) {
         setMainImageValue(data.url);
         toast.success('Зураг оруулагдлаа');
+      } else {
+        toast.error(data.error || 'Зураг оруулахад алдаа гарлаа');
       }
     } catch {
       toast.error('Зураг оруулахад алдаа гарлаа');

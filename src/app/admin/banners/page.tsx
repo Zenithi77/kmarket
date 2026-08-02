@@ -60,23 +60,33 @@ export default function BannersPage() {
     }
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-
     try {
+      const base64 = await fileToBase64(file);
       const res = await fetch('/api/upload', {
         method: 'POST',
-        body: formDataUpload,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: base64, folder: 'kmarket/banners' }),
       });
       const data = await res.json();
       if (data.url) {
         setFormData(prev => ({ ...prev, image: data.url }));
         toast.success('Зураг оруулагдлаа');
+      } else {
+        toast.error(data.error || 'Зураг оруулахад алдаа гарлаа');
       }
     } catch (error) {
       toast.error('Зураг оруулахад алдаа гарлаа');
@@ -90,18 +100,19 @@ export default function BannersPage() {
     if (!file) return;
 
     setUploadingMobile(true);
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-
     try {
+      const base64 = await fileToBase64(file);
       const res = await fetch('/api/upload', {
         method: 'POST',
-        body: formDataUpload,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: base64, folder: 'kmarket/banners' }),
       });
       const data = await res.json();
       if (data.url) {
         setFormData(prev => ({ ...prev, mobile_image: data.url }));
         toast.success('Мобайл зураг оруулагдлаа');
+      } else {
+        toast.error(data.error || 'Зураг оруулахад алдаа гарлаа');
       }
     } catch (error) {
       toast.error('Зураг оруулахад алдаа гарлаа');
