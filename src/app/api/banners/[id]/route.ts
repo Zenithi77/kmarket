@@ -89,7 +89,9 @@ export async function PUT(
 
     // The `mobile_image` column may not exist yet if the schema migration hasn't been
     // applied — fall back to updating without it rather than hard-failing the edit.
-    if (error?.code === '42703') {
+    // PGRST204 = PostgREST's "column not in schema cache" (missing column); 42703 is the
+    // raw Postgres "undefined column" code — checking both covers either error shape.
+    if (error?.code === 'PGRST204' || error?.code === '42703') {
       delete payload.mobile_image;
       ({ data: banner, error } = await supabase.from('banners').update(payload).eq('id', id).select().maybeSingle());
     }
