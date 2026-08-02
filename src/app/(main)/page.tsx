@@ -274,18 +274,6 @@ export default function HomePage() {
     ...EXTRA_CATEGORY_TILES,
   ];
 
-  // ── Top ranking list (sale > featured > all, top 5) ──
-  const rankingProducts = useMemo(() => {
-    const pool = [...saleProducts, ...featuredProducts, ...allProducts];
-    const seen = new Set<string>();
-    const unique: Product[] = [];
-    for (const p of pool) {
-      if (!seen.has(p.id)) { seen.add(p.id); unique.push(p); }
-      if (unique.length >= 8) break;
-    }
-    return unique;
-  }, [saleProducts, featuredProducts, allProducts]);
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* ── HERO BANNER SLIDER (rounded card style) ── */}
@@ -494,60 +482,6 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── TOP RANKING (Korean weekly best style) ── */}
-      {rankingProducts.length > 0 && (
-        <section className="mt-2 bg-white">
-          <div className="max-w-7xl mx-auto px-4 py-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-amber-highlight" />
-                <h2 className="font-display text-lg md:text-xl font-extrabold text-gray-900">Шилдэг рэнкинг</h2>
-                <span className="text-xs text-gray-400">7 хоногийн шилдэг</span>
-              </div>
-              <Link href="/products?featured=true" className="text-xs text-gray-500 hover:text-primary-500 font-medium">
-                Бүгд &gt;
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {rankingProducts.slice(0, 8).map((product, idx) => {
-                const discount = calculateDiscountPercent(product.price, product.sale_price || 0);
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/product/${product.slug}`}
-                    className="flex gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors group"
-                  >
-                    <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                      <Image
-                        src={product.images[0] || '/placeholder.svg'}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                      <div className={`absolute top-1 left-1 w-6 h-6 rounded-md flex items-center justify-center text-xs font-extrabold text-white ${idx < 3 ? 'bg-sale-500' : 'bg-gray-800/80'}`}>
-                        {idx + 1}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-center">
-                      <h3 className="text-sm text-gray-800 line-clamp-2 leading-snug">{product.name}</h3>
-                      <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
-                        {discount > 0 && (
-                          <span className="text-sale-500 font-extrabold text-sm">{discount}%</span>
-                        )}
-                        <span className="text-sm font-extrabold text-gray-900">
-                          {formatPrice(product.sale_price || product.price)}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ── FEATURED / TRENDING ── */}
       {featuredProducts.length > 0 && (
         <div className="mt-2">
@@ -559,30 +493,6 @@ export default function HomePage() {
           />
         </div>
       )}
-
-      {/* ── PROMO STRIP ── */}
-      <section className="mt-2 bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Link href="/products?new=true" className="relative h-32 md:h-36 rounded overflow-hidden bg-gray-50 border border-clay-gray p-5 flex items-center justify-between group">
-              <div>
-                <p className="font-mono text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-wide">NEW IN</p>
-                <h3 className="font-display text-xl md:text-2xl font-extrabold text-gray-900">Шинэ ирсэн</h3>
-                <p className="text-xs text-gray-500 mt-1">Энэ долоо хоногийн шинэлэг</p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-on-surface-variant group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link href="/products?sale=true" className="relative h-32 md:h-36 rounded overflow-hidden bg-primary-50 border border-primary-100 p-5 flex items-center justify-between group">
-              <div>
-                <p className="text-xs font-bold text-primary-600 mb-1">UP TO 70% OFF</p>
-                <h3 className="text-xl md:text-2xl font-extrabold text-gray-900">Хямдралын зах</h3>
-                <p className="text-xs text-gray-500 mt-1">Хязгаарлагдмал тоо</p>
-              </div>
-              <ArrowRight className="w-6 h-6 text-primary-600 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* ── NEW ARRIVALS ── */}
       {newProducts.length > 0 && (
