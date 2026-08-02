@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, ChevronLeft, ChevronRight, Package, Flame, Crown, Sparkles, Shirt, Footprints, Wind, Percent, LayoutGrid } from 'lucide-react';
+import { Package, Flame, Crown, Sparkles, Shirt, Footprints, Wind, Percent, LayoutGrid } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
@@ -222,10 +222,6 @@ export default function HomePage() {
     goToSlide((currentSlide + 1) % banners.length);
   }, [currentSlide, banners.length, goToSlide]);
 
-  const prevSlide = useCallback(() => {
-    goToSlide((currentSlide - 1 + banners.length) % banners.length);
-  }, [currentSlide, banners.length, goToSlide]);
-
   useEffect(() => {
     if (isPaused || banners.length <= 1) return;
     const timer = setInterval(() => {
@@ -294,59 +290,39 @@ export default function HomePage() {
                   className="w-full flex-shrink-0 relative aspect-[2/1] lg:aspect-[4/1]"
                   style={{ backgroundColor: banner.bg_color }}
                 >
-                  <Link
-                    href={banner.link || '/products'}
-                    className="absolute inset-0 flex items-center justify-between gap-2 sm:gap-4 px-4 sm:px-6 lg:px-12"
-                  >
-                    <div className="w-1/2 z-10 min-w-0">
-                      {banner.subtitle && (
-                        <p className="text-[11px] sm:text-sm lg:text-base font-medium mb-1 sm:mb-2 opacity-80 truncate" style={{ color: banner.text_color }}>
-                          {banner.subtitle}
-                        </p>
-                      )}
-                      <h1 className="text-lg sm:text-2xl lg:text-5xl xl:text-6xl font-extrabold mb-1 sm:mb-3 tracking-tight leading-tight truncate" style={{ color: banner.text_color }}>
-                        {banner.title}
-                      </h1>
-                      {banner.description && (
-                        <p className="hidden sm:block text-gray-700/80 text-xs lg:text-base mb-2 lg:mb-5 line-clamp-2">{banner.description}</p>
-                      )}
-                      <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full bg-white/90 backdrop-blur text-gray-900 text-[11px] sm:text-sm font-semibold hover:bg-white transition-all">
-                        SHOP NOW <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                      </span>
-                    </div>
-                    <div className="relative w-1/2 h-full max-h-[85%] shrink-0">
-                      <Image
-                        src={banner.mobile_image || banner.image}
-                        alt={banner.title}
-                        fill
-                        className="object-contain lg:hidden"
-                        priority={index === 0}
-                      />
-                      <Image
-                        src={banner.image}
-                        alt={banner.title}
-                        fill
-                        className="hidden lg:block object-contain"
-                        priority={index === 0}
-                      />
-                    </div>
+                  <Link href={banner.link || '/products'} className="absolute inset-0 block">
+                    <Image
+                      src={banner.mobile_image || banner.image}
+                      alt={banner.title}
+                      fill
+                      className="object-cover lg:hidden"
+                      priority={index === 0}
+                    />
+                    <Image
+                      src={banner.image}
+                      alt={banner.title}
+                      fill
+                      className="hidden lg:block object-cover"
+                      priority={index === 0}
+                    />
                   </Link>
                 </div>
               ))}
             </div>
 
             {banners.length > 1 && (
-              <>
-                <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-md hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
-                  <ChevronLeft className="w-5 h-5 text-gray-700" />
-                </button>
-                <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 hover:bg-white rounded-full shadow-md hidden md:flex items-center justify-center hover:scale-110 transition-all z-20">
-                  <ChevronRight className="w-5 h-5 text-gray-700" />
-                </button>
-                <div className="absolute bottom-3 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur text-white text-[11px] font-medium z-20">
-                  {currentSlide + 1} / {banners.length}
-                </div>
-              </>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+                {banners.map((banner, index) => (
+                  <button
+                    key={banner._id}
+                    onClick={() => goToSlide(index)}
+                    aria-label={`${index + 1}-р зураг руу шилжих`}
+                    className={`rounded-full transition-all duration-300 ${
+                      index === currentSlide ? 'w-5 h-2 bg-white' : 'w-2 h-2 bg-white/60 hover:bg-white/80'
+                    }`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
