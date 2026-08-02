@@ -134,7 +134,6 @@ export const DEFAULT_SUBCATEGORIES: Record<string, { name: string; slug: string 
 // Category-specific filter configurations
 export const CATEGORY_FILTERS: Record<string, FilterDef[]> = {
   beauty: [
-    { key: 'product_type', label: 'Төрөл', type: 'select', options: ['Уруулын будаг', 'Нүүрний тос', 'Mascara', 'Нүдний тень', 'Усан үнэр', 'Арьс арчилгаа', 'Нүүрний ус', 'Сыворотка', 'Маск', 'Хумсны лак', 'Бусад'] },
     { key: 'volume', label: 'Эзлэхүүн', type: 'select', options: ['5ml', '10ml', '15ml', '30ml', '50ml', '75ml', '100ml', '150ml', '200ml', '250ml', '500ml'] },
     { key: 'skin_type', label: 'Арьсны төрөл', type: 'multi-select', options: ['Хуурай', 'Тослог', 'Хэвийн', 'Холимог', 'Мэдрэг'] },
     { key: 'finish', label: 'Төрх', type: 'select', options: ['Matte', 'Glossy', 'Satin', 'Dewy', 'Natural'] },
@@ -152,7 +151,6 @@ export const CATEGORY_FILTERS: Record<string, FilterDef[]> = {
     { key: 'sole_type', label: 'Улны төрөл', type: 'select', options: ['Хавтгай', 'Өсгийтэй', 'Platform', 'Wedge', 'Спорт'] },
   ],
   dyson: [
-    { key: 'product_type', label: 'Төрөл', type: 'select', options: ['Үс хатаагч', 'Үс загварлагч', 'Үс гүйрүүлэгч', 'Тоос сорогч', 'Агаар цэвэршүүлэгч', 'Чийгшүүлэгч', 'Сэлгүүр', 'Бусад'] },
     { key: 'power', label: 'Чадал (Ватт)', type: 'select', options: ['200W', '500W', '1000W', '1200W', '1400W', '1600W', '1800W', '2000W'] },
     { key: 'weight_class', label: 'Жин', type: 'select', options: ['0.5кг хүртэл', '0.5-1кг', '1-2кг', '2-3кг', '3-5кг', '5кг+'] },
     { key: 'warranty', label: 'Баталгаа', type: 'select', options: ['6 сар', '1 жил', '2 жил', '3 жил', '5 жил'] },

@@ -246,6 +246,9 @@ export default function ProductsPage() {
                         <Link href={`/product/${product.slug}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                           <Eye className="w-4 h-4 text-gray-500" />
                         </Link>
+                        <Link href={`/admin/products/${product._id}/edit`} className="p-2 hover:bg-blue-50 rounded-lg transition-colors">
+                          <Edit className="w-4 h-4 text-blue-500" />
+                        </Link>
                         <button
                           onClick={() => setDeleteModal(product)}
                           className="p-2 hover:bg-red-50 rounded-lg transition-colors"

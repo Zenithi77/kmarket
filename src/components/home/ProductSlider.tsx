@@ -138,10 +138,10 @@ export default function ProductSlider({
                 <Link
                   key={product.id}
                   href={`/product/${product.slug}`}
-                  className="flex-shrink-0 w-44 md:w-48 group/card h-[320px]"
+                  className="flex-shrink-0 w-44 md:w-48 group/card"
                 >
-                  <div className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow h-full flex flex-col">
-                    {/* Image */}
+                  <div className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow">
+                    {/* Image (1:1) */}
                     <div className="relative aspect-square bg-gray-50">
                       <Image
                         src={product.images[0] || '/placeholder.svg'}
@@ -152,7 +152,7 @@ export default function ProductSlider({
                       {/* Badge */}
                       {isOnSale && (
                         <span className="absolute top-2 left-2 bg-sale-500 text-white text-xs font-bold px-2 py-0.5 rounded">
-                          On Sale
+                          {discountPercent}%
                         </span>
                       )}
                       {/* Wishlist */}
@@ -175,33 +175,34 @@ export default function ProductSlider({
                       </button>
                     </div>
 
-                    {/* Content */}
-                    <div className="p-3 flex flex-col flex-grow">
-                      {/* Name */}
-                      <h3 className="text-sm text-gray-800 line-clamp-2 mb-2 h-10">
-                        {product.name}
-                      </h3>
-
-                      {/* Discount */}
-                      <div className="h-5 mb-1">
+                    {/* Content — just price + name, then colors */}
+                    <div className="p-3">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
                         {isOnSale && (
-                          <span className="text-sale-500 font-bold text-sm">
-                            {discountPercent}% OFF
-                          </span>
+                          <span className="text-sale-500 font-bold text-sm">{discountPercent}%</span>
                         )}
-                      </div>
-
-                      {/* Price */}
-                      <div className="flex items-baseline gap-2 mt-auto">
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-base font-bold text-gray-900">
                           {formatPrice(product.sale_price || product.price)}
                         </span>
-                        {isOnSale && (
-                          <span className="text-xs text-gray-400 line-through">
-                            {formatPrice(product.price)}
-                          </span>
-                        )}
                       </div>
+                      <h3 className="text-sm text-gray-600 line-clamp-1 mt-1">
+                        {product.name}
+                      </h3>
+                      {product.colors && product.colors.length > 0 && (
+                        <div className="flex items-center gap-1 mt-1.5">
+                          {product.colors.slice(0, 5).map((c, i) => (
+                            <span
+                              key={`${c.hex}-${i}`}
+                              className="w-3 h-3 rounded-full border border-gray-200"
+                              style={{ backgroundColor: c.hex }}
+                              title={c.name}
+                            />
+                          ))}
+                          {product.colors.length > 5 && (
+                            <span className="text-[10px] text-gray-400 ml-0.5">+{product.colors.length - 5}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>

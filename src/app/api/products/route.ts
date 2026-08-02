@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getSupabase } from '@/lib/supabase';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function requireAdmin(email: string) {
+  const supabase = getSupabase();
+  const { data: user } = await supabase
+    .from('users')
+    .select('role')
+    .eq('email', email)
+    .maybeSingle();
+  return user?.role === 'admin';
+}
 
 async function resolveCategoryId(value: string | null): Promise<string | null> {
   if (!value) return null;
@@ -144,13 +156,31 @@ export async function GET(request: NextRequest) {
 // POST /api/products (Admin)
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
+    }
+    if (!(await requireAdmin(session.user.email))) {
+      return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
+    }
+
     const supabase = getSupabase();
     const body = await request.json();
 
-    const slug = body.slug || (body.name
+    if (!body.name || !body.price || !body.category_id) {
+      return NextResponse.json(
+        { error: 'Барааны нэр, үнэ, ангилал заавал шаардлагатай' },
+        { status: 400 }
+      );
+    }
+
+    // Cyrillic-only names strip down to an empty string here (no a-z0-9 survives),
+    // so fall back to a plain timestamp slug rather than inserting an empty/invalid one.
+    const generatedSlug = body.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') + '-' + Date.now());
+      .replace(/(^-|-$)/g, '');
+    const slug = body.slug || (generatedSlug ? `${generatedSlug}-${Date.now()}` : `product-${Date.now()}`);
 
     const { data: product, error } = await supabase
       .from('products')
@@ -161,8 +191,11 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json(withMongoShape(product), { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Products POST error:', error);
-    return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || 'Алдаа гарлаа' },
+      { status: 500 }
+    );
   }
 }

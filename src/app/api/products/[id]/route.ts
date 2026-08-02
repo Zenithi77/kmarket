@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { getSupabase } from '@/lib/supabase';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function withMongoShape(row: any) {
   return { ...row, _id: row.id };
+}
+
+async function requireAdmin(email: string) {
+  const supabase = getSupabase();
+  const { data: user } = await supabase
+    .from('users')
+    .select('role')
+    .eq('email', email)
+    .maybeSingle();
+  return user?.role === 'admin';
 }
 
 // GET /api/products/[id]
@@ -52,25 +64,37 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
+    }
+    if (!(await requireAdmin(session.user.email))) {
+      return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
+    }
+
     const supabase = getSupabase();
     const { id } = await params;
     const body = await request.json();
+    // _id (frontend's Mongo-shaped alias for id) isn't a real column — drop it so it
+    // doesn't get forwarded into the update payload.
+    const { _id, ...updateData } = body;
 
     const { data: product, error } = await supabase
       .from('products')
-      .update({ ...body, updated_at: new Date().toISOString() })
+      .update({ ...updateData, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .maybeSingle();
 
     if (error || !product) {
-      return NextResponse.json({ error: 'Бараа олдсонгүй' }, { status: 404 });
+      console.error('Product PUT error:', error);
+      return NextResponse.json({ error: error?.message || 'Бараа олдсонгүй' }, { status: error ? 500 : 404 });
     }
 
     return NextResponse.json(withMongoShape(product));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Product PUT error:', error);
-    return NextResponse.json({ error: 'Алдаа гарлаа' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Алдаа гарлаа' }, { status: 500 });
   }
 }
 
@@ -80,6 +104,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Нэвтрэх шаардлагатай' }, { status: 401 });
+    }
+    if (!(await requireAdmin(session.user.email))) {
+      return NextResponse.json({ error: 'Зөвхөн админ' }, { status: 403 });
+    }
+
     const supabase = getSupabase();
     const { id } = await params;
 
