@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Flame, Crown, Sparkles, Shirt, Footprints, Wind, Percent, LayoutGrid } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Package, Flame } from 'lucide-react';
 import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
 import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
@@ -68,16 +67,16 @@ const FALLBACK_MAIN_CATEGORIES: Category[] = [
   { _id: 'best', name: 'Best Sellers', slug: 'best', icon: '🏆', order: 5 },
 ];
 
-// Per-category icon + accent color, used for the glowing fallback tile when no
-// admin-uploaded photo exists yet — chosen to feel like one cohesive palette
-// rather than a random rainbow.
-const CATEGORY_STYLE: Record<string, { Icon: LucideIcon; from: string; to: string; accent: string }> = {
-  beauty: { Icon: Sparkles, from: 'from-pink-50', to: 'to-rose-100', accent: '#f472b6' },
-  fashion: { Icon: Shirt, from: 'from-violet-50', to: 'to-indigo-100', accent: '#8b5cf6' },
-  shoes: { Icon: Footprints, from: 'from-sky-50', to: 'to-cyan-100', accent: '#38bdf8' },
-  dyson: { Icon: Wind, from: 'from-slate-50', to: 'to-gray-200', accent: '#94a3b8' },
-  trendy: { Icon: Flame, from: 'from-orange-50', to: 'to-amber-100', accent: '#f97316' },
-  best: { Icon: Crown, from: 'from-yellow-50', to: 'to-amber-100', accent: '#eab308' },
+// Per-category curated photo, used until the admin uploads a real product photo
+// for that category — real macro/product photography (all free-license Unsplash
+// shots) reads far more "tansag" (premium) than line icons or emoji.
+const CATEGORY_STYLE: Record<string, { photo: string }> = {
+  beauty: { photo: 'https://images.unsplash.com/photo-1532441807072-e075a14e3b69?w=300&q=80&fit=crop&auto=format' },
+  fashion: { photo: 'https://images.unsplash.com/photo-1529636273736-fc88b31ea9d9?w=300&q=80&fit=crop&auto=format' },
+  shoes: { photo: 'https://images.unsplash.com/photo-1670938258821-2956d4ce9c9b?w=300&q=80&fit=crop&auto=format' },
+  dyson: { photo: 'https://images.unsplash.com/photo-1724271859348-bad4e179d65d?w=300&q=80&fit=crop&auto=format' },
+  trendy: { photo: 'https://images.unsplash.com/photo-1655232105149-4923a5f6090a?w=300&q=80&fit=crop&auto=format' },
+  best: { photo: 'https://images.unsplash.com/photo-1699364911273-99acc265181f?w=300&q=80&fit=crop&auto=format' },
 };
 
 // Unified shape for the homepage's 8-tile category grid — either a real DB
@@ -87,19 +86,16 @@ interface CategoryTile {
   key: string;
   href: string;
   name: string;
-  imageSrc?: string;
-  Icon: LucideIcon;
-  from: string;
-  to: string;
-  accent: string;
+  imageSrc?: string; // admin-uploaded real photo — takes priority over `defaultPhoto` when set
+  defaultPhoto: string;
 }
 
 // "Sale" and "Others" aren't real categories in the DB (a sale item can belong to
 // any category) — they link straight into /products' existing sale/all-products
 // filters, which already work, rather than a nonexistent /category/sale.
 const EXTRA_CATEGORY_TILES: CategoryTile[] = [
-  { key: 'sale-tile', href: '/products?sale=true', name: 'Sale', Icon: Percent, from: 'from-red-50', to: 'to-orange-100', accent: '#ef4444' },
-  { key: 'others-tile', href: '/products', name: 'Others', Icon: LayoutGrid, from: 'from-emerald-50', to: 'to-teal-100', accent: '#14b8a6' },
+  { key: 'sale-tile', href: '/products?sale=true', name: 'Sale', defaultPhoto: 'https://images.unsplash.com/photo-1571907483086-3c0ea40cc16d?w=300&q=80&fit=crop&auto=format' },
+  { key: 'others-tile', href: '/products', name: 'Others', defaultPhoto: 'https://images.unsplash.com/photo-1513884923967-4b182ef167ab?w=300&q=80&fit=crop&auto=format' },
 ];
 
 // Default Hero Banner Slides (fallback)
@@ -261,10 +257,7 @@ export default function HomePage() {
         href: `/category/${cat.slug}`,
         name: cat.name,
         imageSrc: hasPhoto ? ((cat.image || cat.icon) as string) : undefined,
-        Icon: style?.Icon || Package,
-        from: style?.from || 'from-primary-50',
-        to: style?.to || 'to-primary-100',
-        accent: style?.accent || '#f97316',
+        defaultPhoto: style?.photo || EXTRA_CATEGORY_TILES[1].defaultPhoto,
       };
     }),
     ...EXTRA_CATEGORY_TILES,
@@ -328,63 +321,28 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── MAIN CATEGORIES (Coupang-style 4x2 grid of square tiles) ── */}
-      <section className="bg-white pb-2">
-        <div className="max-w-7xl mx-auto px-3 pt-1">
-          <div className="grid grid-cols-4 gap-2 sm:gap-3">
+      {/* ── MAIN CATEGORIES — real curated product photography per category
+          (until the admin uploads their own) ── */}
+      <section className="bg-white pb-5">
+        <div className="max-w-7xl mx-auto px-3 pt-3">
+          <div className="grid grid-cols-4 gap-y-5 gap-x-2 sm:gap-x-3">
             {categoryTiles.map((tile) => {
-              const IconComp = tile.Icon;
+              const photoSrc = tile.imageSrc || tile.defaultPhoto;
               return (
                 <Link
                   key={tile.key}
                   href={tile.href}
-                  className="group flex flex-col items-center gap-1.5"
+                  className="group flex flex-col items-center gap-2.5"
                 >
-                  <div className="relative w-full aspect-square p-[2px]">
-                    {/* Rotating neon trace ring, normalized via pathLength so it stays a clean
-                        stroke regardless of the tile's actual pixel size. */}
-                    <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none" aria-hidden="true">
-                      <defs>
-                        <linearGradient id={`neon-grad-cat-${tile.key}`} x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor={tile.accent} stopOpacity="0" />
-                          <stop offset="50%" stopColor={tile.accent} stopOpacity="1" />
-                          <stop offset="100%" stopColor={tile.accent} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <rect
-                        x="0" y="0" width="100%" height="100%"
-                        rx="20" ry="20" fill="none"
-                        stroke={`url(#neon-grad-cat-${tile.key})`}
-                        strokeWidth="2" strokeLinecap="round"
-                        pathLength={100}
-                        strokeDasharray="22 78"
-                        className="neon-trace"
-                      />
-                    </svg>
-
-                    <div className="relative w-full h-full rounded-[20px] overflow-hidden bg-gray-100 shadow-sm ring-1 ring-black/5 transition-all duration-300 group-hover:shadow-lg group-active:scale-95">
-                      {tile.imageSrc ? (
-                        <Image
-                          src={tile.imageSrc}
-                          alt={tile.name}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${tile.from} ${tile.to}`}>
-                          <div
-                            className="absolute w-11 h-11 sm:w-16 sm:h-16 rounded-full blur-lg animate-glow-pulse"
-                            style={{ backgroundColor: tile.accent }}
-                          />
-                          <IconComp
-                            className="relative w-7 h-7 sm:w-9 sm:h-9 text-gray-700 transition-all duration-300 group-hover:scale-110 group-hover:text-primary-700"
-                            strokeWidth={1.75}
-                          />
-                        </div>
-                      )}
-                    </div>
+                  <div className="relative w-16 h-16 sm:w-[76px] sm:h-[76px] rounded-full bg-primary-50/80 overflow-hidden transition-all duration-300 ease-out group-hover:scale-[1.06] group-hover:shadow-[0_8px_20px_rgba(249,115,22,0.28)] group-active:scale-95">
+                    <Image
+                      src={photoSrc}
+                      alt={tile.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <span className="text-xs sm:text-sm font-semibold text-gray-800 text-center line-clamp-1">
+                  <span className="text-[13px] sm:text-sm font-medium text-gray-800 tracking-wide text-center line-clamp-1">
                     {tile.name}
                   </span>
                 </Link>
