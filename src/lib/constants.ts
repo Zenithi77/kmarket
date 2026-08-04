@@ -56,7 +56,7 @@ export interface FilterDef {
   options: string[];
 }
 
-// Main 6 Categories
+// Main 8 Categories
 export const CATEGORIES = [
   { id: 'beauty', name: 'Beauty', slug: 'beauty', icon: '💄', description: 'Гоо сайхан, арьс арчилгаа' },
   { id: 'fashion', name: 'Fashion', slug: 'fashion', icon: '👗', description: 'Хувцас, загвар' },
@@ -64,6 +64,8 @@ export const CATEGORIES = [
   { id: 'dyson', name: 'Dyson', slug: 'dyson', icon: '💨', description: 'Dyson бүтээгдэхүүн' },
   { id: 'trendy', name: 'Trendy', slug: 'trendy', icon: '✨', description: 'Трэнд бараа' },
   { id: 'best', name: 'Best Sellers', slug: 'best', icon: '🏆', description: 'Шилдэг борлуулалт' },
+  { id: 'sale', name: 'Sale', slug: 'sale', icon: '🏷️', description: 'Хямдралтай бүтээгдэхүүн' },
+  { id: 'others', name: 'Others', slug: 'others', icon: '🛍️', description: 'Бусад бүтээгдэхүүн' },
 ] as const;
 
 // Default Sub-categories for each main category
@@ -163,6 +165,10 @@ export const CATEGORY_FILTERS: Record<string, FilterDef[]> = {
   ],
   best: [
     { key: 'original_category', label: 'Анхны ангилал', type: 'select', options: ['Beauty', 'Fashion', 'Shoes', 'Dyson', 'Trendy'] },
+  ],
+  sale: [
+    { key: 'original_category', label: 'Анхны ангилал', type: 'select', options: ['Beauty', 'Fashion', 'Shoes', 'Dyson', 'Trendy', 'Best Sellers', 'Others'] },
+    { key: 'discount_range', label: 'Хямдралын хэмжээ', type: 'select', options: ['10-20%', '20-30%', '30-50%', '50%+'] },
   ],
 };
 

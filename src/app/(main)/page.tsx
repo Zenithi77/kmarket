@@ -57,7 +57,8 @@ interface Category {
   order: number;
 }
 
-// Default main-category tiles (fallback until real categories load from the API)
+// Default main-category tiles (fallback until real categories load from the API) —
+// all 8 are now real, admin-managed categories (same as the original 6).
 const FALLBACK_MAIN_CATEGORIES: Category[] = [
   { _id: 'beauty', name: 'Beauty', slug: 'beauty', icon: '💄', order: 0 },
   { _id: 'fashion', name: 'Fashion', slug: 'fashion', icon: '👗', order: 1 },
@@ -65,6 +66,8 @@ const FALLBACK_MAIN_CATEGORIES: Category[] = [
   { _id: 'dyson', name: 'Dyson', slug: 'dyson', icon: '💨', order: 3 },
   { _id: 'trendy', name: 'Trendy', slug: 'trendy', icon: '✨', order: 4 },
   { _id: 'best', name: 'Best Sellers', slug: 'best', icon: '🏆', order: 5 },
+  { _id: 'sale', name: 'Sale', slug: 'sale', icon: '🏷️', order: 6 },
+  { _id: 'others', name: 'Others', slug: 'others', icon: '🛍️', order: 7 },
 ];
 
 // Per-category curated photo, used until the admin uploads a real product photo
@@ -77,11 +80,12 @@ const CATEGORY_STYLE: Record<string, { photo: string }> = {
   dyson: { photo: 'https://images.unsplash.com/photo-1724271859348-bad4e179d65d?w=300&q=80&fit=crop&auto=format' },
   trendy: { photo: 'https://images.unsplash.com/photo-1655232105149-4923a5f6090a?w=300&q=80&fit=crop&auto=format' },
   best: { photo: 'https://images.unsplash.com/photo-1699364911273-99acc265181f?w=300&q=80&fit=crop&auto=format' },
+  sale: { photo: 'https://images.unsplash.com/photo-1571907483086-3c0ea40cc16d?w=300&q=80&fit=crop&auto=format' },
+  others: { photo: 'https://images.unsplash.com/photo-1513884923967-4b182ef167ab?w=300&q=80&fit=crop&auto=format' },
 };
 
-// Unified shape for the homepage's 8-tile category grid — either a real DB
-// category (linking to /category/[slug]) or one of the two static filter
-// shortcuts below (linking straight into the already-working /products filters).
+// Unified shape for the homepage's 8-tile category grid — all 8 are real DB
+// categories now, linking to /category/[slug] like any other category.
 interface CategoryTile {
   key: string;
   href: string;
@@ -89,14 +93,6 @@ interface CategoryTile {
   imageSrc?: string; // admin-uploaded real photo — takes priority over `defaultPhoto` when set
   defaultPhoto: string;
 }
-
-// "Sale" and "Others" aren't real categories in the DB (a sale item can belong to
-// any category) — they link straight into /products' existing sale/all-products
-// filters, which already work, rather than a nonexistent /category/sale.
-const EXTRA_CATEGORY_TILES: CategoryTile[] = [
-  { key: 'sale-tile', href: '/products?sale=true', name: 'Sale', defaultPhoto: 'https://images.unsplash.com/photo-1571907483086-3c0ea40cc16d?w=300&q=80&fit=crop&auto=format' },
-  { key: 'others-tile', href: '/products', name: 'Others', defaultPhoto: 'https://images.unsplash.com/photo-1513884923967-4b182ef167ab?w=300&q=80&fit=crop&auto=format' },
-];
 
 // Default Hero Banner Slides (fallback)
 const defaultSlides: Banner[] = [
@@ -246,22 +242,19 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
-  // ── 6 main categories for the Coupang-style square grid, right below the banner ──
-  const mainCategories = categories.length > 0 ? categories.slice(0, 6) : FALLBACK_MAIN_CATEGORIES;
-  const categoryTiles: CategoryTile[] = [
-    ...mainCategories.map((cat) => {
-      const hasPhoto = cat.image || (cat.icon && cat.icon.startsWith('http'));
-      const style = CATEGORY_STYLE[cat.slug];
-      return {
-        key: cat.slug,
-        href: `/category/${cat.slug}`,
-        name: cat.name,
-        imageSrc: hasPhoto ? ((cat.image || cat.icon) as string) : undefined,
-        defaultPhoto: style?.photo || EXTRA_CATEGORY_TILES[1].defaultPhoto,
-      };
-    }),
-    ...EXTRA_CATEGORY_TILES,
-  ];
+  // ── 8 main categories for the Coupang-style square grid, right below the banner ──
+  const mainCategories = categories.length > 0 ? categories.slice(0, 8) : FALLBACK_MAIN_CATEGORIES;
+  const categoryTiles: CategoryTile[] = mainCategories.map((cat) => {
+    const hasPhoto = cat.image || (cat.icon && cat.icon.startsWith('http'));
+    const style = CATEGORY_STYLE[cat.slug];
+    return {
+      key: cat.slug,
+      href: `/category/${cat.slug}`,
+      name: cat.name,
+      imageSrc: hasPhoto ? ((cat.image || cat.icon) as string) : undefined,
+      defaultPhoto: style?.photo || 'https://images.unsplash.com/photo-1513884923967-4b182ef167ab?w=300&q=80&fit=crop&auto=format',
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gray-100">
