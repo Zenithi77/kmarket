@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getSupabase } from '@/lib/supabase';
@@ -61,9 +62,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result, {
       headers: {
-        // Edge-cache for 1 hour, serve stale up to 1 day while revalidating
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-        'CDN-Cache-Control': 'public, s-maxage=3600',
+        // Short edge-cache — admin edits (image uploads etc.) call revalidatePath()
+        // below, but this low max-age is a safety net so changes never take more
+        // than a minute or so to show up even if revalidation is delayed.
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
+        'CDN-Cache-Control': 'public, s-maxage=30',
       },
     });
   } catch (error) {
@@ -120,6 +123,9 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    revalidatePath('/api/categories');
+    revalidatePath('/');
+
     return NextResponse.json(withMongoShape(category), { status: 201 });
   } catch (error) {
     console.error('Categories POST error:', error);
@@ -155,6 +161,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Категори олдсонгүй' }, { status: 404 });
     }
 
+    revalidatePath('/api/categories');
+    revalidatePath('/');
+
     return NextResponse.json(withMongoShape(category));
   } catch (error) {
     console.error('Categories PUT error:', error);
@@ -185,6 +194,9 @@ export async function DELETE(request: NextRequest) {
     // Also delete subcategories
     await supabase.from('categories').delete().eq('parent_id', id);
     await supabase.from('categories').delete().eq('id', id);
+
+    revalidatePath('/api/categories');
+    revalidatePath('/');
 
     return NextResponse.json({ message: 'Устгагдлаа' });
   } catch (error) {
