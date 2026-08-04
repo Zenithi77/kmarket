@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Button, Input, Textarea } from '@/components/ui';
 import { SIZE_PRESETS, SIZE_TYPE_LABELS, COMMON_COLORS, CATEGORY_FILTERS, isVideoUrl } from '@/lib/constants';
+import { resizeImageForUpload } from '@/lib/image';
 import toast from 'react-hot-toast';
 
 interface MediaItem {
@@ -372,7 +373,10 @@ export default function ProductForm({ mode, productId, initialData }: ProductFor
   const uploadSingleFile = useCallback(async (file: File, index: number) => {
     try {
       const isVideo = isVideoFile(file);
-      const base64 = await fileToBase64(file);
+      // Videos are left as-is (client-side video re-encoding is out of scope here);
+      // images get downscaled first so large photos never blow past the platform's
+      // ~4.5MB request body limit (base64 alone inflates the payload ~33%).
+      const base64 = isVideo ? await fileToBase64(file) : await resizeImageForUpload(file);
 
       setMedia(prev => prev.map((m, i) =>
         i === index ? { ...m, uploading: true, progress: 30 } : m

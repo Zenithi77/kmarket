@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Button, Modal, Input } from '@/components/ui';
 import { CATEGORIES, CATEGORY_FILTERS, DEFAULT_SUBCATEGORIES } from '@/lib/constants';
+import { resizeImageForUpload } from '@/lib/image';
 import toast from 'react-hot-toast';
 
 interface CategoryFilter {
@@ -199,21 +200,12 @@ export default function CategoriesPage() {
     setExpandedCategory(prev => prev === id ? null : id);
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
-      const base64 = await fileToBase64(file);
+      const base64 = await resizeImageForUpload(file);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -243,7 +235,7 @@ export default function CategoriesPage() {
     if (!file) return;
     setMainImageUploading(true);
     try {
-      const base64 = await fileToBase64(file);
+      const base64 = await resizeImageForUpload(file);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

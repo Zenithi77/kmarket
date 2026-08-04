@@ -21,12 +21,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Зураг эсвэл бичлэг шаардлагатай' }, { status: 400 });
     }
 
+    // Banners are full-bleed hero images shown up to ~1600px wide on desktop —
+    // the default 800px cap (sized for product/category thumbnails) left them
+    // visibly soft, so give that folder a much larger allowance.
+    const maxSize = folder.startsWith('kmarket/banners') ? 2000 : 800;
+
     // images should be base64 strings or URLs
     if (Array.isArray(images)) {
       const results = await uploadImages(images, folder);
       return NextResponse.json({ images: results });
     } else {
-      const result = await uploadImage(images, folder);
+      const result = await uploadImage(images, folder, maxSize);
       return NextResponse.json(result);
     }
   } catch (error) {

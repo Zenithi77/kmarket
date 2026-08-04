@@ -8,13 +8,15 @@ cloudinary.config({
 
 export default cloudinary;
 
-// Upload image to Cloudinary
-export async function uploadImage(file: string, folder: string = 'kmarket') {
+// Upload image to Cloudinary. `maxSize` caps the longer edge — small for product/
+// category thumbnails (default), much larger for full-bleed hero banners so they
+// don't come out soft when stretched across a wide desktop screen.
+export async function uploadImage(file: string, folder: string = 'kmarket', maxSize: number = 800) {
   try {
     const result = await cloudinary.uploader.upload(file, {
       folder,
       transformation: [
-        { width: 800, height: 800, crop: 'limit' },
+        { width: maxSize, height: maxSize, crop: 'limit' },
         { quality: 'auto' },
         { fetch_format: 'auto' },
       ],

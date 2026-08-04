@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Plus, Pencil, Trash2, GripVertical, Eye, EyeOff, Upload, X, Save } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
+import { resizeImageForUpload } from '@/lib/image';
 import toast from 'react-hot-toast';
 
 interface Banner {
@@ -60,22 +61,13 @@ export default function BannersPage() {
     }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
     try {
-      const base64 = await fileToBase64(file);
+      const base64 = await resizeImageForUpload(file, 2000);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +93,7 @@ export default function BannersPage() {
 
     setUploadingMobile(true);
     try {
-      const base64 = await fileToBase64(file);
+      const base64 = await resizeImageForUpload(file, 2000);
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
