@@ -1,12 +1,11 @@
 ﻿'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, Flame } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { ProductSlider } from '@/components/home';
 import { Product } from '@/types';
-import { formatPrice, calculateDiscountPercent } from '@/lib/constants';
 
 // Helper to map API response (_id) to frontend Product type (id)
 function mapProduct(p: any): Product {
@@ -222,26 +221,6 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [isPaused, banners.length, nextSlide]);
 
-  // ── Time-deal countdown (resets every 6h) ──
-  const [timeLeft, setTimeLeft] = useState({ h: 0, m: 0, s: 0 });
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const next = new Date(now);
-      const slot = Math.ceil((now.getHours() + 1) / 6) * 6;
-      next.setHours(slot, 0, 0, 0);
-      const diff = Math.max(0, next.getTime() - now.getTime());
-      setTimeLeft({
-        h: Math.floor(diff / 3_600_000),
-        m: Math.floor((diff % 3_600_000) / 60_000),
-        s: Math.floor((diff % 60_000) / 1000),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-
   // ── 8 main categories for the Coupang-style square grid, right below the banner ──
   const mainCategories = categories.length > 0 ? categories.slice(0, 8) : FALLBACK_MAIN_CATEGORIES;
   const categoryTiles: CategoryTile[] = mainCategories.map((cat) => {
@@ -344,70 +323,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── TIME DEAL (Korean-style flash deal w/ countdown) ── */}
-      {saleProducts.length > 0 && (
-        <section className="mt-2 bg-white">
-          <div className="max-w-7xl mx-auto px-4 py-5">
-            <div className="flex items-end justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sale-500 text-white text-xs font-bold">
-                  <Flame className="w-3.5 h-3.5" /> TIME DEAL
-                </div>
-                <h2 className="font-display text-lg md:text-xl font-extrabold text-gray-900">Цагийн онцгой хямдрал</h2>
-              </div>
-              <div className="flex items-center gap-1 font-mono text-sm">
-                {(['h','m','s'] as const).map((k, i) => (
-                  <span key={k} className="contents">
-                    <span className="px-2 py-1 rounded-md bg-gray-900 text-white font-bold tabular-nums min-w-[34px] text-center">
-                      {String((timeLeft as any)[k]).padStart(2, '0')}
-                    </span>
-                    {i < 2 && <span className="text-gray-400 font-bold">:</span>}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-4 px-4 pb-1">
-              {saleProducts.slice(0, 10).map((product) => {
-                const discount = calculateDiscountPercent(product.price, product.sale_price || 0);
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/product/${product.slug}`}
-                    className="flex-shrink-0 w-40 md:w-44 group"
-                  >
-                    <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
-                      <Image
-                        src={product.images[0] || '/placeholder.svg'}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {discount > 0 && (
-                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-sale-500 text-white text-[11px] font-bold">
-                          -{discount}%
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-xs md:text-sm text-gray-800 mt-2 line-clamp-2 leading-snug min-h-[34px]">
-                      {product.name}
-                    </h3>
-                    <div className="mt-1 flex items-baseline gap-1.5">
-                      {discount > 0 && (
-                        <span className="text-sale-500 font-extrabold text-sm">{discount}%</span>
-                      )}
-                      <span className="text-base font-extrabold text-gray-900">
-                        {formatPrice(product.sale_price || product.price)}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── FEATURED / TRENDING ── */}
       {featuredProducts.length > 0 && (
