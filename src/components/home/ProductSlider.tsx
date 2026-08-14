@@ -147,6 +147,7 @@ export default function ProductSlider({
                         src={product.images[0] || '/placeholder.svg'}
                         alt={product.name}
                         fill
+                        sizes="(min-width: 768px) 192px, 176px"
                         className="object-cover group-hover/card:scale-105 transition-transform duration-300"
                       />
                       {/* Badge */}

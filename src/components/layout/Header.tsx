@@ -202,7 +202,6 @@ export default function Header() {
                 height={44}
                 className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover"
                 priority
-                unoptimized
               />
               <span id="header-logo-text" className="block font-logo text-xl sm:text-2xl leading-none text-on-surface">
                 KMarket

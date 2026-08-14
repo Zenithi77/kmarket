@@ -20,7 +20,6 @@ export default function Footer() {
                 width={48}
                 height={48}
                 className="w-12 h-12 rounded-full object-cover"
-                unoptimized
               />
               <span className="text-xl font-bold text-white">KMarket</span>
             </div>

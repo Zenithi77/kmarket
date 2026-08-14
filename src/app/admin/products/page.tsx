@@ -63,8 +63,10 @@ export default function ProductsPage() {
       if (res.ok) {
         const data = await res.json();
         setProducts(data.products || []);
-        setTotalPages(data.totalPages || 1);
-        setTotalCount(data.total || 0);
+        // The API nests these under `pagination` — reading `data.totalPages`/`data.total`
+        // directly always hit undefined, so this count was permanently stuck at 0.
+        setTotalPages(data.pagination?.pages || 1);
+        setTotalCount(data.pagination?.total || 0);
       }
     } catch {
       toast.error('Бараа ачаалахад алдаа гарлаа');

@@ -260,6 +260,7 @@ export default function HomePage() {
                       src={banner.mobile_image || banner.image}
                       alt={banner.title}
                       fill
+                      sizes="(min-width: 1024px) 0px, 100vw"
                       className="object-cover lg:hidden"
                       priority={index === 0}
                     />
@@ -267,6 +268,7 @@ export default function HomePage() {
                       src={banner.image}
                       alt={banner.title}
                       fill
+                      sizes="(max-width: 1024px) 0px, 1280px"
                       className="hidden lg:block object-cover"
                       priority={index === 0}
                     />
@@ -311,6 +313,7 @@ export default function HomePage() {
                       src={photoSrc}
                       alt={tile.name}
                       fill
+                      sizes="76px"
                       className="object-cover"
                     />
                   </div>
