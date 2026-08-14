@@ -496,7 +496,10 @@ export default function ProductForm({ mode, productId, initialData }: ProductFor
         colors: selectedColors.length > 0 ? selectedColors : undefined,
         size_type: sizeType,
         sizes: selectedSizes,
-        category_id: formData.subcategory || formData.category || selectedMainCat?._id,
+        // category_id must always be the real MAIN category — never the subcategory's
+        // own id, or category-level filtering (e.g. /category/dyson) silently matches
+        // nothing for every product that has a subcategory selected.
+        category_id: formData.category || selectedMainCat?._id,
         subcategory_id: formData.subcategory || undefined,
         attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
         brand: formData.brand,
