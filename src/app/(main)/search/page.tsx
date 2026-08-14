@@ -40,17 +40,20 @@ const POPULAR_SEARCHES = ['Dyson', 'Nike', 'MAC', 'Adidas', 'Гутал', 'Ху�
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
+  const category = searchParams.get('category') || '';
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
 
-  const runSearch = useCallback(async (q: string) => {
+  const runSearch = useCallback(async (q: string, cat: string) => {
     if (!q) {
       setResults([]);
       return;
     }
     try {
       setLoading(true);
-      const res = await fetch(`/api/products?search=${encodeURIComponent(q)}&limit=40`);
+      const params = new URLSearchParams({ search: q, limit: '40' });
+      if (cat) params.set('category', cat);
+      const res = await fetch(`/api/products?${params.toString()}`);
       const data = await res.json();
       setResults(data.products ? data.products.map(mapProduct) : []);
     } catch (error) {
@@ -62,8 +65,8 @@ function SearchContent() {
   }, []);
 
   useEffect(() => {
-    runSearch(query);
-  }, [query, runSearch]);
+    runSearch(query, category);
+  }, [query, category, runSearch]);
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -50,6 +50,7 @@ const CATEGORIES = [
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchCategory, setSearchCategory] = useState('All');
+  const [searchCategories, setSearchCategories] = useState<{ name: string; slug: string }[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -74,6 +75,23 @@ export default function Header() {
   // Prevent hydration mismatch by only rendering auth state after mount
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Real categories for the search bar's scope dropdown — was hardcoded with
+  // placeholder options (Electronics/Home) that don't exist in this store and
+  // were never actually wired into the search query.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setSearchCategories(data.map((c: any) => ({ name: c.name, slug: c.slug })));
+          }
+        }
+      } catch {}
+    })();
   }, []);
 
   // Close profile dropdown when clicking outside (the dropdown itself renders in a
@@ -112,7 +130,9 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      const params = new URLSearchParams({ q: searchQuery.trim() });
+      if (searchCategory !== 'All') params.set('category', searchCategory);
+      router.push(`/search?${params.toString()}`);
       setSearchQuery('');
       closeLiveSearch();
     }
@@ -130,7 +150,9 @@ export default function Header() {
     setLiveLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/products?search=${encodeURIComponent(searchQuery.trim())}&limit=8`);
+        const params = new URLSearchParams({ search: searchQuery.trim(), limit: '8' });
+        if (searchCategory !== 'All') params.set('category', searchCategory);
+        const res = await fetch(`/api/products?${params.toString()}`);
         const data = await res.json();
         if (!cancelled) setLiveResults(data.products ? data.products.map(mapProduct) : []);
       } catch {
@@ -143,7 +165,7 @@ export default function Header() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [searchQuery, isSearchActive]);
+  }, [searchQuery, isSearchActive, searchCategory]);
 
   // Close the expanded search on outside click / Escape.
   useEffect(() => {
@@ -254,10 +276,9 @@ export default function Header() {
                   className="h-8 pl-3 pr-6 rounded-full bg-transparent text-xs font-medium text-on-surface-variant focus:outline-none appearance-none cursor-pointer border-r border-clay-gray"
                 >
                   <option value="All">Бүгд</option>
-                  <option value="Beauty">Beauty</option>
-                  <option value="Fashion">Fashion</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Home">Home</option>
+                  {searchCategories.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
               </div>
@@ -362,10 +383,9 @@ export default function Header() {
                   className="h-8 pl-3 pr-6 rounded-full bg-transparent text-xs font-medium text-on-surface-variant focus:outline-none appearance-none cursor-pointer border-r border-clay-gray"
                 >
                   <option value="All">Бүгд</option>
-                  <option value="Beauty">Beauty</option>
-                  <option value="Fashion">Fashion</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Home">Home</option>
+                  {searchCategories.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
               </div>
