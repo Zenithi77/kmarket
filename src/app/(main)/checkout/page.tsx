@@ -15,9 +15,14 @@ import {
 import { useCartStore, useAuthStore } from '@/store';
 import { formatPrice, SHIPPING_COSTS, SHIPPING_LABELS } from '@/lib/constants';
 import { Button, Input, Textarea, Select } from '@/components/ui';
-import { PaymentModal } from '@/components/checkout';
+import { PaymentModal, ComingSoonModal } from '@/components/checkout';
 import { DeliveryType } from '@/types';
 import toast from 'react-hot-toast';
+
+// The site isn't ready to actually process real orders/payments yet — checkout
+// stops at a "coming soon" apology instead of creating a real order. Flip this
+// to true once ready to launch.
+const CHECKOUT_ENABLED = false;
 
 const deliveryOptions: { value: DeliveryType; label: string; price: number; icon: any }[] = [
   { value: 'city', label: SHIPPING_LABELS.city, price: SHIPPING_COSTS.city, icon: Truck },
@@ -32,6 +37,7 @@ export default function CheckoutPage() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const [createdOrder, setCreatedOrder] = useState<any | null>(null);
   
   // Form state
@@ -114,6 +120,14 @@ export default function CheckoutPage() {
 
     if (items.length === 0) {
       toast.error('Сагс хоосон байна');
+      return;
+    }
+
+    // Site isn't ready to actually take orders/payments yet — validate the form
+    // (so checkout still feels real) but stop short of creating a real order.
+    // Flip CHECKOUT_ENABLED once ready to go live.
+    if (!CHECKOUT_ENABLED) {
+      setShowComingSoon(true);
       return;
     }
 
@@ -434,6 +448,12 @@ export default function CheckoutPage() {
         order={createdOrder}
         onClose={() => setShowPaymentModal(false)}
         onSuccess={handlePaymentSuccess}
+      />
+
+      {/* Coming Soon Modal — shown instead of real checkout while the site isn't live yet */}
+      <ComingSoonModal
+        isOpen={showComingSoon}
+        onClose={() => setShowComingSoon(false)}
       />
     </div>
   );
